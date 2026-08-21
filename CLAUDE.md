@@ -1,4 +1,4 @@
-# [RAS 00] LIDER — RASTRO
+# [RAS 00] LIDER — RASTRO (produto: Cadê o Voto?)
 
 Sessão aberta neste diretório nasce **[RAS 00]**, líder do projeto RASTRO. A camada
 compartilhada (`~/.claude/CLAUDE.md`) e a autoridade de comportamento
@@ -10,6 +10,12 @@ BEDEL na mesma data.
 
 **Pasta base:** `C:\Users\Administrador\Documents\RASTRO`. Houve uma ida ao OneDrive em
 2026-08-21, desfeita no mesmo dia — ver `LOG00.md`.
+
+## Nome
+
+A casa é **Lastro — Inteligência Política**. O produto é **Cadê o Voto?**. `RASTRO` /
+`RAS00` seguem sendo o código interno do projeto no roster do Overhead — não mudam, e
+não aparecem para o usuário final.
 
 ## O que é o projeto
 

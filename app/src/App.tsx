@@ -121,7 +121,7 @@ export default function App() {
           <div className="topo-in">
             <div className="marca">
               <Logo />
-              <h1>Mapa do Voto no Brasil</h1>
+              <h1>Cadê o Voto?</h1>
               <p>
                 Distribuição espacial do voto para deputado estadual em cada unidade da
                 federação, de 1998 a 2022, município a município.

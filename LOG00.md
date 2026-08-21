@@ -342,3 +342,18 @@ perdê-los custaria refazer o trabalho.
 Varredura de segredo antes do commit: os primeiros positivos eram "de**senha**do" e
 "de**senha**r". Refeita com padrão estrito (chave de API, token entre aspas, bloco de
 chave privada, credencial de nuvem): nada.
+
+## 2026-08-21 — Nome do produto: Cadê o Voto?
+
+Ordem do usuário. A casa é **Lastro — Inteligência Política**; o produto passa a ser
+**Cadê o Voto?**. `RASTRO`/`RAS00` seguem como código interno no roster do Overhead e
+não aparecem para o usuário final.
+
+Nome funciona porque é uma pergunta, e o painel existe exatamente para respondê-la —
+não é rótulo de categoria, é a coisa que o produto faz.
+
+Aplicado nas duas páginas, no app React e nos README. As duas precisam de nomes
+distinguíveis numa galeria, então:
+
+- página nacional, o produto: **Cadê o Voto?**
+- recorte profundo de Goiás: **Cadê o Voto em Goiás?**

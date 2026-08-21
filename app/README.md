@@ -1,4 +1,6 @@
-# Lastro — front end
+# Cadê o Voto? — front end
+
+Produto de **Lastro — Inteligência Política**.
 
 React 19 + TypeScript + Vite. Build estático: sai um `dist/` que roda em qualquer
 hospedagem de arquivo, sem servidor de aplicação.
