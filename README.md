@@ -32,7 +32,7 @@ python scripts/09_build_html.py # HTML autocontido em dist/
 (a série de Álvaro Guimarães e as suas tabelas de 2018) e sai com erro se algum divergir.
 Rode-o depois de qualquer mudança em `03_normalize.py`.
 
-## Como está organizado
+## Como está organizado ?
 
 ```
 scripts/     pipeline numerado, na ordem de execução
