@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 76 68" role="img"
+     aria-labelledby="t d" fill="none">
+  <title id="t">Lastro — versão monocromática</title>
+  <desc id="d">Marca sem opacidades: a hierarquia das camadas vem só da
+  espessura. Para impressão em uma cor, carimbo, gravação e fundos onde
+  transparência não é confiável.</desc>
+  <g fill="currentColor">
+    <rect x="12" y="12" width="4" height="44" rx="1"/>
+    <rect x="21" y="13" width="16" height="2.5" rx="1"/>
+    <rect x="21" y="25" width="26" height="4.5" rx="1.75"/>
+    <rect x="21" y="38" width="38" height="8" rx="2.5"/>
+    <rect x="12" y="52" width="52" height="4" rx="1.5"/>
+  </g>
+</svg>

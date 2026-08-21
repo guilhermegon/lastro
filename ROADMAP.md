@@ -1,0 +1,107 @@
+# ROADMAP — RAS00 (RASTRO)
+
+Painel da distribuição espacial do voto para deputado estadual em Goiás, 1998–2022.
+Reconstrói o relatório Power BI do TSE/GO (1998–2018), estende a série a 2022 e
+produz as inferências sobre padrões.
+
+Sigla **RAS** (`RAS00`), definida pelo usuário em 2026-08-21 (TKT-001). No roster
+monitorado pelo BEDEL desde essa data. Identidade local em [`CLAUDE.md`](CLAUDE.md).
+
+## Marco 1 — pipeline e painel  ✅ concluído 2026-08-20
+
+- [x] Esqueleto do projeto e configuração compartilhada (`scripts/00_config.py`)
+- [x] Ingestão dos 7 pleitos do TSE, ano a ano, sem acumular zips (`01_ingest.py`)
+- [x] Malha municipal do IBGE, simplificação e matriz de adjacência (`04_geo.py`)
+- [x] Pareamento TSE↔IBGE: 246/246 municípios, 9 correções manuais
+- [x] Modelo estrela e linhagem partidária (`03_normalize.py`)
+- [x] Métricas de concentração, domínio, canibalização e dinâmica (`05_metricas.py`)
+- [x] Teste-ouro contra o painel original (`06_verifica.py`) — passa
+- [x] Apuração dos números das inferências (`07_achados.py`)
+- [x] Payload e painel HTML autocontido (`08_payload.py`, `09_build_html.py`)
+- [x] Publicação do Artifact
+- [x] `docs/MODELO.md` — modelo estrela e medidas DAX
+- [x] `docs/ACHADOS.md` — inferências
+- [x] Textos de ajuda em todos os termos e critérios do painel (2026-08-21)
+- [x] Rivais territoriais por posição ideológica (`10_rivais.py`, 2026-08-21)
+
+## Marco 2 — deputado federal, Senado e cruzamentos  ✅ concluído 2026-08-21
+
+- [x] Ingestão generalizada para os três cargos (`01_ingest.py`), com retentativa e
+      validação de zip truncado
+- [x] Normalização e métricas parametrizadas por cargo, com cadeiras variáveis
+      (Senado renova 1 ou 2 vagas por pleito)
+- [x] Teste-ouro reconferido após a generalização — continua passando
+- [x] Análise cruzada: escala por cargo, arrasto partidário, duplas territoriais
+      (`11_cruzado.py`)
+- [x] Abas Estadual / Federal / Senado / Padrões / Cruzamentos no painel
+- [x] `docs/ACHADOS.md` seções 10 a 12
+
+## Marco 3 — vereadores de Goiânia  ✅ concluído 2026-08-21
+
+- [x] Pipeline próprio do ciclo municipal 2000–2024 (`12_vereador.py`), separado por ser
+      outro ciclo e outra geografia
+- [x] Aba Vereador · Goiânia com distribuição por zona eleitoral (não há mapa: Goiânia é
+      um município só e não existe malha pública de zona)
+- [x] `docs/ACHADOS.md` seções 13 e 14
+
+## Marco 4 — presidente, governador e mapa por seção  ✅ concluído 2026-08-21
+
+- [x] Ingestão dos cinco cargos com os dois turnos, lendo também o membro `_BR` do zip
+      (presidente é cargo nacional e não está no arquivo da UF)
+- [x] Abas Presidente e Governador, com marcação de "venceu em Goiás" separada de "eleito"
+- [x] Mapa de Goiânia por local de votação: 349 pontos com coordenada do TSE, 654.597
+      votos mapeados (`13_secoes.py`)
+- [x] Escala de disputa nos cruzamentos estendida aos cinco cargos
+- [x] `docs/ACHADOS.md` seção 10 e ressalvas 7 a 11 do `MODELO.md`
+
+## Marco 5 — replicação nacional  ✅ concluído 2026-08-21
+
+- [x] Ingestão em modo nacional (`RASTRO_UF=BR`), todas as UFs
+- [x] Portão de validação nacional (`15_valida_nacional.py`): o recorte de Goiás dentro
+      do arquivo do Brasil tem de bater exatamente com o arquivo de Goiás — 34
+      combinações cargo/ano conferidas
+- [x] Agregados por UF e malha do Brasil (`14_nacional.py`)
+- [x] Payload nacional de 13,2 MB (`16_payload_br.py`) — cabe no teto de 16 MB
+- [x] Página `lastro_brasil.html`: gaveta "Qual seu estado?" com as 26 UFs, mesmo
+      tratamento para cada uma, e aba de comparativo nacional
+- [x] Marca Lastro aplicada nas duas páginas
+
+## Marco 6 — front end em React  ✅ base entregue 2026-08-21
+
+- [x] Vite + React 19 + TypeScript estrito em `app/`
+- [x] Dados fatiados por UF (`18_dados_web.py`): abertura de 305 KB contra 13,3 MB
+- [x] Estado da tela na URL (`?uf=&ano=&c=`), link compartilhável
+- [x] Mapa, legenda, cartões, índices e gaveta de estados como componentes
+- [x] Toque tratado desde o começo, não como remendo
+- [x] `app/README.md` com a arquitetura e as escolhas
+
+### Porte dos demais blocos — aguardando ordem de prioridade
+
+Quatro blocos do painel antigo restam portar e competem por ordem. Como o alvo de
+entrega mudou (produto em React, não página única), a prioridade é decisão do usuário
+e está registrada como `RAS 00 TKT 0004` na [`FILA00.md`](FILA00.md), com recomendação
+do líder pelo comparativo nacional.
+
+| Bloco | Situação |
+|---|---|
+| Comparativo nacional | recomendado como primeiro — fecha o produto |
+| Demais cargos (federal, Senado, governador, presidente) | exige refazer o payload por UF para os outros cargos |
+| Rivais e cruzamentos | só existe para Goiás; replicar nacionalmente é o mais pesado |
+| Vereador de Goiânia com mapa por seção | dado de seção já pronto, cidade única |
+- [x] Sigla atribuída e entrada no roster monitorado (TKT-001, 2026-08-21)
+
+## AGUARDANDO — sem próximo item seguro
+
+Nada aqui é executável pelo líder. Os três itens estão registrados como ticket em
+[`FILA00.md`](FILA00.md) e saíram da lista de execução para não serem lidos como
+trabalho pendente.
+
+| Ticket | Item | Por que está parado |
+|---|---|---|
+| `TKT-002` | Estender a outras UFs | Não foi pedido. O pipeline já é parametrizado por UF; executar sem alvo definido seria trabalho especulativo. |
+| `TKT-003` | Incorporar o pleito de 2026 | Espera legítima por evento externo: a eleição ocorre em outubro de 2026 e o TSE só publica os dados após a totalização. |
+
+## Não fazer sem pedido explícito
+
+- Montar o `.pbix`: os CSVs do modelo estrela estão prontos, mas o arquivo do Power BI
+  é trabalho manual no Desktop e o usuário optou pelo painel HTML como entrega visual.

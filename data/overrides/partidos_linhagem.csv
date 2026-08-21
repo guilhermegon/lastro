@@ -1,0 +1,61 @@
+sigla_epoca,partido_norm,nome_linhagem,observacao
+AGIR,AGIR,Agir,
+AVANTE,AVANTE,Avante,
+CIDADANIA,CIDADANIA,Cidadania,
+DC,DC,Democracia Cristã,
+DEM,UNIAO,União Brasil,DEM fundiu com PSL em 2022 formando Uniao Brasil
+MDB,MDB,MDB,
+NOVO,NOVO,Novo,
+PAN,PTB,PTB,PAN incorporado ao PTB em 2006
+PATRIOTA,PATRIOTA,Patriota,PEN->Patriota em 2018
+PC do B,PCDOB,PCdoB,
+PCB,PCB,PCB,
+PCO,PCO,PCO,
+PCdoB,PCDOB,PCdoB,federacao Brasil da Esperanca em 2022
+PDT,PDT,PDT,
+PEN,PATRIOTA,Patriota,
+PFL,UNIAO,União Brasil,PFL virou DEM em 2007
+PGT,PL,PL,PGT incorporado
+PHS,PODE,Podemos,PHS incorporado ao Podemos em 2019
+PL,PL,PL,PL->PR em 2006->PL em 2019
+PMB,PMB,PMB,
+PMDB,MDB,MDB,PMDB retomou a sigla MDB em 2017
+PMN,PMN,PMN,
+PODE,PODE,Podemos,
+PP,PP,Progressistas,
+PPB,PP,Progressistas,PPB->PP em 2003
+PPL,PCDOB,PCdoB,PPL incorporado ao PCdoB em 2019
+PPR,PP,Progressistas,
+PPS,CIDADANIA,Cidadania,PPS virou Cidadania em 2019
+PR,PL,PL,
+PRB,REPUBLICANOS,Republicanos,PRB virou Republicanos em 2019
+PRN,PTC,PTC,PRN virou PTC em 2000
+PRONA,PL,PL,PRONA incorporado ao PR em 2006
+PROS,PROS,PROS,
+PRP,PATRIOTA,Patriota,PRP incorporado ao Patriota em 2019
+PRTB,PRTB,PRTB,
+PSB,PSB,PSB,
+PSC,PODE,Podemos,PSC incorporado ao Podemos em 2023
+PSD,PSD,PSD,PSD atual criado em 2011
+PSDB,PSDB,PSDB,federado com Cidadania em 2022
+PSDC,DC,Democracia Cristã,PSDC virou DC em 2017
+PSL,UNIAO,União Brasil,PSL fundiu com DEM em 2022
+PSN,PODE,Podemos,"PSN->PHS em 2000, PHS->Podemos em 2019"
+PSOL,PSOL,PSOL,federacao PSOL/REDE em 2022
+PST,PL,PL,PST incorporado ao PL em 2003
+PSTU,PSTU,PSTU,
+PT,PT,PT,federacao Brasil da Esperanca em 2022
+PT do B,AVANTE,Avante,
+PTB,PTB,PTB,
+PTC,AGIR,Agir,PTC virou Agir em 2022
+PTN,PODE,Podemos,PTN virou Podemos em 2017
+PTR,PP,Progressistas,
+PTdoB,AVANTE,Avante,PTdoB virou Avante em 2017
+PV,PV,PV,federacao Brasil da Esperanca em 2022
+REDE,REDE,Rede,federacao PSOL/REDE em 2022
+REPUBLICANOS,REPUBLICANOS,Republicanos,
+SD,SOLIDARIEDADE,Solidariedade,
+SOLIDARIEDADE,SOLIDARIEDADE,Solidariedade,
+UNIAO,UNIAO,União Brasil,
+PATRI,PATRIOTA,Patriota,abreviacao usada pelo TSE para Patriota
+UP,UP,Unidade Popular,

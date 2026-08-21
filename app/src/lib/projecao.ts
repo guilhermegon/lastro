@@ -1,0 +1,70 @@
+import type { GeometriaMunicipio } from "../tipos";
+
+export interface Projecao {
+  /** um caminho SVG por município, "" quando não há geometria */
+  caminhos: string[];
+  largura: number;
+  altura: number;
+}
+
+/**
+ * Projeta lat/long em coordenadas de tela.
+ *
+ * Equirretangular com correção de longitude por cos(latitude média). Não é uma
+ * projeção cartográfica séria — para um estado, na escala em que isso é
+ * desenhado, a distorção é invisível, e ela tem a vantagem de não depender de
+ * biblioteca nenhuma. O cosseno importa: sem ele, os estados do Norte ficam
+ * esticados na horizontal.
+ */
+export function projetar(
+  geo: (GeometriaMunicipio | null)[],
+  larguraAlvo = 560,
+): Projecao {
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const municipio of geo) {
+    if (!municipio) continue;
+    for (const anel of municipio) {
+      for (const [x, y] of anel) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+  if (!Number.isFinite(minX)) return { caminhos: geo.map(() => ""), largura: larguraAlvo, altura: 100 };
+
+  const kx = Math.cos(((minY + maxY) / 2) * (Math.PI / 180));
+  const escala = larguraAlvo / ((maxX - minX) * kx || 1);
+  const altura = Math.max(120, Math.round((maxY - minY) * escala));
+
+  const caminhos = geo.map((municipio) => {
+    if (!municipio) return "";
+    return municipio
+      .map(
+        (anel) =>
+          "M" +
+          anel
+            .map(([x, y]) =>
+              `${((x - minX) * kx * escala).toFixed(1)},${((maxY - y) * escala).toFixed(1)}`,
+            )
+            .join("L") +
+          "Z",
+      )
+      .join(" ");
+  });
+
+  return { caminhos, largura: larguraAlvo, altura };
+}
+
+/** Mesma projeção para a malha do Brasil, que vem em GeoJSON e não em array. */
+export function projetarFeicoes(
+  feicoes: { coordinates: number[][][] | number[][][][]; type: string }[],
+  larguraAlvo = 520,
+): Projecao {
+  const comoLista = feicoes.map((g) => {
+    const polys = (g.type === "Polygon" ? [g.coordinates] : g.coordinates) as number[][][][];
+    return polys.map((p) => p[0] as [number, number][]) as GeometriaMunicipio;
+  });
+  return projetar(comoLista, larguraAlvo);
+}

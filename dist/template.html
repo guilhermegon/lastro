@@ -1,0 +1,1842 @@
+<title>Redutos de Goiás</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+:root {
+  --bg: #EFF3F3;
+  --surface: #FFFFFF;
+  --surface-2: #E7EDED;
+  --ink: #11181A;
+  --ink-2: #47565A;
+  --ink-3: #79888C;
+  --line: #D3DDDD;
+  --line-strong: #B6C4C4;
+  --accent: #0E6F72;
+  --accent-soft: #D9EBEB;
+  --on-accent: #FFFFFF;
+
+  --sem-voto: #DFE6E6;
+  --r1: #F6E2C6;
+  --r2: #E8BC84;
+  --r3: #D4914A;
+  --r4: #B0651F;
+  --r5: #7A3D12;
+
+  --c1: #B04A22;
+  --c2: #0398A6;
+  --c3: #C08A0E;
+  --c4: #6B4FC4;
+
+  --tinta-r1: #2A1A08;
+  --tinta-r2: #2A1A08;
+  --tinta-r3: #2A1A08;
+  --tinta-r4: #FFF7EC;
+  --tinta-r5: #FFF7EC;
+
+  --s1: #C43D34;
+  --s2: #E07B33;
+  --s3: #DFBB3C;
+  --s4: #6FAA38;
+  --s5: #2C6E33;
+  --tinta-s1: #FFF2F0;
+  --tinta-s2: #2B1403;
+  --tinta-s3: #241D02;
+  --tinta-s4: #12240A;
+  --tinta-s5: #EFFAF0;
+  --tinta-c1: #FFF6F1;
+  --tinta-c2: #F2FEFF;
+  --tinta-c3: #1F1803;
+  --tinta-c4: #F6F3FF;
+
+  --shadow: 0 1px 2px rgba(17,24,26,.06), 0 4px 14px rgba(17,24,26,.05);
+  --radius: 8px;
+  --step--1: .78rem;
+  --step-0: .9rem;
+  --step-1: 1.05rem;
+  --step-2: 1.4rem;
+  --step-3: 2rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1416;
+    --surface: #161E21;
+    --surface-2: #1E282B;
+    --ink: #E7EDED;
+    --ink-2: #A5B4B7;
+    --ink-3: #75868A;
+    --line: #2A3639;
+    --line-strong: #3B4A4E;
+    --accent: #3FB9BE;
+    --accent-soft: #17393B;
+    --on-accent: #06191A;
+
+    --sem-voto: #232E31;
+    --r1: #4A2E14;
+    --r2: #7A4A1C;
+    --r3: #A9702C;
+    --r4: #D09A4E;
+    --r5: #EFC98A;
+
+    --c1: #D06B3B;
+    --c2: #22A5B3;
+    --c3: #B98C2E;
+    --c4: #8B72CF;
+
+    --tinta-r1: #F3E7D8;
+    --tinta-r2: #F8EEE1;
+    --tinta-r3: #1B1206;
+    --tinta-r4: #1B1206;
+    --tinta-r5: #1B1206;
+
+    --s1: #C4453D;
+    --s2: #D0812F;
+    --s3: #C9AE3B;
+    --s4: #6FAC3D;
+    --s5: #3E9A48;
+    --tinta-s1: #FFF2F0;
+    --tinta-s2: #1F0F02;
+    --tinta-s3: #1B1502;
+    --tinta-s4: #0D1A07;
+    --tinta-s5: #F0FBF1;
+    --tinta-c1: #17100B;
+    --tinta-c2: #04191B;
+    --tinta-c3: #171004;
+    --tinta-c4: #100B1E;
+
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0E1416;
+  --surface: #161E21;
+  --surface-2: #1E282B;
+  --ink: #E7EDED;
+  --ink-2: #A5B4B7;
+  --ink-3: #75868A;
+  --line: #2A3639;
+  --line-strong: #3B4A4E;
+  --accent: #3FB9BE;
+  --accent-soft: #17393B;
+  --on-accent: #06191A;
+
+  --sem-voto: #232E31;
+  --r1: #4A2E14;
+  --r2: #7A4A1C;
+  --r3: #A9702C;
+  --r4: #D09A4E;
+  --r5: #EFC98A;
+
+  --c1: #D06B3B;
+  --c2: #22A5B3;
+  --c3: #B98C2E;
+  --c4: #8B72CF;
+
+  --tinta-r1: #F3E7D8;
+  --tinta-r2: #F8EEE1;
+  --tinta-r3: #1B1206;
+  --tinta-r4: #1B1206;
+  --tinta-r5: #1B1206;
+
+  --s1: #C4453D;
+  --s2: #D0812F;
+  --s3: #C9AE3B;
+  --s4: #6FAC3D;
+  --s5: #3E9A48;
+  --tinta-s1: #FFF2F0;
+  --tinta-s2: #1F0F02;
+  --tinta-s3: #1B1502;
+  --tinta-s4: #0D1A07;
+  --tinta-s5: #F0FBF1;
+  --tinta-c1: #17100B;
+  --tinta-c2: #04191B;
+  --tinta-c3: #171004;
+  --tinta-c4: #100B1E;
+
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--step-0);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: Archivo, "IBM Plex Sans", ui-sans-serif, sans-serif;
+  text-wrap: balance;
+  margin: 0;
+  letter-spacing: -.015em;
+}
+
+.num { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+.wrap { max-width: 1400px; margin: 0 auto; padding: 0 clamp(12px, 3vw, 28px); }
+
+/* ---------- cabecalho ---------- */
+.topo {
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.topo-in {
+  display: flex; flex-wrap: wrap; gap: 16px 28px;
+  align-items: flex-end; justify-content: space-between;
+  padding: 20px 0 16px;
+}
+.lastro { display: block; width: 164px; margin: 0 0 14px; }
+.lastro svg { width: 100%; height: auto; display: block; }
+.lastro-mark { fill: var(--accent); }
+.lastro-nome {
+  fill: var(--ink); font-family: Archivo, "IBM Plex Sans", sans-serif;
+  font-size: 30px; font-weight: 700; letter-spacing: -0.6px;
+}
+.lastro-sub {
+  fill: var(--ink); opacity: .62; font-family: "IBM Plex Sans", sans-serif;
+  font-size: 9px; font-weight: 500; letter-spacing: 3.1px;
+}
+
+.marca h1 { font-size: var(--step-3); font-weight: 700; line-height: 1.05; }
+.marca p {
+  margin: 6px 0 0; color: var(--ink-2); font-size: var(--step--1);
+  max-width: 62ch;
+}
+.eyebrow {
+  font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--accent); font-weight: 600; margin: 0 0 4px;
+}
+
+/* ---------- controles ---------- */
+.seg { display: flex; gap: 2px; background: var(--surface-2); padding: 3px; border-radius: var(--radius); }
+.seg button {
+  font: 500 var(--step--1)/1 "IBM Plex Mono", monospace;
+  border: 0; background: transparent; color: var(--ink-2);
+  padding: 8px 11px; border-radius: 6px; cursor: pointer;
+}
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+
+.abas { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-top: 4px; }
+.abas button {
+  font: 600 var(--step-0)/1 "IBM Plex Sans", sans-serif;
+  background: none; border: 0; border-bottom: 2px solid transparent;
+  color: var(--ink-3); padding: 12px 14px; cursor: pointer; margin-bottom: -1px;
+}
+.abas button:hover { color: var(--ink); }
+.abas button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+
+:where(button, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+
+/* ---------- layout ---------- */
+.painel { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 20px; padding: 20px 0 40px; }
+@media (max-width: 900px) { .painel { grid-template-columns: 1fr; } }
+
+.rail { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.rail-bloco { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow); }
+.rail-titulo {
+  font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 600; margin: 0 0 8px;
+}
+.busca {
+  width: 100%; padding: 7px 9px; border: 1px solid var(--line-strong);
+  border-radius: 6px; background: var(--bg); color: var(--ink);
+  font: 400 var(--step--1) "IBM Plex Sans", sans-serif;
+}
+.lista { max-height: 540px; overflow-y: auto; margin-top: 8px; display: flex; flex-direction: column; gap: 1px; }
+.lista button {
+  text-align: left; border: 0; background: transparent; cursor: pointer;
+  padding: 6px 8px; border-radius: 5px; color: var(--ink-2);
+  font: 400 var(--step--1)/1.3 "IBM Plex Sans", sans-serif;
+  display: flex; justify-content: space-between; gap: 8px; align-items: baseline;
+}
+.lista button:hover { background: var(--surface-2); color: var(--ink); }
+.lista button[aria-pressed="true"] { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+.lista .lv { font-family: "IBM Plex Mono", monospace; font-size: .7rem; color: var(--ink-3); }
+
+.conteudo { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+.cartoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.cartao { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 11px 13px; box-shadow: var(--shadow); }
+.cartao .rot { font-size: .64rem; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+.cartao .val { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; font-size: var(--step-2); font-weight: 500; line-height: 1.2; margin-top: 3px; }
+.cartao .val.txt { font-family: Archivo, sans-serif; font-size: var(--step-1); font-weight: 600; }
+.cartao .sub { font-size: .7rem; color: var(--ink-3); margin-top: 1px; }
+
+.cartaz { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px 16px; }
+.cartaz > h2 { font-size: var(--step-1); font-weight: 600; }
+.cartaz > .cap { color: var(--ink-2); font-size: var(--step--1); margin: 3px 0 12px; max-width: 70ch; }
+
+.mapas { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+
+.legenda { display: flex; flex-wrap: wrap; gap: 8px 12px; margin-top: 10px; }
+.legenda .item { display: flex; align-items: center; gap: 5px; font-size: .7rem; color: var(--ink-2); }
+.swatch { width: 13px; height: 13px; border-radius: 3px; border: 1px solid rgba(128,128,128,.28); flex: none; }
+
+svg { display: block; width: 100%; height: auto; }
+.mun { stroke: var(--surface); stroke-width: .5; cursor: pointer; }
+.mun.on { stroke: var(--ink); stroke-width: 1.4; }
+
+.dica {
+  position: fixed; pointer-events: none; z-index: 50; opacity: 0;
+  background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: 6px; padding: 7px 10px; box-shadow: var(--shadow);
+  font-size: .74rem; line-height: 1.45; max-width: 240px;
+  transition: opacity .1s;
+}
+.dica strong { font-family: Archivo, sans-serif; display: block; font-size: .82rem; }
+.dica .num { color: var(--ink-2); }
+
+table { width: 100%; border-collapse: collapse; font-size: var(--step--1); }
+.rolagem { overflow-x: auto; }
+th, td { padding: 6px 9px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+thead th {
+  font-size: .64rem; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 600; border-bottom: 1px solid var(--line-strong);
+}
+tbody tr:hover { background: var(--surface-2); }
+td.n { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; }
+tfoot td { font-weight: 600; border-bottom: 0; border-top: 1px solid var(--line-strong); }
+
+.duas { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 16px; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px;
+  border-radius: 999px; font-size: .7rem; font-weight: 600;
+  background: var(--surface-2); color: var(--ink-2);
+}
+.chip .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+.indices { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 10px 14px; }
+.indice .rot { font-size: .64rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+.indice .val { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; font-size: var(--step-1); font-weight: 500; }
+.indice .exp { font-size: .68rem; color: var(--ink-3); line-height: 1.35; }
+
+.mini { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+.mini h3 { font-size: .8rem; font-weight: 600; color: var(--ink-2); }
+.mini .cap { font-size: .68rem; color: var(--ink-3); margin: 2px 0 6px; }
+
+.nota {
+  border-left: 3px solid var(--accent); background: var(--accent-soft);
+  padding: 10px 14px; border-radius: 0 6px 6px 0; font-size: var(--step--1);
+  color: var(--ink-2);
+}
+.nota strong { color: var(--ink); }
+
+footer { border-top: 1px solid var(--line); padding: 18px 0 40px; color: var(--ink-3); font-size: .72rem; }
+footer p { margin: 3px 0; max-width: 78ch; }
+
+.ajuda {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 15px; height: 15px; margin-left: 5px; padding: 0; flex: none;
+  border: 1px solid var(--line-strong); border-radius: 50%;
+  background: transparent; color: var(--ink-3);
+  font: 600 9px/1 "IBM Plex Sans", sans-serif; cursor: help;
+  vertical-align: middle;
+}
+.ajuda:hover, .ajuda:focus-visible {
+  border-color: var(--accent); color: var(--accent); background: var(--accent-soft);
+}
+h2 .ajuda { width: 17px; height: 17px; font-size: 10px; margin-left: 7px; }
+
+.ajuda-caixa {
+  position: fixed; z-index: 60; opacity: 0; pointer-events: none;
+  max-width: 320px; background: var(--surface); color: var(--ink-2);
+  border: 1px solid var(--line-strong); border-radius: 8px;
+  padding: 11px 13px; box-shadow: var(--shadow);
+  font-size: .74rem; line-height: 1.55;
+  transition: opacity .1s;
+}
+.ajuda-caixa strong {
+  display: block; color: var(--ink); font-family: Archivo, sans-serif;
+  font-size: .8rem; font-weight: 600; margin-bottom: 5px;
+}
+.ajuda-caixa em { color: var(--ink-3); font-style: normal; }
+
+.ponto { cursor: pointer; }
+.ponto:hover { stroke: var(--ink); stroke-width: 1.5; }
+
+.rival { display: flex; align-items: baseline; gap: 8px; padding: 6px 0;
+  border-bottom: 1px solid var(--line); font-size: var(--step--1); }
+.rival:last-child { border-bottom: 0; }
+.rival .nm { flex: 1; min-width: 0; }
+.rival .nm b { font-weight: 600; }
+.rival .nm span { color: var(--ink-3); font-size: .7rem; display: block; }
+.rival .pr { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums;
+  color: var(--ink); font-weight: 500; }
+.rival .barra { width: 46px; height: 5px; border-radius: 3px; background: var(--surface-2); flex: none; }
+.rival .barra i { display: block; height: 100%; border-radius: 3px; }
+.lado-t { font-size: .68rem; letter-spacing: .08em; text-transform: uppercase;
+  font-weight: 600; margin: 0 0 6px; display: flex; align-items: center; gap: 6px; }
+.pt-ali { color: var(--c2); }
+.pt-adv { color: var(--c1); }
+
+.oculto { display: none !important; }
+.sr {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* ---------- celular ---------- */
+@media (max-width: 760px) {
+  .abas {
+    overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .abas::-webkit-scrollbar { display: none; }
+  .abas button { white-space: nowrap; flex: none; padding: 12px 11px; }
+
+  .painel { display: flex; flex-direction: column; gap: 14px; padding: 14px 0 32px; }
+  .rail { display: contents; }
+  .rail-primario { order: 1; }
+  .conteudo { order: 2; }
+  .rail-bloco { order: 3; }
+
+  .lista { max-height: 246px; }
+  .topo-in { padding: 14px 0 12px; }
+  .lastro { width: 136px; margin-bottom: 10px; }
+  .marca h1 { font-size: 1.55rem; }
+  .marca > p { font-size: .74rem; }
+  .cartaz { padding: 12px 13px 14px; }
+  th, td { padding: 6px 7px; }
+  .estados { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); padding: 4px 12px 14px; }
+  .dica { max-width: calc(100vw - 24px); }
+  .ajuda { width: 18px; height: 18px; font-size: 10px; }
+}
+</style>
+
+<div class="topo">
+  <div class="wrap">
+    <div class="topo-in">
+      <div class="marca">
+        <span class="lastro" role="img" aria-label="Lastro — Inteligência Política">
+          <svg viewBox="0 0 260 68" aria-hidden="true" focusable="false">
+            <g class="lastro-mark">
+              <rect x="12" y="12" width="4" height="44" rx="1"/>
+              <rect x="21" y="12" width="16" height="4" rx="1.5" opacity=".42"/>
+              <rect x="21" y="24" width="26" height="6" rx="2" opacity=".66"/>
+              <rect x="21" y="38" width="38" height="8" rx="2.5"/>
+              <rect x="12" y="52" width="52" height="4" rx="1.5"/>
+            </g>
+            <text class="lastro-nome" x="82" y="36">LASTRO</text>
+            <text class="lastro-sub" x="83.5" y="52">INTELIGÊNCIA POLÍTICA</text>
+          </svg>
+        </span>
+        <p class="eyebrow">Goiás · Assembleia Legislativa · 1998 a 2022</p>
+        <h1>Redutos de Goiás<button class="ajuda" type="button" data-aj="metodo" aria-label="Explicação">?</button></h1>
+        <p>Distribuição espacial do desempenho eleitoral dos deputados estaduais, município a município.
+           Reconstrói o painel do TSE/GO e estende a série ao pleito de 2022.</p>
+      </div>
+      <div class="seg" id="segAno" role="group" aria-label="Pleito"></div>
+    </div>
+    <div class="abas" role="tablist">
+      <button role="tab" id="tabPresidente" aria-selected="false" aria-controls="viewDep">Presidente</button>
+      <button role="tab" id="tabGovernador" aria-selected="false" aria-controls="viewDep">Governador</button>
+      <button role="tab" id="tabEstadual" aria-selected="true" aria-controls="viewDep">Estadual</button>
+      <button role="tab" id="tabFederal" aria-selected="false" aria-controls="viewDep">Federal</button>
+      <button role="tab" id="tabSenador" aria-selected="false" aria-controls="viewDep">Senado</button>
+      <button role="tab" id="tabPad" aria-selected="false" aria-controls="viewPad">Padrões</button>
+      <button role="tab" id="tabVer" aria-selected="false" aria-controls="viewVer">Vereador · Goiânia</button>
+      <button role="tab" id="tabCruz" aria-selected="false" aria-controls="viewCruz">Cruzamentos</button>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <div id="viewDep" role="tabpanel" aria-labelledby="tabDep">
+    <div class="painel">
+      <aside class="rail">
+        <div class="rail-bloco rail-primario">
+          <p class="rail-titulo" id="railTitulo">Deputado(a) eleito(a)</p>
+          <input class="busca" id="busca" type="search" placeholder="Buscar pelo nome" aria-label="Buscar deputado">
+          <div class="lista" id="lista"></div>
+        </div>
+        <div class="rail-bloco">
+          <p class="rail-titulo">Escala dos mapas</p>
+          <div class="seg" id="segEscala" role="group" aria-label="Escala">
+            <button data-esc="orig" aria-pressed="true">Faixas do original</button>
+            <button data-esc="quant" aria-pressed="false">Quantis</button>
+          </div>
+          <p class="indice exp" style="margin:8px 0 0">As faixas fixas do painel original agrupam realidades
+             muito distintas na última classe. Os quantis redistribuem as cores sobre os municípios
+             em que este deputado teve voto.</p>
+        </div>
+        <div class="rail-bloco">
+          <p class="rail-titulo">Cores do mapa</p>
+          <div class="seg" id="segPaleta" role="group" aria-label="Paleta">
+            <button data-pal="semaforo" aria-pressed="true">Vermelho a verde</button>
+            <button data-pal="terra" aria-pressed="false">Matiz única</button>
+          </div>
+          <p class="indice exp" style="margin:8px 0 0">Vermelho para votação baixa, verde para alta.
+             Para quem tem daltonismo vermelho-verde os dois extremos ficam parecidos — nesse caso a
+             matiz única resolve, porque a ordem passa a estar no claro-escuro. O valor exato está
+             sempre no tooltip e nas duas tabelas.</p>
+        </div>
+      </aside>
+
+      <div class="conteudo">
+        <div class="nota oculto" id="notaMajoritario">
+          <strong>Cargo majoritário, mapa de primeiro turno.</strong>
+          A lista traz todos os candidatos do pleito, não só quem venceu<button
+          class="ajuda" type="button" data-aj="majoritario" aria-label="Explicação">?</button>.
+          O mapa e os índices usam sempre o 1º turno: é onde está a disputa territorial
+          de verdade, porque no segundo sobram dois nomes.
+        </div>
+
+        <div class="cartoes" id="cartoes"></div>
+
+        <div class="mapas">
+          <div class="cartaz">
+            <h2>Votação<button class="ajuda" type="button" data-aj="mapaVotacao" aria-label="Explicação">?</button></h2>
+            <p class="cap">Votos nominais que o deputado recebeu em cada município.</p>
+            <div id="mapaVotos"></div>
+            <div class="legenda" id="legVotos"></div>
+          </div>
+          <div class="cartaz">
+            <h2>Influência<button class="ajuda" type="button" data-aj="mapaInfluencia" aria-label="Explicação">?</button></h2>
+            <p class="cap">Quanto o deputado representa do total de votos nominais apurados no município.</p>
+            <div id="mapaInfl"></div>
+            <div class="legenda" id="legInfl"></div>
+          </div>
+        </div>
+
+        <div class="duas">
+          <div class="cartaz">
+            <h2>Trajetória<button class="ajuda" type="button" data-aj="trajetoria" aria-label="Explicação">?</button></h2>
+            <p class="cap" id="capSerie"></p>
+            <div id="serieBar"></div>
+          </div>
+          <div class="cartaz">
+            <h2>Perfil territorial</h2>
+            <p class="cap">Índices que o painel original não calcula.</p>
+            <div class="indices" id="indices"></div>
+          </div>
+        </div>
+
+        <div class="cartaz">
+          <h2>Rivais territoriais<button class="ajuda" type="button" data-aj="rivais" aria-label="Explicação">?</button></h2>
+          <p class="cap">Quem disputa o mesmo chão que este deputado, separado por posição
+             ideológica<button class="ajuda" type="button" data-aj="espectro" aria-label="Explicação">?</button>.
+             Ordenado por pressão, não por votos.</p>
+          <div class="duas" id="rivais"></div>
+        </div>
+
+        <div class="duas">
+          <div class="cartaz">
+            <h2>Concentração<button class="ajuda" type="button" data-aj="tabelaConcentracao" aria-label="Explicação">?</button></h2>
+            <p class="cap">Onde estão os votos do deputado — os 20 municípios que mais lhe renderam.</p>
+            <div class="rolagem"><table id="tabA"></table></div>
+          </div>
+          <div class="cartaz">
+            <h2>Domínio<button class="ajuda" type="button" data-aj="tabelaDominio" aria-label="Explicação">?</button></h2>
+            <p class="cap">Onde o deputado pesa mais — os 20 municípios em que ele tem a maior fatia do total apurado.</p>
+            <div class="rolagem"><table id="tabB"></table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="viewPad" role="tabpanel" aria-labelledby="tabPad" class="oculto">
+    <div class="conteudo" style="padding: 20px 0 40px">
+      <div class="cartaz">
+        <h2>Vinte e quatro anos de dispersão — interrompidos em 2022<button class="ajuda" type="button" data-aj="seriePadroes" aria-label="Explicação">?</button></h2>
+        <p class="cap">Medianas entre os 41 eleitos de cada pleito. Três medidas independentes contam a
+           mesma história: as bases foram se abrindo de 1998 a 2018 e voltaram a fechar em 2022.</p>
+        <div class="mini" id="miniSerie"></div>
+      </div>
+
+      <div class="cartaz">
+        <h2>Que tipo de deputado Goiás elege<button class="ajuda" type="button" data-aj="tipologia" aria-label="Explicação">?</button></h2>
+        <p class="cap">Cada eleito é classificado cruzando concentração (número efetivo de municípios)
+           com domínio (fatia média que ele detém nos municípios onde atua).</p>
+        <div id="tipoBar"></div>
+        <div class="legenda" id="legTipo"></div>
+      </div>
+
+      <div class="cartaz">
+        <h2>A janela de captura municipal<button class="ajuda" type="button" data-aj="janelaCaptura" aria-label="Explicação">?</button></h2>
+        <p class="cap">Fatia do maior candidato no total de votos nominais do município, por porte do
+           eleitorado. Valores medianos; cor mais escura significa município mais capturado.</p>
+        <div class="rolagem"><table id="tabCaptura"></table></div>
+        <div class="nota" style="margin-top:12px">
+          <strong>O padrão se repete nas sete eleições.</strong> A captura não cresce nem cai com o tamanho
+          do município: ela tem um pico numa faixa intermediária — grande o bastante para sustentar um
+          candidato nativo, pequeno o bastante para que um só o domine — e desaba nas cidades maiores.
+        </div>
+      </div>
+
+      <div class="duas">
+        <div class="cartaz">
+          <h2>O preço de uma cadeira<button class="ajuda" type="button" data-aj="quociente" aria-label="Explicação">?</button></h2>
+          <p class="cap">Quociente eleitoral aproximado e votação do último eleito em cada pleito.</p>
+          <div class="rolagem"><table id="tabPleito"></table></div>
+        </div>
+        <div class="cartaz">
+          <h2>Partidos e canibalização<button class="ajuda" type="button" data-aj="similaridadePartido" aria-label="Explicação">?</button></h2>
+          <p class="cap">Semelhança média entre os mapas de votos de candidatos do mesmo partido
+             (cosseno, 0 a 1). Quanto mais alto, mais eles disputam o mesmo território.</p>
+          <div class="rolagem"><table id="tabPartido"></table></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="viewVer" role="tabpanel" aria-labelledby="tabVer" class="oculto">
+    <div class="painel">
+      <aside class="rail">
+        <div class="rail-bloco rail-primario">
+          <p class="rail-titulo">Pleito municipal</p>
+          <div class="seg" id="segVerAno" role="group" aria-label="Pleito municipal"
+               style="flex-wrap:wrap"></div>
+        </div>
+        <div class="rail-bloco rail-primario">
+          <p class="rail-titulo">Vereador(a) de Goiânia</p>
+          <input class="busca" id="buscaVer" type="search" placeholder="Buscar pelo nome" aria-label="Buscar vereador">
+          <div class="lista" id="listaVer"></div>
+        </div>
+        <div class="rail-bloco">
+          <p class="rail-titulo">Só eleitos</p>
+          <div class="seg" id="segVerFiltro" role="group" aria-label="Filtro">
+            <button data-vf="eleitos" aria-pressed="true">Eleitos</button>
+            <button data-vf="todos" aria-pressed="false">Todos</button>
+          </div>
+          <p class="indice exp" style="margin:8px 0 0">A lista traz quem teve 100 votos ou mais.
+             Em 2024 foram 473 candidaturas nessa faixa, das quais 37 se elegeram.</p>
+        </div>
+      </aside>
+
+      <div class="conteudo">
+        <div class="nota">
+          <strong>Aqui não há mapa, e a razão é de dado, não de escolha.</strong>
+          Goiânia é um município só: a malha municipal que sustenta as outras abas não
+          desagrega nada dentro da cidade. A única divisão territorial interna que este
+          arquivo do TSE oferece é a zona eleitoral<button class="ajuda" type="button"
+          data-aj="zonaEleitoral" aria-label="Explicação">?</button>, e não existe malha
+          pública com o desenho delas. A geografia entra como distribuição por zona.
+        </div>
+
+        <div class="cartoes" id="cartoesVer"></div>
+
+        <div class="cartaz" id="cartazMapaVer">
+          <h2>Onde estão os votos, ponto a ponto<button class="ajuda" type="button" data-aj="mapaLocais" aria-label="Explicação">?</button></h2>
+          <p class="cap" id="capVerMapa"></p>
+          <div id="verMapa"></div>
+          <div class="legenda" id="verMapaLeg"></div>
+        </div>
+
+        <div class="duas">
+          <div class="cartaz">
+            <h2>Distribuição por zona eleitoral</h2>
+            <p class="cap" id="capVerZona"></p>
+            <div id="verZonaBar"></div>
+          </div>
+          <div class="cartaz">
+            <h2>Trajetória</h2>
+            <p class="cap" id="capVerSerie"></p>
+            <div id="verSerieBar"></div>
+          </div>
+        </div>
+
+        <div class="duas">
+          <div class="cartaz">
+            <h2>Perfil na cidade</h2>
+            <p class="cap">O mesmo cruzamento de concentração usado nas outras abas, agora
+               entre as zonas de Goiânia.</p>
+            <div class="indices" id="verIndices"></div>
+          </div>
+          <div class="cartaz">
+            <h2>Zonas do candidato</h2>
+            <p class="cap">Votos e fatia do total dele em cada zona.</p>
+            <div class="rolagem"><table id="verTabZona"></table></div>
+          </div>
+        </div>
+
+        <div class="duas">
+          <div class="cartaz">
+            <h2>O preço da cadeira na Câmara<button class="ajuda" type="button" data-aj="camara" aria-label="Explicação">?</button></h2>
+            <p class="cap">Sete pleitos municipais, de 2000 a 2024.</p>
+            <div class="rolagem"><table id="verTabPleito"></table></div>
+          </div>
+          <div class="cartaz">
+            <h2>Partidos e puxadores<button class="ajuda" type="button" data-aj="puxador" aria-label="Explicação">?</button></h2>
+            <p class="cap">Partidos com três candidaturas ou mais no pleito selecionado.
+               A semelhança aqui <strong>não se compara</strong> com a das outras abas: sobre
+               9 zonas ela é mecanicamente muito mais alta do que sobre 246 municípios. Use-a
+               para ordenar partidos entre si dentro do mesmo pleito, não entre escalas.</p>
+            <div class="rolagem"><table id="verTabPartido"></table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="viewCruz" role="tabpanel" aria-labelledby="tabCruz" class="oculto">
+    <div class="conteudo" style="padding: 20px 0 40px">
+      <div class="cartaz">
+        <h2>Cada cargo se disputa numa escala diferente<button class="ajuda" type="button" data-aj="escala" aria-label="Explicação">?</button></h2>
+        <p class="cap">Municípios efetivos dos eleitos, mediana por pleito. Quanto menor,
+           mais a votação depende de poucas cidades.</p>
+        <div id="cruzEscala"></div>
+        <div class="legenda" id="cruzEscalaLeg"></div>
+        <div class="nota" style="margin-top:12px">
+          <strong>O deputado estadual disputa um território três a quatro vezes menor.</strong>
+          Não é uma diferença de grau: são jogos distintos rodando na mesma urna, no mesmo dia.
+        </div>
+      </div>
+
+      <div class="cartaz">
+        <h2>O partido anda junto entre os cargos?<button class="ajuda" type="button" data-aj="arrasto" aria-label="Explicação">?</button></h2>
+        <p class="cap">Correlação, entre os 246 municípios, da fatia do partido no estadual e
+           no federal. Alto = máquina territorial coordenada; baixo = candidatos independentes
+           que dividem apenas a legenda.</p>
+        <div class="rolagem"><table id="cruzArrasto"></table></div>
+      </div>
+
+      <div class="cartaz">
+        <h2>Duplas estadual e federal com o mesmo mapa<button class="ajuda" type="button" data-aj="dobradinha" aria-label="Explicação">?</button></h2>
+        <p class="cap">Para cada deputado estadual, o federal cujo mapa municipal mais se parece
+           com o dele.</p>
+        <div class="rolagem"><table id="cruzDobra"></table></div>
+        <div class="nota" style="margin-top:12px">
+          <strong>Isto não prova dobradinha.</strong> Dois candidatos concentrados na mesma
+          cidade têm mapas quase idênticos mesmo sem combinação nenhuma — por isso as afinidades
+          chegam a 0,999. O que a tabela mostra é coincidência territorial; a intenção por trás
+          dela o dado não revela. O número informativo está abaixo.
+        </div>
+        <div class="mini" id="cruzMesmoPartido" style="margin-top:16px"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="wrap">
+  <p><strong>Fonte:</strong> Tribunal Superior Eleitoral, dados abertos, arquivo
+     <span class="num">votacao_candidato_munzona</span> (1998–2022), cargo de deputado estadual, 1º turno.
+     Malha municipal: IBGE.</p>
+  <p>O painel original — <em>Distribuição Espacial do Desempenho Eleitoral dos Deputados Estaduais
+     (1998 a 2018)</em>, da Seção de Assessoramento Temático — foi reproduzido item a item e conferido:
+     a votação de cada deputado por município bate exatamente. O total de votos nominais do município,
+     usado como denominador do mapa de Influência, difere em parte dos casos, porque o painel original
+     foi construído sobre um extrato anterior a revisões de totalização do TSE. Os números aqui vêm da
+     base atual e coincidem entre duas fontes independentes do próprio TSE.</p>
+  <p><strong>Lastro — Inteligência Política.</strong> Votos nominais não incluem votos de legenda. Em 1998, 242 dos 246 municípios registraram votos.</p>
+</footer>
+
+<div class="dica" id="dica" role="status" aria-live="polite"></div>
+<div class="ajuda-caixa" id="ajudaCaixa" role="tooltip"></div>
+
+<script>
+const D = /*__DADOS__*/;
+
+const fmt = n => n.toLocaleString("pt-BR");
+const pct = (n, c = 2) => n.toLocaleString("pt-BR", {minimumFractionDigits: c, maximumFractionDigits: c});
+const NS = "http://www.w3.org/2000/svg";
+const el = (t, a = {}) => {
+  const e = document.createElementNS(NS, t);
+  for (const k in a) e.setAttribute(k, a[k]);
+  return e;
+};
+
+// O TSE grava a situacao sem acento e em caixa alta, e muda o rotulo ao longo
+// da serie: ate 2010 o eleito por media aparece so como "MEDIA".
+const SITUACAO = {
+  "ELEITO": "Eleito",
+  "ELEITO POR QP": "Eleito por quociente",
+  "ELEITO POR MEDIA": "Eleito por média",
+  "MEDIA": "Eleito por média",
+};
+
+// ---------- textos de ajuda ----------
+// Cada verbete diz o que a medida e', como foi calculada e como ler o numero.
+const AJUDA = {
+  metodo: {t: "Como isto foi feito", d:
+    "Dados abertos do TSE, arquivo <em>votacao_candidato_munzona</em>, sete pleitos de 1998 a 2022, cargo de deputado estadual, 1\u00ba turno. O dado bruto vem por munic\u00edpio <em>e zona eleitoral</em> e foi agregado para munic\u00edpio. Os munic\u00edpios foram pareados com a malha do IBGE por nome sem acento: 246 de 246, com nove corre\u00e7\u00f5es manuais de grafia. Valida\u00e7\u00e3o: os n\u00fameros reproduzem exatamente o painel original do TSE/GO na vota\u00e7\u00e3o por munic\u00edpio."},
+
+  votosNominais: {t: "Votos nominais", d:
+    "Votos dados ao <em>nome</em> do candidato na urna. N\u00e3o incluem voto de legenda, dado s\u00f3 ao n\u00famero do partido \u2014 ele conta para o quociente, mas n\u00e3o para a vota\u00e7\u00e3o individual de ningu\u00e9m."},
+
+  municipiosComVoto: {t: "Munic\u00edpios com voto", d:
+    "Em quantos dos 246 munic\u00edpios de Goi\u00e1s este deputado teve pelo menos um voto. O painel original do TSE/GO mostra sempre 246 neste card: l\u00e1 o n\u00famero \u00e9 o total de munic\u00edpios do mapa, n\u00e3o os que deram voto."},
+
+  doEstado: {t: "Fatia do estado", d:
+    "A vota\u00e7\u00e3o do deputado dividida pelo total de votos nominais dados a <em>todos</em> os candidatos a deputado estadual em Goi\u00e1s naquele pleito."},
+
+  situacao: {t: "Como se elegeu", d:
+    "Classifica\u00e7\u00e3o do TSE. <em>Por quociente</em>: o partido atingiu o quociente eleitoral e ele estava entre os mais votados da nominata. <em>Por m\u00e9dia</em>: a cadeira veio da distribui\u00e7\u00e3o das sobras. At\u00e9 2010 o TSE gravava o eleito por m\u00e9dia apenas como M\u00c9DIA, o que faz a contagem cair para 35\u201338 se n\u00e3o for tratado."},
+
+  mapaVotacao: {t: "Mapa de vota\u00e7\u00e3o", d:
+    "Votos nominais que o deputado recebeu em cada munic\u00edpio, em n\u00fameros absolutos. As faixas s\u00e3o as mesmas do painel original do TSE/GO, para permitir compara\u00e7\u00e3o lado a lado. Munic\u00edpio sem nenhum voto fica em cinza."},
+
+  mapaInfluencia: {t: "Mapa de influ\u00eancia", d:
+    "N\u00e3o \u00e9 quanto ele tem de votos, \u00e9 quanto ele <em>pesa</em>: votos dele no munic\u00edpio \u00f7 votos de todos os candidatos a deputado estadual naquele munic\u00edpio. Uma cidade pequena pode aparecer forte aqui com poucos votos. Ressalva: este denominador n\u00e3o bate com o do painel original em parte dos casos \u2014 ver o rodap\u00e9."},
+
+  municipiosEfetivos: {t: "Munic\u00edpios efetivos", d:
+    "1 dividido pelo \u00edndice HHI da vota\u00e7\u00e3o por munic\u00edpio. Responde: se os votos estivessem repartidos <em>igualmente</em> entre N munic\u00edpios, qual N daria essa mesma concentra\u00e7\u00e3o? 2 significa base de praticamente duas cidades; 20, voto espalhado."},
+
+  maiorMunicipio: {t: "Maior munic\u00edpio", d:
+    "Fatia do munic\u00edpio que mais rendeu votos ao deputado, sobre o total dele. \u00c9 a medida mais direta de depend\u00eancia de um s\u00f3 lugar."},
+
+  cincoMaiores: {t: "Cinco maiores", d:
+    "Soma dos cinco munic\u00edpios que mais renderam, sobre o total do deputado."},
+
+  dominioMedio: {t: "Dom\u00ednio m\u00e9dio", d:
+    "M\u00e9dia das fatias que o deputado det\u00e9m nos munic\u00edpios onde teve voto, ponderada pelos votos dele. Mede peso local, n\u00e3o volume: 20 mil votos espalhados d\u00e3o dom\u00ednio baixo; os mesmos 20 mil concentrados numa cidade pequena d\u00e3o dom\u00ednio alto."},
+
+  dominioMaximo: {t: "Dom\u00ednio m\u00e1ximo", d:
+    "A maior fatia que ele alcan\u00e7ou num \u00fanico munic\u00edpio."},
+
+  municipiosDominados: {t: "Munic\u00edpios dominados", d:
+    "Em quantos munic\u00edpios o deputado ficou com 25% ou mais de todos os votos nominais ali apurados. O corte de 25% \u00e9 escolha anal\u00edtica: \u00e9 o ponto a partir do qual um candidato domina claramente a disputa local."},
+
+  contiguidade: {t: "Contiguidade", d:
+    "Fatia dos votos que est\u00e1 no munic\u00edpio de maior vota\u00e7\u00e3o e nos que fazem fronteira com ele. Alto = base territorialmente compacta; baixo = manchas separadas. A vizinhan\u00e7a foi derivada das fronteiras compartilhadas na malha do IBGE \u2014 m\u00e9dia de 5,3 vizinhos por munic\u00edpio."},
+
+  gini: {t: "Gini municipal", d:
+    "Gini da vota\u00e7\u00e3o sobre os 246 munic\u00edpios, com os zeros inclu\u00eddos. 0 = repartido por igual pelo estado inteiro; 1 = tudo num munic\u00edpio s\u00f3. Fica sempre alto porque ningu\u00e9m disputa os 246 de verdade \u2014 serve para comparar candidatos e anos entre si, n\u00e3o como valor absoluto."},
+
+  tipologia: {t: "Perfil territorial", d:
+    "Cruzamento de dois eixos. <em>Concentrado</em> = 10 ou menos munic\u00edpios efetivos. <em>Dominante</em> = dom\u00ednio m\u00e9dio de 10% ou mais. Da\u00ed saem quatro tipos: Concentrado-Dominante (dono de reduto), Concentrado-Compartilhado (base pequena e disputada), Disperso-Dominante (pesa em muitos lugares) e Disperso-Difuso (espalhado sem dominar nada). Os cortes s\u00e3o escolha anal\u00edtica, n\u00e3o do TSE."},
+
+  semelhancaAnterior: {t: "Semelhan\u00e7a com o pleito anterior", d:
+    "Cosseno entre o mapa de votos deste pleito e o do pleito anterior da mesma pessoa. 1 = mapa id\u00eantico, 0 = bases sem sobreposi\u00e7\u00e3o. Acima de 0,96 a geografia praticamente n\u00e3o se moveu. As pessoas s\u00e3o pareadas pelo nome completo sem acento, porque o TSE grava o mesmo nome ora com acento ora sem, e o c\u00f3digo do candidato muda a cada elei\u00e7\u00e3o."},
+
+  tabelaConcentracao: {t: "Concentra\u00e7\u00e3o", d:
+    "Onde est\u00e3o os votos <em>dele</em>. Ordena os munic\u00edpios pelo que cada um rendeu ao deputado. A coluna de percentual soma 100%."},
+
+  tabelaDominio: {t: "Dom\u00ednio", d:
+    "Onde ele <em>pesa</em>. Ordena pelos munic\u00edpios em que a fatia dele no total apurado \u00e9 maior. Esta coluna n\u00e3o soma 100%: cada linha tem um denominador diferente, o total do seu pr\u00f3prio munic\u00edpio."},
+
+  trajetoria: {t: "Trajet\u00f3ria", d:
+    "Vota\u00e7\u00e3o em cada pleito que a pessoa disputou, eleita ou n\u00e3o \u2014 as barras claras marcam os anos em que ficou de fora. Reproduz o gr\u00e1fico de barras do painel original."},
+
+  seriePadroes: {t: "Como ler estas s\u00e9ries", d:
+    "S\u00e3o <em>medianas</em> entre os 41 eleitos de cada pleito, n\u00e3o m\u00e9dias: a distribui\u00e7\u00e3o \u00e9 assim\u00e9trica e a m\u00e9dia seria puxada pelos casos extremos."},
+
+  janelaCaptura: {t: "Janela de captura", d:
+    "Para cada munic\u00edpio, a fatia do candidato mais votado ali. Os munic\u00edpios s\u00e3o agrupados por porte \u2014 total de votos nominais apurados \u2014 e o quadro mostra a mediana de cada grupo. Cor mais escura = munic\u00edpio mais capturado por um s\u00f3 nome."},
+
+  quociente: {t: "Quociente eleitoral", d:
+    "Total de votos nominais do estado dividido pelas 41 cadeiras. \u00c9 <em>aproximado</em>: o quociente oficial usa votos v\u00e1lidos, que incluem legenda, e tem arredondamento. Serve para comparar o custo da cadeira entre pleitos, n\u00e3o como valor legal."},
+
+  ultimoEleito: {t: "\u00daltimo eleito", d:
+    "Vota\u00e7\u00e3o do menos votado entre os 41 eleitos \u2014 o corte de entrada na Assembleia naquele ano."},
+
+  puxador: {t: "Puxador de legenda", d:
+    "Votos do candidato mais votado do partido \u00f7 total nominal do partido. Alto significa nominata dependente de um nome s\u00f3."},
+
+  zonaEleitoral: {t: "Zona eleitoral", d:
+    "Goi\u00e2nia \u00e9 um munic\u00edpio s\u00f3, ent\u00e3o o mapa por munic\u00edpio \u2014 espinha do resto do painel \u2014 aqui n\u00e3o existe. A \u00fanica desagrega\u00e7\u00e3o territorial dentro da cidade que este arquivo do TSE oferece \u00e9 a <em>zona eleitoral</em>: 10 at\u00e9 2016, 9 a partir de 2020. N\u00e3o h\u00e1 malha p\u00fablica de zona, ent\u00e3o n\u00e3o h\u00e1 mapa \u2014 a geografia entra como distribui\u00e7\u00e3o, n\u00e3o como desenho. E como o desenho das zonas muda, comparar a mesma zona entre pleitos distantes n\u00e3o \u00e9 comparar a mesma \u00e1rea."},
+
+  mapaLocais: {t: "Mapa por local de vota\u00e7\u00e3o", d:
+    "Cada c\u00edrculo \u00e9 um local de vota\u00e7\u00e3o \u2014 escola, col\u00e9gio, centro comunit\u00e1rio \u2014 posicionado pela coordenada que o TSE publica em <em>eleitorado_local_votacao</em>. O tamanho \u00e9 proporcional aos votos que o candidato teve ali, somando as se\u00e7\u00f5es daquele local. S\u00e3o 349 locais em Goi\u00e2nia e 654.597 votos mapeados em 2024. Coordenada ausente vem como \u22121 no arquivo do TSE e foi descartada: 45 se\u00e7\u00f5es de 6.080, ou 0,7%. Existe s\u00f3 para 2024, ano em que o TSE publica as coordenadas."},
+
+  zonasEfetivas: {t: "Zonas efetivas", d:
+    "1 \u00f7 HHI da vota\u00e7\u00e3o entre as zonas. Em quantas zonas <em>equivalentes</em> a vota\u00e7\u00e3o se concentra. Com 9 zonas no total, 8 significa voto espalhado pela cidade inteira e 2 significa candidato de uma regi\u00e3o s\u00f3."},
+
+  camara: {t: "C\u00e2mara de Goi\u00e2nia", d:
+    "As cadeiras acompanharam a popula\u00e7\u00e3o: 33 em 2000, 34 em 2004, 35 de 2008 a 2020 e 37 em 2024. O quociente aqui \u00e9 aproximado \u2014 total de nominais dividido pelas cadeiras \u2014 porque o oficial usa votos v\u00e1lidos, que incluem legenda."},
+
+  majoritario: {t: "Cargo majorit\u00e1rio", d:
+    "Presidente e governador elegem um s\u00f3, e podem ter segundo turno. A lista traz <em>todos</em> os candidatos do pleito, n\u00e3o s\u00f3 o vencedor \u2014 com um nome a aba n\u00e3o serviria para nada. O mapa e os \u00edndices usam sempre o <strong>1\u00ba turno</strong>, que \u00e9 onde est\u00e1 a disputa territorial de verdade: no segundo sobram dois nomes e o mapa vira quase bin\u00e1rio."},
+
+  venceuGO: {t: "Venceu em Goi\u00e1s", d:
+    "O mais votado <em>no estado</em>, que n\u00e3o \u00e9 sempre quem ganhou a elei\u00e7\u00e3o. Presidente \u00e9 cargo nacional: Goi\u00e1s pode ter votado no derrotado. Em 2006 e 2010 o TSE deixou o campo de resultado em branco neste arquivo, ent\u00e3o quem venceu no pa\u00eds n\u00e3o \u00e9 deriv\u00e1vel daqui \u2014 mas quem venceu em Goi\u00e1s \u00e9, e est\u00e1 marcado."},
+
+  escala: {t: "Escala da disputa", d:
+    "Munic\u00edpios efetivos = 1 \u00f7 HHI da vota\u00e7\u00e3o por munic\u00edpio. Mostra em quantas cidades <em>equivalentes</em> a vota\u00e7\u00e3o se concentra. Compara os eleitos de cada cargo, mediana por pleito."},
+
+  arrasto: {t: "Arrasto entre cargos", d:
+    "Para cada partido e ano, a correla\u00e7\u00e3o entre a fatia que ele tem em cada munic\u00edpio no estadual e a fatia que tem no federal, sobre os 246 munic\u00edpios. Perto de 1, o partido tem a mesma geografia nos dois cargos \u2014 m\u00e1quina coordenada. Perto de 0, as duas disputas correm soltas: candidatos independentes dividindo s\u00f3 a legenda."},
+
+  dobradinha: {t: "Duplas com o mesmo mapa", d:
+    "Cosseno entre o mapa municipal de um estadual e o de um federal; para cada estadual mostra-se o federal mais parecido. <em>Aten\u00e7\u00e3o:</em> alta semelhan\u00e7a n\u00e3o prova campanha casada. Dois candidatos concentrados na mesma cidade t\u00eam mapas quase id\u00eanticos por geografia, sem nenhuma combina\u00e7\u00e3o. Entram candidatos com 3.000 votos ou mais."},
+
+  senadoVotos: {t: "Duas vagas, dois votos", d:
+    "Quando o Senado renova duas vagas \u2014 2002, 2010 e 2018 \u2014 cada eleitor vota duas vezes, e o total do cargo chega a quase o dobro dos demais: 4,9 milh\u00f5es em 2010 contra 2,8 do estadual. Comparar fatias entre cargos sem levar isso em conta superestima o Senado."},
+
+  rivais: {t: "Rivais territoriais", d:
+    "Quem disputa o mesmo ch\u00e3o. <em>Press\u00e3o</em> = quanto do voto deste deputado est\u00e1 em munic\u00edpios onde o rival tamb\u00e9m \u00e9 forte, ponderado pela for\u00e7a do rival ali; n\u00e3o \u00e9 sim\u00e9trica, um gigante pressiona um pequeno muito mais que o contr\u00e1rio. <em>Afinidade</em> = cosseno entre os dois mapas, sim\u00e9trica, mede s\u00f3 o formato. Entram candidatos com 1.000 votos ou mais."},
+
+  espectro: {t: "Aliado ou advers\u00e1rio", d:
+    "Esta separa\u00e7\u00e3o <em>n\u00e3o sai do dado eleitoral</em>. Cada partido foi posicionado em cinco faixas \u2014 esquerda, centro-esquerda, centro, centro-direita, direita \u2014 em <em>data/overrides/partidos_espectro.csv</em>. Aliado = mesma faixa ou vizinha; advers\u00e1rio = duas faixas ou mais de dist\u00e2ncia. \u00c9 ju\u00edzo externo e discut\u00edvel: trocar o arquivo troca a leitura. Siglas mudam de posi\u00e7\u00e3o com o tempo e partidos de coaliz\u00e3o como o MDB t\u00eam baixa coes\u00e3o interna."},
+
+  similaridadePartido: {t: "Canibaliza\u00e7\u00e3o", d:
+    "M\u00e9dia das semelhan\u00e7as de cosseno entre os mapas municipais de cada par de candidatos do mesmo partido, considerando s\u00f3 quem teve 500 votos ou mais \u2014 abaixo disso o vetor \u00e9 ru\u00eddo. Perto de 0, os candidatos ocupam territ\u00f3rios distintos; perto de 1, disputam o mesmo espa\u00e7o e tiram voto um do outro."},
+};
+
+const aj = k => `<button class="ajuda" type="button" data-aj="${k}" aria-label="Explica\u00e7\u00e3o">?</button>`;
+
+// Duas paletas para os mapas. "semaforo" (vermelho = baixo, verde = alto) e' a
+// pedida pelo usuario e o padrao. Tem um custo conhecido: sob deuteranopia e
+// protanopia os dois extremos convergem para tons escuros parecidos, entao a
+// classe mais baixa e a mais alta ficam dificeis de separar - justamente as que
+// mais importam. O alivio e' o tooltip por municipio e as duas tabelas, que dao
+// o valor em texto. "terra" e' uma rampa sequencial de matiz unica, que nao tem
+// esse problema porque a ordem esta na luminosidade.
+const PALETAS = {
+  semaforo: ["--s1", "--s2", "--s3", "--s4", "--s5"],
+  terra: ["--r1", "--r2", "--r3", "--r4", "--r5"],
+};
+const RAMPA_HEATMAP = PALETAS.terra;   // a tabela de captura fica sequencial:
+                                       // ali "alto" nao e' bom nem ruim.
+const CORES_TIPO = {
+  "Concentrado-Dominante": "--c1",
+  "Disperso-Dominante": "--c2",
+  "Concentrado-Compartilhado": "--c3",
+  "Disperso-Difuso": "--c4",
+};
+const cor = v => `var(${v})`;
+const rampa = () => PALETAS[paleta];
+
+
+/* Em tela de toque nao existe hover: sem isto o mapa fica mudo no celular.
+   O mesmo gesto que revela tambem serve para fechar, tocando fora. */
+function coordsDoEvento(ev) {
+  const t = ev.touches && ev.touches[0];
+  return t ? {clientX: t.clientX, clientY: t.clientY} : ev;
+}
+function ligarInspecao(elemento, conteudo) {
+  elemento.addEventListener("mousemove", ev => mostrarDica(ev, conteudo()));
+  elemento.addEventListener("mouseleave", esconderDica);
+  elemento.addEventListener("touchstart", ev => {
+    ev.stopPropagation();
+    mostrarDica(coordsDoEvento(ev), conteudo());
+  }, {passive: true});
+}
+document.addEventListener("touchstart", e => {
+  if (!(e.target.closest && e.target.closest(".mun, .uf, .ponto, .ajuda"))) esconderDica();
+}, {passive: true});
+
+/* ---------- projecao do mapa ---------- */
+let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+for (const m of D.geo) for (const anel of m) for (const [x, y] of anel) {
+  if (x < minX) minX = x; if (x > maxX) maxX = x;
+  if (y < minY) minY = y; if (y > maxY) maxY = y;
+}
+const latMedia = (minY + maxY) / 2;
+const kx = Math.cos(latMedia * Math.PI / 180);
+const LARG = 560;
+const escala = LARG / ((maxX - minX) * kx);
+const ALT = Math.round((maxY - minY) * escala);
+
+const CAMINHOS = D.geo.map(m => m.map(anel =>
+  "M" + anel.map(([x, y]) =>
+    `${((x - minX) * kx * escala).toFixed(1)},${((maxY - y) * escala).toFixed(1)}`
+  ).join("L") + "Z").join(" "));
+
+/* ---------- estado ---------- */
+let cargo = "estadual";
+let ano = 2022;
+const CG = () => D.cargos[cargo];
+const ROTULO_CARGO = {estadual: "Deputado(a) estadual eleito(a)",
+                      federal: "Deputado(a) federal eleito(a)",
+                      senador: "Candidato(a) ao Senado",
+                      governador: "Candidato(a) a governador",
+                      presidente: "Candidato(a) a presidente"};
+const MAJORITARIO = ["presidente", "governador", "senador"];
+let sel = 0;
+let escalaMapa = "orig";
+let paleta = "semaforo";
+let filtro = "";
+
+const dica = document.getElementById("dica");
+function mostrarDica(ev, html) {
+  dica.innerHTML = html;
+  dica.style.opacity = "1";
+  const r = dica.getBoundingClientRect();
+  let x = ev.clientX + 14, y = ev.clientY + 14;
+  if (matchMedia("(max-width: 760px)").matches) {
+    x = Math.max(12, Math.min(ev.clientX - r.width / 2, innerWidth - r.width - 12));
+    y = ev.clientY - r.height - 18;
+    if (y < 12) y = ev.clientY + 22;
+  }
+  if (x + r.width > innerWidth - 8) x = ev.clientX - r.width - 14;
+  if (y + r.height > innerHeight - 8) y = ev.clientY - r.height - 14;
+  dica.style.left = x + "px";
+  dica.style.top = y + "px";
+}
+const esconderDica = () => { dica.style.opacity = "0"; };
+
+/* ---------- mapa ---------- */
+function desenharMapa(destino, valores, faixas, rotulo) {
+  destino.textContent = "";
+  const svg = el("svg", {viewBox: `0 0 ${LARG} ${ALT}`, role: "img",
+                         "aria-label": `Mapa de Goiás: ${rotulo}`});
+  const classe = v => {
+    if (!(v > 0)) return -1;
+    for (let i = 0; i < faixas.length; i++) if (v <= faixas[i]) return i;
+    return faixas.length - 1;
+  };
+  D.municipios.forEach((m, i) => {
+    const v = valores[i] || 0;
+    const c = classe(v);
+    const p = el("path", {
+      d: CAMINHOS[i], class: "mun",
+      fill: c < 0 ? cor("--sem-voto") : cor(rampa()[Math.min(c, 4)]),
+    });
+    ligarInspecao(p, () =>
+      `<strong>${m.nome}</strong>${rotulo}: <span class="num">${
+        v > 0 ? (rotulo.includes("%") ? pct(v) + "%" : fmt(Math.round(v))) : "sem voto"
+      }</span><br><span class="num" style="font-size:.68rem">${m.micro}</span>`);
+    svg.appendChild(p);
+  });
+  destino.appendChild(svg);
+}
+
+function desenharLegenda(destino, faixas, sufixo) {
+  destino.textContent = "";
+  const add = (c, t) => {
+    const d = document.createElement("span");
+    d.className = "item";
+    d.innerHTML = `<span class="swatch" style="background:${c}"></span>${t}`;
+    destino.appendChild(d);
+  };
+  add(cor("--sem-voto"), "Nenhum voto");
+  faixas.forEach((f, i) => {
+    const de = i === 0 ? 0 : faixas[i - 1];
+    const rot = sufixo === "%"
+      ? `${pct(de, 1)}% a ${pct(f, 1)}%`
+      : `${fmt(de)} a ${fmt(f)}`;
+    add(cor(rampa()[i]), i === 0 ? `até ${sufixo === "%" ? pct(f, 1) + "%" : fmt(f)}` : rot);
+  });
+}
+
+function quantis(vals, n) {
+  const v = vals.filter(x => x > 0).sort((a, b) => a - b);
+  if (!v.length) return [1, 2, 3, 4, 5];
+  const q = [];
+  for (let i = 1; i <= n; i++) q.push(v[Math.min(v.length - 1, Math.floor(v.length * i / n) - 1 + (i === n ? 0 : 0))]);
+  return q.map((x, i) => i === n - 1 ? v[v.length - 1] : x);
+}
+
+/* ---------- graficos ---------- */
+function barras(destino, itens, opts = {}) {
+  destino.textContent = "";
+  const L = 460, H = opts.altura || 150, ml = 8, mb = 26, mt = 16;
+  const svg = el("svg", {viewBox: `0 0 ${L} ${H}`, role: "img",
+                         "aria-label": opts.rotulo || "gráfico de barras"});
+  const max = Math.max(...itens.map(d => d.v), 1);
+  const larg = (L - ml * 2) / itens.length;
+  itens.forEach((d, i) => {
+    const h = Math.max(2, (H - mb - mt) * d.v / max);
+    const x = ml + i * larg + larg * .18;
+    const w = larg * .64;
+    const y = H - mb - h;
+    svg.appendChild(el("rect", {x, y, width: w, height: h, rx: 4,
+      fill: d.cor || cor("--r4"), opacity: d.fraco ? .45 : 1}));
+    const t = el("text", {x: x + w / 2, y: H - mb + 13, "text-anchor": "middle",
+      "font-size": 11, fill: cor("--ink-3"),
+      "font-family": "IBM Plex Mono, monospace"});
+    t.textContent = d.r;
+    svg.appendChild(t);
+    if (d.v > 0) {
+      const n = el("text", {x: x + w / 2, y: y - 5, "text-anchor": "middle",
+        "font-size": 11, fill: cor("--ink-2"),
+        "font-family": "IBM Plex Mono, monospace"});
+      n.textContent = opts.fmtRotulo ? opts.fmtRotulo(d.v) : fmt(d.v);
+      svg.appendChild(n);
+    }
+  });
+  destino.appendChild(svg);
+}
+
+function linha(destino, pontos, opts = {}) {
+  destino.textContent = "";
+  const L = 300, H = 120, ml = 34, mr = 10, mt = 12, mb = 22;
+  const svg = el("svg", {viewBox: `0 0 ${L} ${H}`, role: "img",
+                         "aria-label": opts.rotulo || "série temporal"});
+  const vs = pontos.map(p => p.v);
+  const min = Math.min(...vs), max = Math.max(...vs);
+  const lo = min - (max - min) * .25, hi = max + (max - min) * .25;
+  const px = i => ml + (L - ml - mr) * i / (pontos.length - 1);
+  const py = v => mt + (H - mt - mb) * (1 - (v - lo) / (hi - lo || 1));
+  [lo, hi].forEach(v => {
+    svg.appendChild(el("line", {x1: ml, x2: L - mr, y1: py(v), y2: py(v),
+      stroke: cor("--line"), "stroke-width": 1}));
+    const t = el("text", {x: ml - 5, y: py(v) + 3, "text-anchor": "end",
+      "font-size": 9, fill: cor("--ink-3"), "font-family": "IBM Plex Mono, monospace"});
+    t.textContent = v.toFixed(opts.dec ?? 1);
+    svg.appendChild(t);
+  });
+  svg.appendChild(el("path", {
+    d: "M" + pontos.map((p, i) => `${px(i).toFixed(1)},${py(p.v).toFixed(1)}`).join("L"),
+    fill: "none", stroke: cor("--accent"), "stroke-width": 2,
+    "stroke-linejoin": "round", "stroke-linecap": "round"}));
+  pontos.forEach((p, i) => {
+    const ult = i === pontos.length - 1;
+    svg.appendChild(el("circle", {cx: px(i), cy: py(p.v), r: ult ? 5 : 3.5,
+      fill: cor("--accent"), stroke: cor("--surface"), "stroke-width": 2}));
+    const t = el("text", {x: px(i), y: H - 7, "text-anchor": "middle",
+      "font-size": 9, fill: cor("--ink-3"), "font-family": "IBM Plex Mono, monospace"});
+    t.textContent = String(p.r).slice(2);
+    svg.appendChild(t);
+  });
+  const u = pontos[pontos.length - 1];
+  const lab = el("text", {x: px(pontos.length - 1), y: py(u.v) - 10,
+    "text-anchor": "end", "font-size": 11, "font-weight": 600, fill: cor("--ink"),
+    "font-family": "IBM Plex Mono, monospace"});
+  lab.textContent = u.v.toFixed(opts.dec ?? 1);
+  svg.appendChild(lab);
+  destino.appendChild(svg);
+}
+
+/* ---------- render principal ---------- */
+function candidatos() {
+  const l = CG().dados[ano].eleitos;
+  if (!filtro) return l;
+  const f = filtro.toLowerCase();
+  return l.filter(c => c.nome.toLowerCase().includes(f) ||
+                       c.completo.toLowerCase().includes(f));
+}
+
+function renderLista() {
+  const cont = document.getElementById("lista");
+  cont.textContent = "";
+  const l = candidatos();
+  if (!l.length) {
+    const p = document.createElement("p");
+    p.className = "indice exp";
+    p.textContent = "Nenhum deputado com esse nome neste pleito.";
+    cont.appendChild(p);
+    return;
+  }
+  l.forEach(c => {
+    const b = document.createElement("button");
+    const i = CG().dados[ano].eleitos.indexOf(c);
+    b.setAttribute("aria-pressed", i === sel ? "true" : "false");
+    b.innerHTML = `<span>${c.nome}</span><span class="lv">${fmt(c.total)}</span>`;
+    b.addEventListener("click", () => { sel = i; render(); });
+    cont.appendChild(b);
+  });
+}
+
+function render() {
+  // Presidente nao tem 1998 neste conjunto do TSE: cai para o ano mais proximo
+  // disponivel em vez de quebrar.
+  if (!CG().dados[ano]) {
+    const disp = D.anos.filter(a => CG().dados[a]);
+    ano = disp.reduce((m, a) => Math.abs(a - ano) < Math.abs(m - ano) ? a : m, disp[0]);
+  }
+  const dd = CG().dados[ano];
+  const c = dd.eleitos[sel] || dd.eleitos[0];
+  sel = dd.eleitos.indexOf(c);
+
+  document.querySelectorAll("#segAno button").forEach(b => {
+    b.setAttribute("aria-pressed", String(+b.dataset.ano === ano));
+    const temAno = !!CG().dados[b.dataset.ano];
+    b.disabled = !temAno;
+    b.style.opacity = temAno ? "" : ".35";
+    b.title = temAno ? "" : `Sem dado de ${ROTULO_CARGO[cargo].toLowerCase()} neste pleito`;
+  });
+  document.getElementById("railTitulo").textContent = ROTULO_CARGO[cargo];
+  document.getElementById("notaMajoritario")
+    .classList.toggle("oculto", !MAJORITARIO.includes(cargo));
+  renderLista();
+
+  /* cartoes */
+  const pctUF = c.total / dd.pleito.totalUF * 100;
+  document.getElementById("cartoes").innerHTML = [
+    ["Deputado(a)", c.nome, c.completo, true, ""],
+    ["Partido", c.partido, c.linhagem !== c.partido ? "hoje " + c.linhagem : "", true, ""],
+    ["Situação",
+     MAJORITARIO.includes(cargo)
+       ? (c.eleito ? "Eleito" : (c.venceuGO ? "Venceu em Goiás" : "Não eleito"))
+       : (SITUACAO[c.situacao] || c.situacao),
+     MAJORITARIO.includes(cargo) && c.venceuGO && !c.eleito
+       ? "mais votado no estado" : "",
+     true, MAJORITARIO.includes(cargo) ? "venceuGO" : "situacao"],
+    ["Municípios com voto", fmt(c.nmun), `de 246`, false, "municipiosComVoto"],
+    ["Votos nominais", fmt(c.total), "", false, "votosNominais"],
+    ["Do estado", pct(pctUF) + "%", `${fmt(dd.pleito.totalUF)} no total`, false, "doEstado"],
+  ].map(([r, v, s, txt, k]) =>
+    `<div class="cartao"><div class="rot">${r}${k ? aj(k) : ""}</div>
+     <div class="val ${txt ? "txt" : ""}">${v}</div>
+     ${s ? `<div class="sub">${s}</div>` : ""}</div>`).join("");
+
+  /* mapas */
+  const votos = new Array(246).fill(0);
+  c.mi.forEach((idx, k) => votos[idx] = c.mv[k]);
+  const infl = votos.map((v, i) =>
+    v > 0 && dd.totalMun[i] > 0 ? v / dd.totalMun[i] * 100 : 0);
+
+  const fv = escalaMapa === "orig" ? D.faixasVotacao.slice(1) : quantis(votos, 5);
+  const fi = escalaMapa === "orig" ? D.faixasInfluencia.slice(1) : quantis(infl, 5);
+
+  desenharMapa(document.getElementById("mapaVotos"), votos, fv, "Votos nominais");
+  desenharLegenda(document.getElementById("legVotos"), fv, "");
+  desenharMapa(document.getElementById("mapaInfl"), infl, fi, "Influência %");
+  desenharLegenda(document.getElementById("legInfl"), fi, "%");
+
+  /* trajetoria */
+  const serie = CG().seriePessoal[c.chave] || [];
+  const porAno = Object.fromEntries(serie.map(s => [s.ano, s]));
+  document.getElementById("capSerie").textContent =
+    `Votos de ${c.nome} em cada pleito disputado. Barras claras marcam anos em que não se elegeu.`;
+  barras(document.getElementById("serieBar"), D.anos.map(a => ({
+    r: a, v: porAno[a] ? porAno[a].votos : 0,
+    fraco: porAno[a] ? !porAno[a].eleito : false,
+    cor: a === ano ? cor("--accent") : cor("--r4"),
+  })), {rotulo: "Votos por pleito"});
+
+  /* indices */
+  document.getElementById("indices").innerHTML = [
+    ["Municípios efetivos", c.efet.toFixed(1),
+     "Equivale a concentrar todos os votos nesse tanto de municípios iguais.",
+     "municipiosEfetivos"],
+    ["Maior município", pct(c.top1, 1) + "%", `do total do deputado — ${c.reduto}`,
+     "maiorMunicipio"],
+    ["Cinco maiores", pct(c.top5, 1) + "%", "do total do deputado", "cincoMaiores"],
+    ["Domínio médio", pct(c.dom, 1) + "%", "fatia dele nos municípios onde tem voto",
+     "dominioMedio"],
+    ["Domínio máximo", pct(c.dommax, 1) + "%", `em ${c.reduto}`, "dominioMaximo"],
+    ["Municípios dominados", fmt(c.dom25), "onde tem 25% ou mais do total apurado",
+     "municipiosDominados"],
+    ["Contiguidade", pct(c.contig, 1) + "%", "dos votos no reduto e nos vizinhos dele",
+     "contiguidade"],
+    ["Gini municipal", c.gini.toFixed(3), "0 = espalhado por igual, 1 = tudo num lugar",
+     "gini"],
+  ].map(([r, v, e, k]) =>
+    `<div class="indice"><div class="rot">${r}${aj(k)}</div><div class="val">${v}</div>
+     <div class="exp">${e}</div></div>`).join("") +
+    `<div class="indice" style="grid-column:1/-1"><div class="rot">Perfil${aj("tipologia")}</div>
+     <div><span class="chip"><span class="dot" style="background:${cor(CORES_TIPO[c.tipo])}"></span>${c.tipo}</span></div>
+     ${c.sim != null ? `<div class="exp">Semelhança do mapa com o pleito anterior${aj("semelhancaAnterior")}:
+       <span class="num">${c.sim.toFixed(3)}</span> — variação de votos
+       <span class="num">${c.var > 0 ? "+" : ""}${pct(c.var, 1)}%</span>.</div>` :
+       `<div class="exp">Primeira aparição na série.</div>`}</div>`;
+
+  /* rivais */
+  const rv = c.rivais || [];
+  const bloco = (lado, rot, classe, cor) => {
+    const l = rv.filter(r => r.lado === lado).slice(0, 5);
+    if (!l.length) return `<div><p class="lado-t ${classe}">${rot}</p>
+      <p class="indice exp">Nenhum candidato nesta condição com voto relevante.</p></div>`;
+    const max = Math.max(...l.map(r => r.pr), 1);
+    return `<div><p class="lado-t ${classe}">${rot}</p>` + l.map(r => `
+      <div class="rival">
+        <span class="barra"><i style="width:${Math.round(r.pr / max * 100)}%;background:${cor}"></i></span>
+        <span class="nm"><b>${r.n}</b> · ${r.p}${r.el ? "" : " (suplente)"}
+          <span>${r.mun || "—"}</span></span>
+        <span class="pr">${pct(r.pr, 1)}%</span>
+      </div>`).join("") + `</div>`;
+  };
+  document.getElementById("rivais").innerHTML =
+    bloco("aliado", `Aliados — mesma faixa ou vizinha`, "pt-ali", cor("--c2")) +
+    bloco("adversario", `Adversários — duas faixas ou mais`, "pt-adv", cor("--c1"));
+
+  /* tabelas */
+  const linhas = c.mi.map((idx, k) => ({
+    nome: D.municipios[idx].nome, v: c.mv[k], tot: dd.totalMun[idx],
+    pd: c.mv[k] / c.total * 100,
+    pm: dd.totalMun[idx] > 0 ? c.mv[k] / dd.totalMun[idx] * 100 : 0,
+  }));
+
+  const tabA = [...linhas].sort((a, b) => b.v - a.v).slice(0, 20);
+  document.getElementById("tabA").innerHTML =
+    `<thead><tr><th>Município</th><th>Votos</th><th>% do deputado</th></tr></thead><tbody>` +
+    tabA.map(r => `<tr><td>${r.nome}</td><td class="n">${fmt(r.v)}</td>
+      <td class="n">${pct(r.pd)}</td></tr>`).join("") +
+    `</tbody><tfoot><tr><td>Total do deputado</td><td class="n">${fmt(c.total)}</td>
+     <td class="n">100,00</td></tr></tfoot>`;
+
+  const tabB = [...linhas].sort((a, b) => b.pm - a.pm).slice(0, 20);
+  document.getElementById("tabB").innerHTML =
+    `<thead><tr><th>Município</th><th>Votos</th><th>Total do município</th><th>% do município</th></tr></thead><tbody>` +
+    tabB.map(r => `<tr><td>${r.nome}</td><td class="n">${fmt(r.v)}</td>
+      <td class="n">${fmt(r.tot)}</td><td class="n">${pct(r.pm)}</td></tr>`).join("") +
+    `</tbody>`;
+}
+
+/* ---------- aba de padroes ---------- */
+function renderPadroes() {
+  const mini = document.getElementById("miniSerie");
+  mini.textContent = "";
+  [["Municípios efetivos", "efet", 1, "Quanto maior, mais espalhada a base."],
+   ["Maior município (%)", "top1", 1, "Fatia do município que mais rende ao deputado."],
+   ["Domínio médio (%)", "dom", 1, "Peso do deputado onde ele tem voto."]
+  ].forEach(([tit, campo, dec, cap]) => {
+    const box = document.createElement("div");
+    box.innerHTML = `<h3>${tit}</h3><p class="cap">${cap}</p>`;
+    const alvo = document.createElement("div");
+    box.appendChild(alvo);
+    mini.appendChild(box);
+    linha(alvo, CG().serie.map(s => ({r: s.ano, v: s[campo]})), {dec, rotulo: tit});
+  });
+
+  /* tipologia empilhada */
+  const cont = document.getElementById("tipoBar");
+  cont.textContent = "";
+  const ordem = ["Concentrado-Dominante", "Disperso-Dominante",
+                 "Concentrado-Compartilhado", "Disperso-Difuso"];
+  const L = 620, H = 210, ml = 8, mb = 28, mt = 10;
+  const svg = el("svg", {viewBox: `0 0 ${L} ${H}`, role: "img",
+    "aria-label": "Tipologia dos eleitos por pleito"});
+  const larg = (L - ml * 2) / CG().serie.length;
+  CG().serie.forEach((s, i) => {
+    const totalTipos = Object.values(s.tipos)
+      .reduce((a, b) => a + b, 0);
+    let acc = 0;
+    const x = ml + i * larg + larg * .16;
+    const w = larg * .68;
+    ordem.forEach(t => {
+      const n = s.tipos[t] || 0;
+      if (!n) return;
+      const h = (H - mb - mt) * n / Math.max(1, totalTipos);
+      const y = H - mb - acc - h;
+      svg.appendChild(el("rect", {x, y: y + 1, width: w, height: Math.max(1, h - 2),
+        rx: 3, fill: cor(CORES_TIPO[t])}));
+      if (h > 17) {
+        const tx = el("text", {x: x + w / 2, y: y + h / 2 + 4, "text-anchor": "middle",
+          "font-size": 11, "font-weight": 600,
+          fill: cor(CORES_TIPO[t].replace("--c", "--tinta-c")),
+          "font-family": "IBM Plex Mono, monospace"});
+        tx.textContent = n;
+        svg.appendChild(tx);
+      }
+      acc += h;
+    });
+    const t = el("text", {x: x + w / 2, y: H - mb + 15, "text-anchor": "middle",
+      "font-size": 11, fill: cor("--ink-3"), "font-family": "IBM Plex Mono, monospace"});
+    t.textContent = s.ano;
+    svg.appendChild(t);
+  });
+  cont.appendChild(svg);
+
+  const lt = document.getElementById("legTipo");
+  lt.textContent = "";
+  ordem.forEach(t => {
+    const d = document.createElement("span");
+    d.className = "item";
+    d.innerHTML = `<span class="swatch" style="background:${cor(CORES_TIPO[t])}"></span>${t}`;
+    lt.appendChild(d);
+  });
+
+  /* janela de captura */
+  const vals = D.captura.anos.flatMap(a => a.top1).filter(v => v != null);
+  const lo = Math.min(...vals), hi = Math.max(...vals);
+  const passo = v => Math.min(4, Math.floor((v - lo) / ((hi - lo) / 5 || 1)));
+  document.getElementById("tabCaptura").innerHTML =
+    `<thead><tr><th>Pleito</th>${D.captura.faixas.map(f =>
+      `<th>${f}</th>`).join("")}</tr></thead><tbody>` +
+    D.captura.anos.map(a => `<tr><td class="n">${a.ano}</td>` +
+      a.top1.map(v => v == null ? `<td class="n">—</td>` :
+        `<td class="n" style="background:${cor(RAMPA_HEATMAP[passo(v)])};color:${
+          cor(RAMPA_HEATMAP[passo(v)].replace("--r", "--tinta-r"))}">${pct(v, 1)}</td>`).join("") +
+      `</tr>`).join("") +
+    `</tbody><tfoot><tr><td>Municípios</td>${
+      D.captura.anos[D.captura.anos.length - 1].n.map(n =>
+        `<td class="n">${n}</td>`).join("")}</tr></tfoot>`;
+
+  /* pleitos */
+  // O Senado e' majoritario: nao existe quociente eleitoral ali. Mostrar
+  // total/vagas naquela coluna seria inventar um numero sem significado legal.
+  const temQE = cargo !== "senador";
+  document.getElementById("tabPleito").innerHTML =
+    `<thead><tr><th>Pleito</th><th>Nominais</th>` +
+    (temQE ? `<th>Quociente<button class="ajuda" type="button" data-aj="quociente" aria-label="Explicação">?</button></th>` : "") +
+    `<th>Último eleito<button class="ajuda" type="button" data-aj="ultimoEleito" aria-label="Explicação">?</button></th>
+      <th>Candidatos</th><th>${temQE ? "Por cadeira" : "Por vaga"}</th></tr></thead><tbody>` +
+    D.anos.map(a => {
+      const p = CG().dados[a].pleito;
+      return `<tr><td class="n">${a}</td><td class="n">${fmt(p.totalUF)}` +
+        (p.votosPorEleitor > 1
+          ? ` <span style="color:var(--ink-3);font-size:.68rem">(2 votos)</span>` : "") +
+        `</td>` +
+        (temQE ? `<td class="n">${fmt(Math.round(p.qe))}</td>` : "") +
+        `<td class="n">${fmt(p.ultimo)}</td>
+        <td class="n">${p.nCand}</td>
+        <td class="n">${(p.nCand / p.cadeiras).toFixed(1)}</td></tr>`;
+    }).join("") +
+    `</tbody>` +
+    (cargo === "senador"
+      ? `<tfoot><tr><td colspan="5" style="white-space:normal;color:var(--ink-3)">
+         O Senado é majoritário: não há quociente eleitoral. Nos anos de duas vagas
+         cada eleitor vota duas vezes, e o total do cargo quase dobra<button class="ajuda"
+         type="button" data-aj="senadoVotos" aria-label="Explicação">?</button>.</td></tr></tfoot>`
+      : "");
+
+  /* partidos */
+  const ps = CG().dados[ano].partidos.filter(p => p.sim != null)
+    .sort((a, b) => b.ne - a.ne || b.votos - a.votos).slice(0, 12);
+  document.getElementById("tabPartido").innerHTML =
+    `<thead><tr><th>Partido em ${ano}</th><th>Cand.</th><th>Eleitos</th>
+      <th>Votos</th><th>Puxador<button class="ajuda" type="button" data-aj="puxador" aria-label="Explicação">?</button></th><th>Semelhança<button class="ajuda" type="button" data-aj="similaridadePartido" aria-label="Explicação">?</button></th></tr></thead><tbody>` +
+    ps.map(p => `<tr><td>${p.nome}</td><td class="n">${p.nc}</td>
+      <td class="n">${p.ne}</td><td class="n">${fmt(p.votos)}</td>
+      <td class="n">${pct(p.puxador, 1)}%</td>
+      <td class="n">${p.sim.toFixed(3)}</td></tr>`).join("") + `</tbody>`;
+}
+
+/* ---------- aba de vereador ---------- */
+let anoVer = 2024;
+let filtroVer = "";
+let soEleitos = true;
+const VR = () => D.vereador;
+
+function candsVer() {
+  let l = VR().cands[String(anoVer)] || [];
+  if (soEleitos) l = l.filter(c => c.eleito);
+  if (filtroVer) {
+    const f = filtroVer.toLowerCase();
+    l = l.filter(c => c.nome.toLowerCase().includes(f) ||
+                      c.completo.toLowerCase().includes(f));
+  }
+  return l;
+}
+
+let selVer = 0;
+
+function renderListaVer() {
+  const cont = document.getElementById("listaVer");
+  cont.textContent = "";
+  const l = candsVer();
+  if (!l.length) {
+    cont.innerHTML = `<p class="indice exp">Nenhuma candidatura com esse nome.</p>`;
+    return;
+  }
+  l.forEach((c, i) => {
+    const b = document.createElement("button");
+    b.setAttribute("aria-pressed", String(i === selVer));
+    b.innerHTML = `<span>${c.nome}${c.eleito ? "" :
+      ` <span style="color:var(--ink-3)">·</span>`}</span>
+      <span class="lv">${fmt(c.total)}</span>`;
+    b.addEventListener("click", () => { selVer = i; renderVer(); });
+    cont.appendChild(b);
+  });
+}
+
+function renderVer() {
+  const l = candsVer();
+  if (!l.length) { renderListaVer(); return; }
+  if (selVer >= l.length) selVer = 0;
+  const c = l[selVer];
+  const z = VR().zonas[String(anoVer)];
+  const p = VR().pleitos[String(anoVer)];
+
+  document.querySelectorAll("#segVerAno button").forEach(b =>
+    b.setAttribute("aria-pressed", String(+b.dataset.ano === anoVer)));
+  renderListaVer();
+
+  document.getElementById("cartoesVer").innerHTML = [
+    ["Vereador(a)", c.nome, c.completo, true, ""],
+    ["Partido", c.partido, c.linhagem !== c.partido ? "hoje " + c.linhagem : "", true, ""],
+    ["Situação", SITUACAO[c.situacao] || (c.eleito ? "Eleito" : "Não eleito"), "", true, "situacao"],
+    ["Zonas com voto", fmt(c.nz), `de ${z.length}`, false, "zonaEleitoral"],
+    ["Votos nominais", fmt(c.total), "", false, "votosNominais"],
+    ["Da cidade", pct(c.total / p.total * 100) + "%", `${fmt(p.total)} no total`, false, ""],
+  ].map(([r, v, sb, txt, k]) =>
+    `<div class="cartao"><div class="rot">${r}${k ? aj(k) : ""}</div>
+     <div class="val ${txt ? "txt" : ""}">${v}</div>
+     ${sb ? `<div class="sub">${sb}</div>` : ""}</div>`).join("");
+
+  /* mapa de pontos, so no ano com coordenadas publicadas */
+  const L = VR().locais;
+  const cartazMapa = document.getElementById("cartazMapaVer");
+  if (L && L.ano === anoVer && VR().votoLocal) {
+    cartazMapa.classList.remove("oculto");
+    desenharPontos(c);
+  } else {
+    cartazMapa.classList.add("oculto");
+  }
+
+  document.getElementById("capVerZona").textContent =
+    `Votos de ${c.nome} em cada uma das ${z.length} zonas eleitorais de Goiânia em ${anoVer}.`;
+  const max = Math.max(...c.zv);
+  barras(document.getElementById("verZonaBar"),
+    z.map((zz, i) => ({r: zz, v: c.zv[i],
+      cor: c.zv[i] === max ? cor("--s5") : cor("--s3")})),
+    {rotulo: "Votos por zona"});
+
+  const sp = VR().seriePessoal[c.chave] || [];
+  const porAno = Object.fromEntries(sp.map(x => [x.ano, x]));
+  document.getElementById("capVerSerie").textContent = sp.length > 1
+    ? `Votos de ${c.nome} em cada pleito municipal disputado. Barras claras marcam os anos em que não se elegeu.`
+    : `${c.nome} aparece em um único pleito da série.`;
+  barras(document.getElementById("verSerieBar"), VR().anos.map(a => ({
+    r: a, v: porAno[a] ? porAno[a].votos : 0,
+    fraco: porAno[a] ? !porAno[a].eleito : false,
+    cor: a === anoVer ? cor("--accent") : cor("--s4"),
+  })), {rotulo: "Votos por pleito municipal"});
+
+  document.getElementById("verIndices").innerHTML = [
+    ["Zonas efetivas", c.efetz.toFixed(1),
+     `de ${z.length} zonas — quanto menor, mais a votação vem de uma região só`,
+     "zonasEfetivas"],
+    ["Maior zona", pct(c.top1z, 1) + "%", `do total dele — zona ${c.reduto}`, ""],
+    ["Gini entre zonas", c.gini.toFixed(3),
+     "0 = repartido por igual entre as zonas, 1 = tudo numa só", "gini"],
+    ["Zonas com voto", `${c.nz} de ${z.length}`, "", ""],
+  ].map(([r, v, e, k]) =>
+    `<div class="indice"><div class="rot">${r}${k ? aj(k) : ""}</div>
+     <div class="val">${v}</div><div class="exp">${e}</div></div>`).join("") +
+    (c.sim != null
+      ? `<div class="indice" style="grid-column:1/-1"><div class="exp">
+         Semelhança da distribuição por zona com o pleito anterior:
+         <span class="num">${c.sim.toFixed(3)}</span>${c.var != null
+           ? ` — variação de votos <span class="num">${c.var > 0 ? "+" : ""}${pct(c.var, 1)}%</span>` : ""}.
+         </div></div>`
+      : `<div class="indice" style="grid-column:1/-1"><div class="exp">
+         Sem pleito anterior comparável nesta série.</div></div>`);
+
+  const linhas = z.map((zz, i) => ({z: zz, v: c.zv[i],
+    p: c.total ? c.zv[i] / c.total * 100 : 0}))
+    .sort((a, b) => b.v - a.v);
+  document.getElementById("verTabZona").innerHTML =
+    `<thead><tr><th>Zona</th><th>Votos</th><th>% do candidato</th></tr></thead><tbody>` +
+    linhas.map(r => `<tr><td class="n">${r.z}</td><td class="n">${fmt(r.v)}</td>
+      <td class="n">${pct(r.p)}</td></tr>`).join("") +
+    `</tbody><tfoot><tr><td>Total</td><td class="n">${fmt(c.total)}</td>
+     <td class="n">100,00</td></tr></tfoot>`;
+
+  document.getElementById("verTabPleito").innerHTML =
+    `<thead><tr><th>Pleito</th><th>Cadeiras</th><th>Nominais</th><th>Quociente</th>
+      <th>Último eleito</th><th>Candidatos</th><th>Reeleitos</th></tr></thead><tbody>` +
+    VR().anos.map(a => {
+      const q = VR().pleitos[String(a)];
+      return `<tr><td class="n">${a}</td><td class="n">${q.nEleitos}</td>
+        <td class="n">${fmt(q.total)}</td><td class="n">${fmt(Math.round(q.qe))}</td>
+        <td class="n">${fmt(q.ultimo)}</td><td class="n">${q.nCand}</td>
+        <td class="n">${pct(q.reinc, 1)}%</td></tr>`;
+    }).join("") + `</tbody>`;
+
+  const pts = (VR().partidos[String(anoVer)] || []).slice(0, 12);
+  document.getElementById("verTabPartido").innerHTML =
+    `<thead><tr><th>Partido</th><th>Cand.</th><th>Eleitos</th><th>Votos</th>
+      <th>Puxador</th><th>Semelhança<button class="ajuda" type="button"
+      data-aj="similaridadePartido" aria-label="Explicação">?</button></th></tr></thead><tbody>` +
+    pts.map(t => `<tr><td>${t.nome}</td><td class="n">${t.nc}</td>
+      <td class="n">${t.ne}</td><td class="n">${fmt(t.votos)}</td>
+      <td class="n">${pct(t.puxador, 1)}%</td>
+      <td class="n">${t.sim == null ? "—" : t.sim.toFixed(3)}</td></tr>`).join("") +
+    `</tbody>`;
+}
+
+/* ---------- aba de cruzamentos ---------- */
+const CORES_CARGO = {estadual: "--c1", federal: "--c2", senador: "--c4",
+                     governador: "--c3", presidente: "--s5"};
+const NOME_CARGO = {estadual: "Estadual", federal: "Federal", senador: "Senado",
+                    governador: "Governador", presidente: "Presidente"};
+
+function desenharPontos(c) {
+  const L = VR().locais;
+  const vl = VR().votoLocal[c.sq] || {i: [], v: []};
+  const votos = new Array(L.pontos.length).fill(0);
+  vl.i.forEach((idx, k) => votos[idx] = vl.v[k]);
+  const max = Math.max(...votos, 1);
+  const totalMapeado = votos.reduce((a, b) => a + b, 0);
+
+  const box = document.getElementById("verMapa");
+  box.textContent = "";
+  const LA = 620, mar = 14;
+  const lats = L.pontos.map(p => p.lat), lons = L.pontos.map(p => p.lon);
+  const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+  const minLon = Math.min(...lons), maxLon = Math.max(...lons);
+  const kx = Math.cos((minLat + maxLat) / 2 * Math.PI / 180);
+  const escala = (LA - mar * 2) / ((maxLon - minLon) * kx);
+  const AL = Math.round((maxLat - minLat) * escala) + mar * 2;
+  const px = lon => mar + (lon - minLon) * kx * escala;
+  const py = lat => mar + (maxLat - lat) * escala;
+
+  const svg = el("svg", {viewBox: `0 0 ${LA} ${AL}`, role: "img",
+    "aria-label": `Locais de votação de Goiânia, votos de ${c.nome}`});
+
+  // zero primeiro, para os pontos com voto ficarem por cima
+  const ordem = L.pontos.map((p, i) => i)
+    .sort((a, b) => votos[a] - votos[b]);
+  ordem.forEach(i => {
+    const p = L.pontos[i];
+    const v = votos[i];
+    const r = v > 0 ? 2.5 + 11 * Math.sqrt(v / max) : 1.8;
+    const cir = el("circle", {
+      cx: px(p.lon).toFixed(1), cy: py(p.lat).toFixed(1), r: r.toFixed(1),
+      class: "ponto",
+      fill: v > 0 ? cor("--s5") : cor("--sem-voto"),
+      "fill-opacity": v > 0 ? 0.72 : 0.9,
+      stroke: cor("--surface"), "stroke-width": 0.6,
+    });
+    ligarInspecao(cir, () =>
+      `<strong>${p.n}</strong>${p.b || ""}<br>
+       <span class="num">${v > 0 ? fmt(v) + " votos" : "nenhum voto"}</span>
+       <span class="num" style="font-size:.68rem"> · zona ${p.z} · ${p.ns} seç${
+         p.ns > 1 ? "ões" : "ão"}</span>`);
+    svg.appendChild(cir);
+  });
+  box.appendChild(svg);
+
+  const comVoto = votos.filter(v => v > 0).length;
+  document.getElementById("capVerMapa").innerHTML =
+    `Cada círculo é um dos ${L.pontos.length} locais de votação de Goiânia, no tamanho
+     proporcional aos votos de <strong>${c.nome}</strong> ali.
+     Teve voto em ${comVoto} deles; o maior rendeu ${fmt(max)}.`;
+
+  const lg = document.getElementById("verMapaLeg");
+  lg.textContent = "";
+  [[max, "maior local"], [Math.round(max / 2), "metade"],
+   [Math.max(1, Math.round(max / 10)), "um décimo"], [0, "sem voto"]]
+    .forEach(([v, rot]) => {
+      const r = v > 0 ? 2.5 + 11 * Math.sqrt(v / max) : 1.8;
+      const d = document.createElement("span");
+      d.className = "item";
+      d.innerHTML = `<svg width="${r * 2 + 4}" height="${r * 2 + 4}" style="flex:none">
+        <circle cx="${r + 2}" cy="${r + 2}" r="${r}"
+          fill="${v > 0 ? cor("--s5") : cor("--sem-voto")}"
+          fill-opacity="${v > 0 ? 0.72 : 0.9}"/></svg>${rot}${
+        v > 0 ? ` (${fmt(v)})` : ""}`;
+      lg.appendChild(d);
+    });
+}
+
+function renderCruz() {
+  /* escala: uma linha por cargo */
+  const box = document.getElementById("cruzEscala");
+  box.textContent = "";
+  const L = 620, H = 240, ml = 40, mr = 14, mt = 14, mb = 28;
+  const svg = el("svg", {viewBox: `0 0 ${L} ${H}`, role: "img",
+    "aria-label": "Municípios efetivos dos eleitos por cargo e pleito"});
+  const vals = D.cruz.escala.map(e => e.efet);
+  const hi = Math.max(...vals) * 1.1;
+  const px = i => ml + (L - ml - mr) * i / (D.anos.length - 1);
+  const py = v => mt + (H - mt - mb) * (1 - v / hi);
+  [0, hi / 2, hi].forEach(v => {
+    svg.appendChild(el("line", {x1: ml, x2: L - mr, y1: py(v), y2: py(v),
+      stroke: cor("--line"), "stroke-width": 1}));
+    const t = el("text", {x: ml - 6, y: py(v) + 3, "text-anchor": "end",
+      "font-size": 10, fill: cor("--ink-3"), "font-family": "IBM Plex Mono, monospace"});
+    t.textContent = v.toFixed(0);
+    svg.appendChild(t);
+  });
+  Object.keys(NOME_CARGO).forEach(cg => {
+    const pts = D.anos.map((a, i) => {
+      const e = D.cruz.escala.find(x => x.cargo === cg && x.ano === a);
+      return e ? [px(i), py(e.efet)] : null;
+    }).filter(Boolean);
+    svg.appendChild(el("path", {
+      d: "M" + pts.map(q => `${q[0].toFixed(1)},${q[1].toFixed(1)}`).join("L"),
+      fill: "none", stroke: cor(CORES_CARGO[cg]), "stroke-width": 2.5,
+      "stroke-linejoin": "round"}));
+    pts.forEach((q, i) => svg.appendChild(el("circle", {
+      cx: q[0], cy: q[1], r: i === pts.length - 1 ? 5 : 3.5,
+      fill: cor(CORES_CARGO[cg]), stroke: cor("--surface"), "stroke-width": 2})));
+  });
+  D.anos.forEach((a, i) => {
+    const t = el("text", {x: px(i), y: H - 9, "text-anchor": "middle",
+      "font-size": 11, fill: cor("--ink-3"), "font-family": "IBM Plex Mono, monospace"});
+    t.textContent = a;
+    svg.appendChild(t);
+  });
+  box.appendChild(svg);
+
+  const lg = document.getElementById("cruzEscalaLeg");
+  lg.textContent = "";
+  Object.entries(NOME_CARGO).forEach(([cg, nm]) => {
+    const d = document.createElement("span");
+    d.className = "item";
+    d.innerHTML = `<span class="swatch" style="background:${cor(CORES_CARGO[cg])}"></span>${nm}`;
+    lg.appendChild(d);
+  });
+
+  /* arrasto */
+  const anos = D.anos;
+  const partidos = [...new Set(D.cruz.arrasto.map(a => a.partido))];
+  const porPartido = partidos.map(pt => ({
+    pt, vals: anos.map(a => {
+      const r = D.cruz.arrasto.find(x => x.partido === pt && x.ano === a);
+      return r ? r.r : null;
+    })
+  })).filter(o => o.vals.filter(v => v != null).length >= 4)
+     .sort((a, b) => {
+        const m = v => { const f = v.filter(x => x != null); return f.reduce((s, x) => s + x, 0) / f.length; };
+        return m(b.vals) - m(a.vals);
+     });
+  const passoR = v => Math.min(4, Math.max(0, Math.floor(v / 0.2)));
+  document.getElementById("cruzArrasto").innerHTML =
+    `<thead><tr><th>Partido</th>${anos.map(a => `<th>${a}</th>`).join("")}</tr></thead><tbody>` +
+    porPartido.map(o => `<tr><td>${o.pt}</td>` + o.vals.map(v => v == null
+      ? `<td class="n">—</td>`
+      : `<td class="n" style="background:${cor(RAMPA_HEATMAP[passoR(v)])};color:${
+          cor(RAMPA_HEATMAP[passoR(v)].replace("--r", "--tinta-r"))}">${
+          v.toFixed(2)}</td>`).join("") + `</tr>`).join("") + `</tbody>`;
+
+  /* dobradinhas */
+  const dd = D.cruz.dobradinhas.filter(d => d.ano === ano).slice(0, 15);
+  document.getElementById("cruzDobra").innerHTML =
+    `<thead><tr><th>Estadual</th><th>Federal</th><th>Mesmo partido</th>
+      <th>Afinidade</th><th>Municípios em comum</th></tr></thead><tbody>` +
+    (dd.length ? dd.map(d => `<tr>
+      <td>${d.e} <span style="color:var(--ink-3)">${d.ep}</span></td>
+      <td>${d.f} <span style="color:var(--ink-3)">${d.fp}</span></td>
+      <td>${d.mp ? "sim" : "não"}</td>
+      <td class="n">${d.af.toFixed(4)}</td>
+      <td style="white-space:normal;color:var(--ink-2)">${d.mun}</td></tr>`).join("")
+      : `<tr><td colspan="5">Sem pares neste pleito.</td></tr>`) + `</tbody>`;
+
+  /* quantos pares sao do mesmo partido */
+  const mp = document.getElementById("cruzMesmoPartido");
+  mp.textContent = "";
+  const cx = document.createElement("div");
+  cx.innerHTML = `<h3>Duplas do mesmo partido</h3>
+    <p class="cap">Entre os pares mais parecidos, a fatia que divide a legenda.</p>`;
+  const alvo = document.createElement("div");
+  cx.appendChild(alvo);
+  mp.appendChild(cx);
+  linha(alvo, D.cruz.mesmoPartido.map(x => ({r: x.ano, v: x.pct})),
+        {dec: 1, rotulo: "Duplas do mesmo partido, %"});
+}
+
+/* ---------- controles ---------- */
+const segAno = document.getElementById("segAno");
+D.anos.forEach(a => {
+  const b = document.createElement("button");
+  b.dataset.ano = a;
+  b.textContent = a;
+  b.setAttribute("aria-pressed", String(a === ano));
+  b.addEventListener("click", () => { ano = a; sel = 0; render(); renderPadroes(); });
+  segAno.appendChild(b);
+});
+
+document.querySelectorAll("#segEscala button").forEach(b =>
+  b.addEventListener("click", () => {
+    escalaMapa = b.dataset.esc;
+    document.querySelectorAll("#segEscala button").forEach(o =>
+      o.setAttribute("aria-pressed", String(o === b)));
+    render();
+  }));
+
+const segVerAno = document.getElementById("segVerAno");
+D.vereador.anos.forEach(a => {
+  const b = document.createElement("button");
+  b.dataset.ano = a;
+  b.textContent = a;
+  b.setAttribute("aria-pressed", String(a === anoVer));
+  b.addEventListener("click", () => { anoVer = a; selVer = 0; renderVer(); });
+  segVerAno.appendChild(b);
+});
+
+document.getElementById("buscaVer").addEventListener("input", e => {
+  filtroVer = e.target.value.trim();
+  selVer = 0;
+  renderVer();
+});
+
+document.querySelectorAll("#segVerFiltro button").forEach(b =>
+  b.addEventListener("click", () => {
+    soEleitos = b.dataset.vf === "eleitos";
+    document.querySelectorAll("#segVerFiltro button").forEach(o =>
+      o.setAttribute("aria-pressed", String(o === b)));
+    selVer = 0;
+    renderVer();
+  }));
+
+document.querySelectorAll("#segPaleta button").forEach(b =>
+  b.addEventListener("click", () => {
+    paleta = b.dataset.pal;
+    document.querySelectorAll("#segPaleta button").forEach(o =>
+      o.setAttribute("aria-pressed", String(o === b)));
+    render();
+  }));
+
+document.getElementById("busca").addEventListener("input", e => {
+  filtro = e.target.value.trim();
+  renderLista();
+});
+
+// As tres primeiras abas mostram a MESMA view, trocando o cargo: o layout e'
+// identico e duplicar o DOM so criaria tres copias para manter em sincronia.
+const ABAS = [
+  {id: "tabPresidente", view: "viewDep", cargo: "presidente"},
+  {id: "tabGovernador", view: "viewDep", cargo: "governador"},
+  {id: "tabEstadual", view: "viewDep", cargo: "estadual"},
+  {id: "tabFederal", view: "viewDep", cargo: "federal"},
+  {id: "tabSenador", view: "viewDep", cargo: "senador"},
+  {id: "tabPad", view: "viewPad"},
+  {id: "tabVer", view: "viewVer"},
+  {id: "tabCruz", view: "viewCruz"},
+];
+const VIEWS = ["viewDep", "viewPad", "viewVer", "viewCruz"];
+
+ABAS.forEach(a => {
+  document.getElementById(a.id).addEventListener("click", () => {
+    ABAS.forEach(b => document.getElementById(b.id)
+      .setAttribute("aria-selected", String(b.id === a.id)));
+    VIEWS.forEach(v => document.getElementById(v)
+      .classList.toggle("oculto", v !== a.view));
+    if (a.cargo && a.cargo !== cargo) {
+      cargo = a.cargo;
+      sel = 0;
+      filtro = "";
+      document.getElementById("busca").value = "";
+      render();
+      renderPadroes();
+    }
+    if (a.view === "viewCruz") renderCruz();
+    if (a.view === "viewVer") renderVer();
+  });
+});
+
+// ---------- ajuda: hover e teclado ----------
+// Delegacao no documento porque cartoes, indices e tabelas sao re-renderizados
+// a cada troca de deputado; listener por botao morreria no primeiro render.
+const caixaAjuda = document.getElementById("ajudaCaixa");
+
+function abrirAjuda(btn) {
+  const a = AJUDA[btn.dataset.aj];
+  if (!a) return;
+  caixaAjuda.innerHTML = `<strong>${a.t}</strong>${a.d}`;
+  caixaAjuda.style.opacity = "1";
+  const r = btn.getBoundingClientRect();
+  const c = caixaAjuda.getBoundingClientRect();
+  let x = r.left + r.width / 2 - c.width / 2;
+  let y = r.bottom + 8;
+  if (x < 8) x = 8;
+  if (x + c.width > innerWidth - 8) x = innerWidth - c.width - 8;
+  if (y + c.height > innerHeight - 8) y = r.top - c.height - 8;
+  // trava final: se nem abaixo nem acima couber, gruda na borda visivel
+  y = Math.max(8, Math.min(y, innerHeight - c.height - 8));
+  caixaAjuda.style.left = x + "px";
+  caixaAjuda.style.top = y + "px";
+}
+
+const fecharAjuda = () => { caixaAjuda.style.opacity = "0"; };
+
+document.addEventListener("mouseover", e => {
+  const b = e.target.closest && e.target.closest(".ajuda");
+  if (b) abrirAjuda(b);
+});
+document.addEventListener("mouseout", e => {
+  if (e.target.closest && e.target.closest(".ajuda")) fecharAjuda();
+});
+document.addEventListener("focusin", e => {
+  const b = e.target.closest && e.target.closest(".ajuda");
+  if (b) abrirAjuda(b);
+});
+document.addEventListener("focusout", e => {
+  if (e.target.closest && e.target.closest(".ajuda")) fecharAjuda();
+});
+// toque: sem hover, o clique abre e o proximo clique fora fecha
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest(".ajuda");
+  if (b) { e.preventDefault(); abrirAjuda(b); } else { fecharAjuda(); }
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape") fecharAjuda(); });
+addEventListener("scroll", fecharAjuda, true);
+
+render();
+renderPadroes();
+renderCruz();
+renderVer();
+</script>

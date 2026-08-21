@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 68" role="img"
+     aria-labelledby="t d" fill="none">
+  <title id="t">Lastro — Inteligência Política</title>
+  <desc id="d">Versao para fundo claro: simbolo em teal escuro, texto em tinta quase preta.</desc>
+  <g fill="#0E6F72">
+    <rect x="12" y="12" width="4" height="44" rx="1"/>
+    <rect x="21" y="12" width="16" height="4" rx="1.5" opacity=".42"/>
+    <rect x="21" y="24" width="26" height="6" rx="2" opacity=".66"/>
+    <rect x="21" y="38" width="38" height="8" rx="2.5"/>
+    <rect x="12" y="52" width="52" height="4" rx="1.5"/>
+  </g>
+  <g fill="#11181A">
+    <text x="82" y="36" font-family="Archivo, Inter, Helvetica, Arial, sans-serif"
+          font-size="30" font-weight="700" letter-spacing="-0.6">LASTRO</text>
+    <text x="83.5" y="52" font-family="'IBM Plex Sans', Helvetica, Arial, sans-serif"
+          font-size="9" font-weight="500" letter-spacing="3.1" opacity=".62">INTELIGÊNCIA POLÍTICA</text>
+  </g>
+</svg>

@@ -1,0 +1,32 @@
+# ---- dados: todos reprodutíveis pelo pipeline, nenhum versionado ----
+# data/interim sozinho tem 5,3 GB. data/raw é transitório por desenho: a
+# ingestão apaga cada zip logo após extrair. data/processed é derivado.
+data/raw/
+data/interim/
+data/processed/
+
+# Exceção: estes três são feitos à mão e não saem de lugar nenhum.
+!data/overrides/
+!data/overrides/*.csv
+
+# ---- artefatos de build ----
+dist/*.html
+!dist/template.html
+!dist/template_br.html
+dist/dados.json
+dist/dados_br.json
+
+app/node_modules/
+app/dist/
+app/public/dados/
+app/tsconfig.tsbuildinfo
+
+# ---- dumps de apuração: reproduzíveis por scripts/07 e 11 ----
+docs/_*.txt
+docs/_*.json
+
+# ---- sistema ----
+.DS_Store
+Thumbs.db
+*.pyc
+__pycache__/

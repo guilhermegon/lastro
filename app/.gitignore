@@ -1,0 +1,4 @@
+node_modules/
+dist/
+# gerados por scripts/18_dados_web.py — reproduzíveis, não versionar
+public/dados/
