@@ -320,3 +320,25 @@ com índice vindo do dado, e é exatamente aí que se quer o compilador reclaman
 Verificado no navegador: SP com 645 municípios e 94 deputados, troca de estado e de ano,
 URL sincronizando, toque abrindo o balão com dado real. Zero erro de console, `tsc`
 limpo em modo estrito.
+
+## 2026-08-21 — Repositório
+
+`https://github.com/GTzon/lastro` — **privado**. Convite de escrita enviado a
+`guilhermegon`, pendente de aceite. Commit autorado como
+`Guilherme <guilhermegon@hotmail.com>`, conforme pedido.
+
+65 arquivos, 0,4 MB. O que ficou de fora e por quê:
+
+- `data/interim/` tem **5,3 GB** — só `votos_br_estadual_2022.csv` são 960 MB. É
+  derivado e refazível pela ingestão.
+- `data/raw/` é transitório por desenho: a ingestão apaga cada zip logo após extrair.
+- `data/processed/`, `app/public/dados/` e os HTML montados são gerados.
+- `app/node_modules/`, 71 MB, vem do `package-lock.json`.
+
+Entram os três CSV de `data/overrides/` — correções de grafia de município, linhagem
+partidária e posição no espectro. Não saem de lugar nenhum: foram levantados à mão e
+perdê-los custaria refazer o trabalho.
+
+Varredura de segredo antes do commit: os primeiros positivos eram "de**senha**do" e
+"de**senha**r". Refeita com padrão estrito (chave de API, token entre aspas, bloco de
+chave privada, credencial de nuvem): nada.
