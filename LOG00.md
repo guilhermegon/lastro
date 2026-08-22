@@ -395,3 +395,26 @@ do PT 0,617; semelhança do Republicanos 0,6103; escala governador 21,91 > presi
 Roraima virou o contraexemplo útil da ressalva de escala: com 15 municípios, todos os
 cargos ficam entre 2,2 e 3,0 efetivos, e o estadual (3,0) fica **acima** do presidente
 (2,2). Não é que o voto estadual seja mais disperso lá — é que o teto é 15.
+
+## 2026-08-22 — Front React com o modelo completo
+
+As sete abas no ar: presidente, governador, Senado, federal, estadual, Padrões e
+Cruzamentos — para qualquer uma das 26 UFs, nos sete pleitos.
+
+Carregamento por aba, não por estado. Trocar de aba busca um arquivo; trocar de estado
+busca a base mais o cargo aberto. Abertura em 328 KB; a maior requisição do sistema é
+`SP/estadual.json` com 2,7 MB, e só quem abrir São Paulo no estadual paga por ela.
+
+Dois acertos que vieram de graça por causa do desenho:
+
+- **O Distrito Federal aparece com a aba Estadual desabilitada**, porque ele elege
+  distrital. Não há caso especial no código: a lista de cargos vem por UF no índice, e
+  a aba se desabilita sozinha.
+- **Roraima escancara a ressalva de escala na própria tela.** Os cinco cargos ficam
+  entre 2,2 e 3,0 municípios efetivos, com o estadual acima do presidente. A nota da
+  aba de Cruzamentos diz o motivo — o teto é 15 municípios — e a coluna de fração dá o
+  número comparável.
+
+`TKT-0004`, que pedia a ordem de porte entre quatro blocos, foi fechado sem precisar da
+decisão: com a replicação completa, portou-se tudo de uma vez e não havia mais o que
+priorizar.

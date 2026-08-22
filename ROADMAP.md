@@ -75,27 +75,21 @@ monitorado pelo BEDEL desde essa data. Identidade local em [`CLAUDE.md`](CLAUDE.
 - [x] Toque tratado desde o começo, não como remendo
 - [x] `app/README.md` com a arquitetura e as escolhas
 
-## Marco 7 — modelo completo em todas as UFs  ⏳ dados prontos 2026-08-22
+## Marco 7 — modelo completo em todas as UFs  ✅ concluído 2026-08-22
 
 - [x] Cinco cargos × 7 pleitos × 26 UFs (`19_nacional_completo.py`)
 - [x] Adjacência da malha completa, separada da geometria de desenho (`20_adjacencia.py`)
 - [x] Padrões e Cruzamentos por UF (`21_padroes_cruzamentos.py`)
 - [x] Validado contra o pipeline de Goiás: votos, captura, arrasto, semelhança e escala
-- [ ] **Falta:** ligar tudo no front React — abas de cargo, Padrões e Cruzamentos
+- [x] Front React com as sete abas: cinco cargos, Padrões e Cruzamentos
 
-### Porte dos demais blocos — aguardando ordem de prioridade
-
-Quatro blocos do painel antigo restam portar e competem por ordem. Como o alvo de
-entrega mudou (produto em React, não página única), a prioridade é decisão do usuário
-e está registrada como `RAS 00 TKT 0004` na [`FILA00.md`](FILA00.md), com recomendação
-do líder pelo comparativo nacional.
+### O que ainda não está no React
 
 | Bloco | Situação |
 |---|---|
-| Comparativo nacional | recomendado como primeiro — fecha o produto |
-| Demais cargos (federal, Senado, governador, presidente) | exige refazer o payload por UF para os outros cargos |
-| Rivais e cruzamentos | só existe para Goiás; replicar nacionalmente é o mais pesado |
-| Vereador de Goiânia com mapa por seção | dado de seção já pronto, cidade única |
+| Comparativo nacional | mapa por UF e rankings; os dados já estão em `indice.json` |
+| Rivais territoriais | existe para Goiás em `10_rivais.py`; falta rodar por UF |
+| Vereador com mapa por seção | existe para Goiânia; replicar exige as 26 capitais |
 - [x] Sigla atribuída e entrada no roster monitorado (TKT-001, 2026-08-21)
 
 ## AGUARDANDO — sem próximo item seguro

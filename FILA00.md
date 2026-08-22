@@ -109,12 +109,18 @@ porque ele confere os pleitos antigos.
 |---|---|
 | `type` | `BLOCKING_DECISION` |
 | `criticality` | média |
-| `work_continues` | não — o próximo passo depende da resposta |
-| `status` | **ABERTO** |
+| `work_continues` | sim |
+| `status` | **FECHADO** — resolvido sem precisar da decisão, 2026-08-22 |
 
-**summary.** A base do front em React está entregue e verificada: deputado estadual das
-26 UFs, mapa, índices, gaveta de estados, estado na URL, toque. Restam quatro blocos do
-painel antigo para portar, e eles competem entre si por ordem.
+**Fechado porque a pergunta deixou de existir.** O ticket pedia a ordem de porte entre
+quatro blocos que competiam por prioridade. Com o modelo completo replicado para as 26
+UFs, os cinco cargos, Padrões e Cruzamentos foram portados de uma vez — não havia mais
+o que priorizar entre eles. Restam apenas o comparativo nacional, os rivais por UF e o
+vereador com mapa por seção, que estão no `ROADMAP.md` sem competir entre si.
+
+**summary (no momento da abertura).** A base do front em React estava entregue:
+deputado estadual das 26 UFs, mapa, índices, gaveta de estados, estado na URL, toque.
+Restavam quatro blocos do painel antigo para portar, competindo por ordem.
 
 **decision_needed.** Qual bloco vem primeiro?
 
