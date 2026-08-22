@@ -357,3 +357,41 @@ distinguíveis numa galeria, então:
 
 - página nacional, o produto: **Cadê o Voto?**
 - recorte profundo de Goiás: **Cadê o Voto em Goiás?**
+
+## 2026-08-22 — Modelo completo replicado para as 26 UFs
+
+Os cinco cargos, os sete pleitos, todos os estados, mais Padrões e Cruzamentos por UF.
+54 MB, fatiados em `data/processed/web/{UF}/{cargo}.json`.
+
+**Um arquivo por UF *e por cargo*, não um por UF.** Assim o front baixa só o cargo na
+tela: São Paulo no estadual são 2,7 MB e não os 7,9 MB dos cinco somados.
+
+Três defeitos encontrados, e nenhum deu erro:
+
+1. **Adjacência calculada sobre a geometria de desenho.** A malha da web é simplificada
+   a 0,012 e isso apaga vértices: Goiás caía de 5,3 para 3,7 vizinhos por município. Um
+   índice de contiguidade assim mede o desenho, não o território. Separei em
+   `20_adjacencia.py`, que deriva da malha completa — Goiás volta a 5,5 e o único
+   município sem vizinho no país é Ilhabela, que é ilha.
+
+2. **Chave de tipo trocado.** `vetores` era indexado pelo `sq` cru do groupby e a ficha
+   guardava `str(sq)`. Nenhuma consulta casava, em silêncio: a janela de captura saía
+   com 0 municípios de 246 e a semelhança entre partidos saía zero.
+
+3. **Arrasto somando só eleitos.** Os cargos proporcionais guardam ficha só de quem se
+   elegeu, para caber. Somar o partido por essas fichas subestima quem tem muita gente
+   sem eleger — o PT saía 0,344 contra os 0,617 conhecidos. Passou a usar um agregado
+   por partido sobre todos os candidatos, gravado no próprio arquivo do cargo.
+
+Mais um ajuste de leitura: o arrasto exige presença em metade dos municípios do estado.
+Sem isso a Unidade Popular, presente em 76 de 246, correlacionava 0,73 e aparecia acima
+do PT sem dizer nada sobre máquina territorial.
+
+Validação contra o pipeline de Goiás, tudo exato: Bruno Peixoto 73.692 e 23,78
+municípios efetivos; janela de captura com pico de 41,66 na faixa de 15–25 mil; arrasto
+do PT 0,617; semelhança do Republicanos 0,6103; escala governador 21,91 > presidente
+14,46 > senador 12,14 > federal 10,12 > estadual 4,75.
+
+Roraima virou o contraexemplo útil da ressalva de escala: com 15 municípios, todos os
+cargos ficam entre 2,2 e 3,0 efetivos, e o estadual (3,0) fica **acima** do presidente
+(2,2). Não é que o voto estadual seja mais disperso lá — é que o teto é 15.

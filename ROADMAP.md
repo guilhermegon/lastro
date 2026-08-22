@@ -75,6 +75,14 @@ monitorado pelo BEDEL desde essa data. Identidade local em [`CLAUDE.md`](CLAUDE.
 - [x] Toque tratado desde o começo, não como remendo
 - [x] `app/README.md` com a arquitetura e as escolhas
 
+## Marco 7 — modelo completo em todas as UFs  ⏳ dados prontos 2026-08-22
+
+- [x] Cinco cargos × 7 pleitos × 26 UFs (`19_nacional_completo.py`)
+- [x] Adjacência da malha completa, separada da geometria de desenho (`20_adjacencia.py`)
+- [x] Padrões e Cruzamentos por UF (`21_padroes_cruzamentos.py`)
+- [x] Validado contra o pipeline de Goiás: votos, captura, arrasto, semelhança e escala
+- [ ] **Falta:** ligar tudo no front React — abas de cargo, Padrões e Cruzamentos
+
 ### Porte dos demais blocos — aguardando ordem de prioridade
 
 Quatro blocos do painel antigo restam portar e competem por ordem. Como o alvo de
