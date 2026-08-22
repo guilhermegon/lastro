@@ -451,3 +451,19 @@ dizia "Vereador · GOIANIA". Separadas em `CAPITAIS` e `NOMES`.
 Tamanho: os rivais saíram primeiro com 28,9 MB porque cada ficha repetia o
 **nome** dos municípios disputados. Trocado por índice em `base.json` (22,6 MB) e
 cortado por cargo — São Paulo no estadual caiu de 3,97 MB para 1,54 MB.
+
+## 2026-08-22 — o título pergunta pelo estado aberto
+
+`Cadê o Voto em Goiás?`, `no Rio de Janeiro?`, `na Bahia?` — e a aba do
+navegador junto, que é por ela que a pessoa acha a tela entre dez abertas e é o
+que vai no link compartilhado.
+
+A preposição é tabela, não regra derivável: "Goiás" e "Pará" terminam igual e
+pedem *em* e *no*; "Bahia" e "Paraná" parecem o mesmo caso e pedem *na* e *no*.
+Fica em `app/src/lib/uf.ts`, chaveada por sigla e não por nome — o nome vem do
+IBGE e pode mudar de grafia. Mato Grosso e Mato Grosso do Sul vão sem artigo,
+que é o uso oficial.
+
+O subtítulo perdia o sentido dizendo "em todas as unidades da federação" sob um
+título que nomeia uma: passou a descrever o estado aberto, e omite "município a
+município" onde isso não quer dizer nada — o Distrito Federal é um município só.

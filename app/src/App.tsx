@@ -9,6 +9,7 @@ import {
   carregarRivais, carregarVereador,
 } from "./lib/dados";
 import { numero } from "./lib/formato";
+import { noEstado } from "./lib/uf";
 import { Logo } from "./componentes/Logo";
 import { SeletorEstado } from "./componentes/SeletorEstado";
 import { Abas, type Vista } from "./componentes/Abas";
@@ -111,6 +112,12 @@ export default function App() {
 
   useEffect(() => gravarURL(sel), [sel]);
 
+  useEffect(() => {
+    if (!indice) return;
+    const r = indice.ufs.find((u) => u.s === sel.uf);
+    document.title = r ? `Cadê o Voto ${noEstado(r.s, r.n)}?` : "Cadê o Voto?";
+  }, [indice, sel.uf]);
+
   const trocarUF = useCallback((uf: Sigla) => {
     setSel((s) => ({ ...s, uf, cand: 0 }));
     setGaveta(false);
@@ -138,6 +145,8 @@ export default function App() {
   const nMun = resumo?.nm ?? base?.municipios.length ?? 0;
   const agregado = indice.agregado.find((a) => a.uf === sel.uf && a.ano === sel.ano);
   const anosComDado = indice.anos;
+  const titulo = resumo ? `Cadê o Voto ${noEstado(resumo.s, resumo.n)}?`
+                        : "Cadê o Voto?";
 
   return (
     <>
@@ -146,10 +155,11 @@ export default function App() {
           <div className="topo-in">
             <div className="marca">
               <Logo />
-              <h1>Cadê o Voto?</h1>
+              <h1>{titulo}</h1>
               <p>
-                Onde cada candidato tirou voto, município a município, em todos os
-                cargos e em todas as unidades da federação, de 1998 a 2022.
+                Onde cada candidato tirou voto
+                {nMun > 2 && <>, município a município</>}, em todos os cargos,
+                de 1998 a 2022.
               </p>
             </div>
             <div className="seg" role="group" aria-label="Pleito">
