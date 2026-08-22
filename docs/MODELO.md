@@ -179,3 +179,57 @@ Documentadas aqui porque nenhuma delas é visível no dado e todas alteram resul
 12. **O card "Nº de municípios" do painel original é sempre 246**: conta o universo
    exibido no mapa, não os municípios em que o deputado teve voto (Álvaro Guimarães
    teve voto em 190 dos 246 em 2018).
+
+
+## Rivais territoriais (`web/{UF}/rivais_{cargo}.json`)
+
+Um arquivo por UF e por cargo, e só nos proporcionais. Nos majoritários cada
+partido lança um nome e a disputa não se dá dentro de uma lista: ali "rival"
+seria o próprio adversário da eleição, que a tela do cargo já mostra inteiro.
+
+| Campo | O que é |
+|---|---|
+| `pr` | **pressão** — % do voto do eleito que está em municípios onde o rival também é forte, ponderado pela força do rival ali. **Assimétrica**: um gigante pressiona um pequeno muito mais do que o contrário |
+| `af` | **afinidade** — cosseno entre os dois vetores municipais. Simétrica; mede formato do mapa, não tamanho |
+| `mun` | índices, em `base.json`, dos três municípios onde os dois mais se encostam |
+| `b` | banda ideológica, de `partidos_espectro.csv` |
+
+Corte de mil votos: abaixo disso o vetor municipal é ruído, não geografia.
+
+### A aferição, e por que ela está no arquivo
+
+O achado aparente é "o rival nº 1 costuma ser um aliado ideológico". Ele não
+sobrevive sozinho: se a maioria das candidaturas já está na mesma faixa, aliado
+venceria por acaso. Por isso cada pleito carrega três números:
+
+- `esperado` — fração média de candidaturas na mesma banda do eleito. É o acaso.
+- `observado` — fração de eleitos cujo rival nº 1 é de fato aliado.
+- `pareado` — **o único que sobrevive sozinho**: para o MESMO eleito, quanto o
+  aliado mais pressionante pressiona a mais que o adversário mais pressionante.
+  Controla a composição por completo.
+
+Medido nas 27 unidades, `observado` acompanha `esperado` de perto — o achado
+aparente é, em boa parte, composição do campo. O pareado é positivo em quase
+todos os pleitos, mas pequeno (ordem de +1 a +3 pp). A leitura honesta é
+**território e ideologia são pouco acoplados**, não "aliados se canibalizam".
+
+## Vereador nas capitais (`web/{UF}/vereador.json`)
+
+26 capitais, 2000 a 2024. Brasília não entra: elege distrital, não vereador.
+
+**Não há mapa, e não é omissão.** Uma capital é um município só — o coroplético
+que sustenta o resto do projeto aqui não existe. A única desagregação territorial
+que o arquivo do TSE oferece dentro da cidade é a zona eleitoral, e não há malha
+pública de zona: a geografia entra como distribuição, não como desenho.
+
+Duas armadilhas que a replicação amplia, tratadas no código e não só no texto:
+
+- **O número e o traçado das zonas mudam entre pleitos**, e de forma diferente
+  em cada cidade. Zonas efetivas nunca viram série temporal — só valem dentro de
+  um ano — e a similaridade com o pleito anterior só é calculada quando o número
+  de zonas bate. Devolver um número sobre zonas redesenhadas seria comparar dois
+  mapas diferentes fingindo que são o mesmo.
+- **A escala não se compara entre capitais.** Rio de Janeiro tem 49 zonas e São
+  Paulo 57; Macapá, Boa Vista e Vitória têm 2. **Palmas tem 1 nos sete pleitos** —
+  lá não há geografia interna nenhuma, e a tela diz isso em vez de desenhar uma
+  barra de 100%.

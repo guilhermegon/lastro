@@ -1,8 +1,11 @@
-import type { Candidato } from "../tipos";
 import { numero } from "../lib/formato";
 
+/** Só nome e total: serve tanto para as fichas de cargo quanto para as de
+ *  vereador, que não têm geografia municipal. */
+interface Item { n: string; t: number }
+
 interface Props {
-  candidatos: Candidato[];
+  candidatos: Item[];
   selecionado: number;
   filtro: string;
   aoFiltrar: (v: string) => void;
@@ -26,7 +29,7 @@ export function ListaCandidatos({
       />
       <div className="lista">
         {candidatos.length === 0 ? (
-          <p className="indice exp">Nenhum eleito com esse nome neste pleito.</p>
+          <p className="indice exp">Ninguém com esse nome neste pleito.</p>
         ) : (
           candidatos.map((c, i) => (
             <button

@@ -201,3 +201,24 @@ footer p { margin: 3px 0; max-width: 80ch; }
   .dica { max-width: calc(100vw - 24px); }
   .ajuda { width: 18px; height: 18px; font-size: 10px; }
 }
+
+/* --- rivais territoriais --- */
+.rivais { list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 11px; }
+.rivais > li { display: flex; flex-direction: column; gap: 3px; }
+.rival-topo { display: flex; justify-content: space-between;
+  align-items: baseline; gap: 10px; }
+.rival-nome { font-weight: 600; }
+.rival-el { color: var(--accent); }
+.rival-barra { height: 5px; border-radius: 3px;
+  background: var(--surface-2); overflow: hidden; }
+.rival-barra > span { display: block; height: 100%; border-radius: 3px; }
+
+/* --- vereador: sem mapa, a geografia é a distribuição por zona --- */
+.zonas { list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 7px; }
+.zonas > li { display: grid; grid-template-columns: 3.6rem 1fr 4.4rem;
+  align-items: center; gap: 10px; }
+.zona-barra { height: 9px; border-radius: 3px;
+  background: var(--surface-2); overflow: hidden; }
+.zona-barra > span { display: block; height: 100%; border-radius: 3px; }

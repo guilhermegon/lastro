@@ -468,3 +468,56 @@ nome completo sem acento, porque o TSE grava o mesmo nome ora com acento ora sem
 `SQ_CANDIDATO` muda a cada eleição. Isso funde eventuais homônimos — um risco pequeno
 num universo de 4.128 candidaturas, mas real. Os números de reincidência e de
 semelhança entre pleitos carregam essa margem.
+
+## Território e ideologia são pouco acoplados
+
+*Reproduz por `scripts/23_rivais.py`, que imprime a tabela abaixo ao final.*
+
+Calculado o rival territorial mais pressionante de cada eleito em todas as
+unidades, no estadual e no federal, 1998–2022, a leitura tentadora é: **o rival
+nº 1 costuma ser um aliado ideológico**. Em Goiás 2022 ele é aliado para 69,8%
+dos eleitos; em Minas 1998, para 81,1%.
+
+O número não sobrevive sozinho. Se a maior parte das candidaturas já está na
+mesma faixa ideológica do eleito, "aliado" vence por acaso — e é o que acontece:
+
+| UF | ano | acaso | observado | pareado |
+|---|---|---|---|---|
+| GO | 2022 | 71,0% | 69,8% | +1,21 pp |
+| SP | 2010 | 54,4% | 48,2% | −0,11 pp |
+| MG | 1998 | 74,3% | 81,1% | +2,27 pp |
+| RR | 2022 | 75,0% | 51,7% | +0,25 pp |
+
+`observado` acompanha `esperado` de perto, e às vezes fica **abaixo** dele. O
+achado aparente é, em boa medida, composição do campo — não comportamento.
+
+O que resta é o teste pareado, que compara aliado e adversário **dentro do mesmo
+eleito** e por isso controla a composição por completo. Ele é positivo em quase
+todos os pleitos das 27 unidades, mas pequeno: ordem de +1 a +3 pontos
+percentuais de pressão a mais. A conclusão defensável é a mais fraca e a mais
+interessante: **a geografia do voto proporcional é quase independente da posição
+ideológica**. Quem disputa o mesmo chão disputa por estar ali, não por pensar
+parecido.
+
+Uma unidade fica de fora por construção: o Distrito Federal é um município só, e
+lá o cosseno entre dois candidatos quaisquer dá exatamente 1,000. A medida não é
+calculada, e a tela diz por quê em vez de mostrar um ranking de tamanho de
+votação disfarçado de território.
+
+## Câmaras municipais: a mesma cadeira custa coisas muito diferentes
+
+*Reproduz por `scripts/25_vereador_web.py`.*
+
+Nas 26 capitais, 2000–2024, o vereador mais votado da cidade tira múltiplos
+muito diferentes do último eleito. Em São Paulo 2024, Lucas Pavanato fez 161.386
+votos contra 22.306 do último a entrar — **7,2 vezes**. E a base dele não é um
+reduto: 54,83 zonas efetivas de 57, Gini 0,112 entre zonas. É votação grande e
+espalhada, o oposto do padrão de reduto que domina o interior nos estaduais.
+
+São Paulo teve 979 candidatos para 55 cadeiras — 17,8 por cadeira — e 67,3% dos
+eleitos já haviam concorrido antes.
+
+A comparação entre capitais para na escala: Rio de Janeiro tem 49 zonas e São
+Paulo 57, mas Macapá, Boa Vista e Vitória têm 2, e **Palmas tem 1 nos sete
+pleitos**. Onde há uma zona só não existe geografia interna, e a tela diz isso em
+vez de desenhar uma barra de 100% que fingiria distribuição.

@@ -1,5 +1,6 @@
 import type {
-  BaseUF, Cargo, Cruzamentos, DadosCargo, Indice, Padroes, Sigla,
+  BaseUF, Cargo, CargoComRival, Cruzamentos, DadosCargo, Indice, Padroes,
+  Rivais, Sigla, Vereador,
 } from "../tipos";
 
 const BASE = `${import.meta.env.BASE_URL}dados`;
@@ -44,3 +45,9 @@ export const carregarPadroes = (uf: Sigla): Promise<Padroes> =>
 
 export const carregarCruzamentos = (uf: Sigla): Promise<Cruzamentos> =>
   comCache<Cruzamentos>(`cruz:${uf}`, `${BASE}/${uf}/cruzamentos.json`);
+
+export const carregarRivais = (uf: Sigla, cargo: CargoComRival): Promise<Rivais> =>
+  comCache<Rivais>(`rivais:${uf}:${cargo}`, `${BASE}/${uf}/rivais_${cargo}.json`);
+
+export const carregarVereador = (uf: Sigla): Promise<Vereador> =>
+  comCache<Vereador>(`ver:${uf}`, `${BASE}/${uf}/vereador.json`);

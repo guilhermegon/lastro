@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import type {
-  BaseUF, Cargo, Cruzamentos, DadosCargo, Indice, Padroes, Sigla,
+  BaseUF, Cargo, Cruzamentos, DadosCargo, Indice, Padroes, Rivais, Sigla,
+  Vereador,
 } from "./tipos";
 import { CARGOS } from "./tipos";
 import {
   carregarBase, carregarCargo, carregarCruzamentos, carregarIndice, carregarPadroes,
+  carregarRivais, carregarVereador,
 } from "./lib/dados";
 import { numero } from "./lib/formato";
 import { Logo } from "./componentes/Logo";
@@ -14,6 +16,7 @@ import { Dica, type EstadoDica } from "./componentes/Dica";
 import { VistaCargo } from "./vistas/VistaCargo";
 import { VistaPadroes } from "./vistas/VistaPadroes";
 import { VistaCruzamentos } from "./vistas/VistaCruzamentos";
+import { VistaVereador } from "./vistas/VistaVereador";
 
 /**
  * O estado da tela mora na URL: `?uf=GO&ano=2022&v=estadual&c=0`.
@@ -26,7 +29,8 @@ import { VistaCruzamentos } from "./vistas/VistaCruzamentos";
 interface Selecao { uf: Sigla; ano: number; vista: Vista; cand: number }
 
 function ehVista(v: string): v is Vista {
-  return v === "padroes" || v === "cruzamentos" || (CARGOS as string[]).includes(v);
+  return v === "padroes" || v === "cruzamentos" || v === "vereador"
+    || (CARGOS as string[]).includes(v);
 }
 
 function lerURL(): Selecao {
@@ -53,6 +57,8 @@ export default function App() {
   const [cargo, setCargo] = useState<DadosCargo | null>(null);
   const [padroes, setPadroes] = useState<Padroes | null>(null);
   const [cruz, setCruz] = useState<Cruzamentos | null>(null);
+  const [rivais, setRivais] = useState<Rivais | null>(null);
+  const [ver, setVer] = useState<Vereador | null>(null);
   const [sel, setSel] = useState<Selecao>(lerURL);
   const [gaveta, setGaveta] = useState(false);
   const [dica, setDica] = useState<EstadoDica | null>(null);
@@ -62,6 +68,11 @@ export default function App() {
   useEffect(() => {
     carregarIndice().then(setIndice).catch((e) => setErro(String(e)));
   }, []);
+
+  useEffect(() => {
+    setRivais(null);
+    setVer(null);
+  }, [sel.uf]);
 
   useEffect(() => {
     let vivo = true;
@@ -80,7 +91,17 @@ export default function App() {
     const pedido =
       v === "padroes" ? carregarPadroes(sel.uf).then((d) => vivo && setPadroes(d))
       : v === "cruzamentos" ? carregarCruzamentos(sel.uf).then((d) => vivo && setCruz(d))
+      : v === "vereador" ? carregarVereador(sel.uf).then((d) => vivo && setVer(d))
       : carregarCargo(sel.uf, v).then((d) => vivo && setCargo(d));
+
+    // Rivais vem em arquivo à parte e só nos proporcionais: quem abre a aba de
+    // presidente não deve pagar por ele. A falha aqui não derruba a tela — o
+    // painel simplesmente não aparece.
+    if (v === "estadual" || v === "federal") {
+      carregarRivais(sel.uf, v)
+        .then((d) => { if (vivo) setRivais(d); })
+        .catch(() => { if (vivo) setRivais(null); });
+    }
     pedido
       .then(() => { if (vivo) setErro(null); })
       .catch((e) => { if (vivo) setErro(String(e)); })
@@ -145,6 +166,8 @@ export default function App() {
                          aoAbrir={setGaveta} aoEscolher={trocarUF} />
 
           <Abas atual={sel.vista} cargosDisponiveis={resumo?.cargos ?? CARGOS}
+                temVereador={resumo?.capital != null}
+                cidade={resumo?.capital}
                 aoTrocar={(v) => setSel((s) => ({ ...s, vista: v, cand: 0 }))} />
         </div>
       </div>
@@ -165,7 +188,13 @@ export default function App() {
                             uf={resumo?.n ?? sel.uf} />
         )}
 
-        {sel.vista !== "padroes" && sel.vista !== "cruzamentos" && base && cargo && (
+        {sel.vista === "vereador" && ver && (
+          <VistaVereador v={ver} selecionado={sel.cand}
+                         aoSelecionar={(i) => setSel((s) => ({ ...s, cand: i }))} />
+        )}
+
+        {sel.vista !== "padroes" && sel.vista !== "cruzamentos"
+          && sel.vista !== "vereador" && base && cargo && (
           <VistaCargo
             cargo={sel.vista as Cargo}
             base={base}
@@ -175,6 +204,7 @@ export default function App() {
             selecionado={sel.cand}
             aoSelecionar={(i) => setSel((s) => ({ ...s, cand: i }))}
             aoInspecionar={setDica}
+            rivais={rivais}
           />
         )}
       </main>

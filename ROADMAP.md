@@ -83,13 +83,15 @@ monitorado pelo BEDEL desde essa data. Identidade local em [`CLAUDE.md`](CLAUDE.
 - [x] Validado contra o pipeline de Goiás: votos, captura, arrasto, semelhança e escala
 - [x] Front React com as sete abas: cinco cargos, Padrões e Cruzamentos
 
+- [x] Rivais territoriais em todas as UFs, estadual e federal (`23_rivais.py`)
+- [x] Vereador nas 26 capitais, 2000–2024 (`24_`, `25_`)
+
 ### O que ainda não está no React
 
 | Bloco | Situação |
 |---|---|
 | Comparativo nacional | mapa por UF e rankings; os dados já estão em `indice.json` |
-| Rivais territoriais | existe para Goiás em `10_rivais.py`; falta rodar por UF |
-| Vereador com mapa por seção | existe para Goiânia; replicar exige as 26 capitais |
+| Vereador com mapa por seção | o mapa por seção existe só para Goiânia (`13_secoes.py`), e depende do arquivo de locais de votação com coordenadas — não replicado |
 - [x] Sigla atribuída e entrada no roster monitorado (TKT-001, 2026-08-21)
 
 ## AGUARDANDO — sem próximo item seguro

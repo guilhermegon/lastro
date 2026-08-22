@@ -61,8 +61,13 @@ def main():
                     "ef": s.get("ef"), "t1": s.get("t1"), "fr": s.get("fr"),
                 })
         cargos = [c for c in CARGOS if (ORIGEM / uf / f"{c}.json").exists()]
-        resumo.append({"s": uf, "n": nomes_uf.get(uf, uf), "nm": n_mun,
-                       "cargos": cargos})
+        r = {"s": uf, "n": nomes_uf.get(uf, uf), "nm": n_mun, "cargos": cargos}
+        # a capital so entra no indice se o arquivo existir: e' ela que liga a
+        # aba de vereador, e o DF nao tem nenhuma das duas coisas
+        if (ORIGEM / uf / "vereador.json").exists():
+            v = json.loads((ORIGEM / uf / "vereador.json").read_text(encoding="utf-8"))
+            r["capital"] = v["cidade"]
+        resumo.append(r)
 
     indice = {
         "anos": cfg.ANOS,
@@ -83,14 +88,23 @@ def main():
     print(f"total publicado: {total/1024/1024:.1f} MB")
     print(f"maior arquivo: {maior[1]} com {maior[0]/1024:.0f} KB")
     print()
+    com_ver = sum(1 for r in resumo if "capital" in r)
+    com_riv = sum(1 for uf in ufs_dir
+                  if (DESTINO / uf / "rivais_estadual.json").exists()
+                  or (DESTINO / uf / "rivais_federal.json").exists())
+    print(f"vereador em {com_ver} capitais, rivais em {com_riv} UFs")
+    print()
     for uf in ("RR", "GO", "SP"):
         p = DESTINO / uf
         if not p.exists():
             continue
-        est = (p / "estadual.json").stat().st_size / 1024
+        def kb(nome):
+            q = p / nome
+            return q.stat().st_size / 1024 if q.exists() else 0
         print(f"  abertura em {uf}: índice {f.stat().st_size/1024:.0f} KB "
-              f"+ base {(p/'base.json').stat().st_size/1024:.0f} KB "
-              f"+ estadual {est:.0f} KB")
+              f"+ base {kb('base.json'):.0f} KB + estadual {kb('estadual.json'):.0f} KB"
+              f"  |  rivais {kb('rivais_estadual.json'):.0f} KB, "
+              f"vereador {kb('vereador.json'):.0f} KB")
 
 
 if __name__ == "__main__":

@@ -27,6 +27,8 @@ export interface ResumoUF {
   n: string;
   /** municípios do estado */ nm: number;
   cargos: Cargo[];
+  /** capital, quando há histórico de vereador; o DF não tem */
+  capital?: string;
 }
 
 export interface AgregadoUF {
@@ -137,4 +139,81 @@ export interface Cruzamentos {
   duplas: { ano: number; e: string; ep: string; f: string; fp: string;
             mp: boolean; af: number }[];
   mesmoPartido: { ano: number; pct: number; n: number }[];
+}
+
+/** Um rival territorial: quem disputa o mesmo chão, não quem teve votação de
+ *  tamanho parecido. `pr` é assimétrico — um gigante pressiona um pequeno
+ *  muito mais do que o contrário; `af` é o cosseno, e é simétrico. */
+export interface Rival {
+  n: string;
+  p: string;
+  /** banda ideológica */ b: string;
+  el: boolean;
+  t: number;
+  /** afinidade: quanto os dois mapas têm o mesmo formato */ af: number;
+  /** pressão, % do voto do eleito em chão onde o rival é forte */ pr: number;
+  /** índices, em `BaseUF.municipios`, do chão onde os dois mais se encostam */
+  mun: number[];
+}
+
+/**
+ * Aferição do achado "o rival nº 1 costuma ser aliado".
+ *
+ * `observado` sozinho não vale nada: se a maioria das candidaturas já está na
+ * mesma faixa ideológica, aliado venceria por acaso — é o que `esperado` mede.
+ * O número que sobrevive sozinho é `pareado`: para o MESMO eleito, quanto o
+ * aliado mais pressionante pressiona a mais que o adversário mais pressionante.
+ */
+export interface Afericao {
+  n: number;
+  esperado: number | null;
+  observado: number | null;
+  pareado: number | null;
+  nPar: number;
+  aliadoMais: number;
+}
+
+export interface BlocoRivais {
+  fichas: Record<string, { b: string; al?: Rival[]; ad?: Rival[] }>;
+  afericao: Afericao;
+}
+
+/** Um arquivo por UF e por cargo, indexado por ano — quem abre o estadual de
+ *  São Paulo não deve pagar pelo federal. Só os proporcionais têm: nos
+ *  majoritários a disputa não se dá dentro de uma lista, e "rival" seria o
+ *  próprio adversário da eleição, que a tela do cargo já mostra inteiro. */
+export type CargoComRival = "estadual" | "federal";
+export type Rivais = Record<string, BlocoRivais>;
+
+export interface FichaVereador {
+  sq: string;
+  n: string;
+  completo: string;
+  p: string;
+  pn: string;
+  el: boolean;
+  t: number;
+  /** índices na lista `zonas` do ano */ zi: number[];
+  zv: number[];
+  nz: number;
+  /** zonas efetivas — só vale dentro de um ano */ ef: number;
+  t1: number;
+  gi: number;
+  /** número da zona de maior votação */ reduto: number;
+  /** já havia concorrido antes */ re: boolean;
+  /** cosseno com o pleito anterior; null quando as zonas foram redesenhadas */
+  sim: number | null;
+}
+
+export interface Vereador {
+  cidade: string;
+  anos: Record<string, {
+    pleito: {
+      nCand: number; cadeiras: number; total: number; ultimo: number;
+      maior: number; qe: number; nz: number; rePct: number;
+    };
+    zonas: number[];
+    fichas: FichaVereador[];
+    partidos: Partido[];
+  }>;
 }

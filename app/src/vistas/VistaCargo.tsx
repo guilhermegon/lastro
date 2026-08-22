@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { AgregadoUF, BaseUF, Cargo, DadosCargo } from "../tipos";
+import type { AgregadoUF, BaseUF, Cargo, DadosCargo, Rivais as TRivais } from "../tipos";
 import { MAJORITARIOS, NOME_CARGO } from "../tipos";
 import { quantis } from "../lib/escalas";
 import { decimal, numero, percentual } from "../lib/formato";
@@ -8,6 +8,7 @@ import { Indices } from "../componentes/Indices";
 import { Legenda } from "../componentes/Legenda";
 import { ListaCandidatos } from "../componentes/ListaCandidatos";
 import { Mapa } from "../componentes/Mapa";
+import { Rivais } from "../componentes/Rivais";
 import type { EstadoDica } from "../componentes/Dica";
 
 interface Props {
@@ -19,10 +20,14 @@ interface Props {
   selecionado: number;
   aoSelecionar: (i: number) => void;
   aoInspecionar: (d: EstadoDica | null) => void;
+  /** só chega nos proporcionais; nos majoritários a disputa não é dentro de
+   *  uma lista e "rival" seria o próprio adversário da eleição */
+  rivais: TRivais | null;
 }
 
 export function VistaCargo({
   cargo, base, dados, ano, agregado, selecionado, aoSelecionar, aoInspecionar,
+  rivais,
 }: Props) {
   const [filtro, setFiltro] = useState("");
   const bloco = dados[String(ano)];
@@ -61,6 +66,8 @@ export function VistaCargo({
   }
 
   const majoritario = MAJORITARIOS.has(cargo);
+  const proporcional = cargo === "estadual" || cargo === "federal";
+  const blocoRivais = proporcional ? rivais?.[String(ano)] ?? null : null;
   const venceuUF = atual && bloco.vencedorUF === atual.sq;
 
   return (
@@ -166,6 +173,17 @@ export function VistaCargo({
                 Perfil: <strong>{atual.tipo}</strong>
               </p>
             </div>
+
+            {/* Mostra o painel também quando não há dado, desde que se saiba
+                por quê: no Distrito Federal a ausência é a informação, e um
+                painel que apenas some deixa o leitor achando que faltou
+                trabalho. Enquanto carrega, nada aparece. */}
+            {proporcional && (blocoRivais || municipios.length < 3) && (
+              <Rivais aliados={blocoRivais?.fichas[atual.sq]?.al}
+                      adversarios={blocoRivais?.fichas[atual.sq]?.ad}
+                      afericao={blocoRivais?.afericao} ano={ano}
+                      municipios={municipios} />
+            )}
 
             <div className="duas">
               <div className="cartaz">

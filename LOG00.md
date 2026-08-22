@@ -418,3 +418,36 @@ Dois acertos que vieram de graça por causa do desenho:
 `TKT-0004`, que pedia a ordem de porte entre quatro blocos, foi fechado sem precisar da
 decisão: com a replicação completa, portou-se tudo de uma vez e não havia mais o que
 priorizar.
+
+## 2026-08-22 — as duas abas que faltavam
+
+O usuário apontou que faltava algo, e faltava: a versão completa de Goiás tinha
+**oito** abas, não sete. Faltavam os rivais territoriais e o vereador.
+
+Os dois foram replicados para o país — rivais em 27 unidades (estadual e
+federal, 1998–2022) e vereador nas 26 capitais (2000–2024, 182 arquivos
+extraídos sem um aviso sequer).
+
+**Um susto que não era defeito.** O arquivo do estadual de 2014 tem 4,26 milhões
+de linhas contra 791 mil em 2010 — cinco vezes, no mesmo cargo. Parecia a
+duplicação que já mordeu este projeto antes. Não era: 717 candidatos × 246
+municípios em Goiás dá 176.382 exatamente, e não há duplicata em
+`(uf, sq, município)`. A partir de 2014 o arquivo do TSE é **denso** — traz a
+linha do município mesmo com zero voto.
+
+**Um defeito que era real, e sério.** No Distrito Federal o painel de rivais
+mostrava afinidade 1,000 com todo mundo e "disputam Brasília". O DF é um
+município só: o cosseno entre dois candidatos quaisquer é exatamente 1, e a
+lista estava ordenando por tamanho de votação com aparência de território. É o
+risco que a regra de auditoria deste projeto nomeia — mapa errado com aparência
+de certo. Corrigido nos dois lados: `23_rivais.py` não produz o arquivo abaixo
+de três municípios, e a tela explica a ausência em vez de simplesmente não
+mostrar o painel.
+
+**Duas coisas que estavam misturadas.** O nome da capital servia ao mesmo tempo
+de chave de pareamento com o TSE (maiúscula, sem acento) e de rótulo — a aba
+dizia "Vereador · GOIANIA". Separadas em `CAPITAIS` e `NOMES`.
+
+Tamanho: os rivais saíram primeiro com 28,9 MB porque cada ficha repetia o
+**nome** dos municípios disputados. Trocado por índice em `base.json` (22,6 MB) e
+cortado por cargo — São Paulo no estadual caiu de 3,97 MB para 1,54 MB.
