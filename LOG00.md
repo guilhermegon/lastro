@@ -830,3 +830,29 @@ Executivo num levantamento sobre o Legislativo.
 
 A aba diz a data no rodapé e aponta o script: portal muda de endereço, e é a
 data que dá validade ao número, não a nossa palavra.
+
+## 2026-08-23 — piloto consumindo a API da ALEGO
+
+A aba API catalogava quem publica. Agora consome: verba indenizatória dos
+deputados de Goiás, 91 dos 96 meses entre 2019 e 2026, direto da API.
+
+**Dois achados, os dois de uma subtração que ninguém faz.** A API entrega
+`valor_apresentado` e `valor_indenizado`; a diferença é a glosa — despesa que o
+gabinete pediu e a Casa recusou. São R$ 349 mil de R$ 111,8 mi: **0,31%**. E os
+20 deputados com série longa ficam todos entre R$ 25 mil e R$ 32 mil por mês.
+Todo mundo bate no teto, quase nada é recusado.
+
+A consequência analítica importa mais que os números: **se todos usam o teto,
+ordenar por gasto total ordena por tempo de mandato, não por comportamento.** O
+que distingue é a glosa, e ela é rara o bastante para que os poucos casos
+mereçam olhar.
+
+**Um defeito que teria virado afirmação falsa.** A primeira varredura trouxe 37
+dos 96 meses, com 2022 e 2023 completamente vazios — e eu já tinha testado
+2023/02 à mão, com 41 registros. Requisição que falha, lida como ausência de
+dado, não parece erro: parece resultado. Foi o único tipo de erro que este
+projeto comete repetidamente, e a correção é sempre a mesma — tentar de novo
+antes de concluir. Com três tentativas, 91 meses.
+
+Verba indenizatória não é salário nem emenda: é custeio de gabinete, pago pela
+própria Assembleia. A tela diz isso, para que ninguém some com emenda.

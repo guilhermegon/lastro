@@ -337,6 +337,30 @@ pipeline mudar e o texto ficar, o texto vira mentira antiga.
 
 - [x] Sondagem das 27 casas legislativas (`39_sonda_assembleias.py`)
 - [x] Aba **API** com o levantamento e as inferências
+- [x] Piloto consumindo a API de fato (`40_alego_verbas.py`): verba
+      indenizatória dos deputados de Goiás, 91 dos 96 meses de 2019 a 2026
+
+### O piloto, e os dois achados que saem de uma subtração
+
+R$ 111,8 mi apresentados, R$ 111,4 mi indenizados, **R$ 349 mil glosados —
+0,31%**. Nenhum dos dois números abaixo é publicado como indicador em lugar
+nenhum; os dois saem de comparar duas colunas que a API já entrega.
+
+**Quase nada é recusado.** A diferença entre apresentado e indenizado mede
+decisão administrativa, e a decisão é praticamente sempre aprovar.
+
+**Todo mundo usa o teto.** Entre os 20 deputados com cinco anos ou mais de
+série, a média mensal fica entre R$ 25 mil e R$ 32 mil, mediana de R$ 30 mil.
+Não há quem gaste pouco — a verba é usada como piso, não como limite. Isso muda
+o que "quem gasta mais" significa: ordenar por total ordena por tempo de
+mandato, não por comportamento.
+
+### E um defeito que teria virado afirmação falsa
+
+A primeira varredura trouxe **37 dos 96 meses**, e 2022 e 2023 apareciam
+completamente vazios — quando eu mesmo já tinha testado 2023/02 à mão, com 41
+registros. Requisição que falha, lida como ausência de dado, não parece erro:
+parece resultado. Com três tentativas por mês, foram 91 meses, 2,4× mais dado.
 
 **19 de 27 respondem** algum portal de dado aberto; **4 têm API confirmada** por
 abertura manual (GO, MG, PE, DF); 8 não devolveram nada nos caminhos testados —

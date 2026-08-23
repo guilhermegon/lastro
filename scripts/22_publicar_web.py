@@ -110,6 +110,9 @@ def main():
     print(f"total publicado: {total/1024/1024:.1f} MB")
     print(f"maior arquivo: {maior[1]} com {maior[0]/1024:.0f} KB")
     print()
+    com_vb = sum(1 for uf in ufs_dir if (DESTINO / uf / "alego_verbas.json").exists())
+    if com_vb:
+        print(f"verba indenizatória (API da assembleia) em {com_vb} UF(s)")
     com_est = sum(1 for uf in ufs_dir
                   if (DESTINO / uf / "emendas_estadual.json").exists())
     if com_est:

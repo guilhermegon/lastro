@@ -96,7 +96,8 @@ def montar_dados():
                        "p": ler("padroes.json"), "c": ler("cruzamentos.json"),
                        "e": ler("emendas.json"), "d": ler("demografia.json"),
                        "ve": ler("voto_emenda.json"),
-                       "ee": ler("emendas_estadual.json")}
+                       "ee": ler("emendas_estadual.json"),
+                       "vb": ler("alego_verbas.json")}
     return {
         "anos": indice["anos"],
         "ufs": indice["ufs"],
@@ -1494,6 +1495,85 @@ function pintarSobre() {
      ["Semelhança (cosseno)","Quanto dois mapas têm o mesmo formato","Não se compara entre estados de portes diferentes"]]);
 }
 
+/* ---------- piloto: consumindo a API da ALEGO ----------
+   A aba API cataloga quem publica. Esta seção mostra o que sai quando se
+   consome de fato — e serve de prova de que o catálogo não é teórico. */
+function secaoPiloto() {
+  const v = (D.estados.GO || {}).vb;
+  if (!v) return "";
+  const t = v.total;
+  const pctG = t.apresentado > 0 ? t.glosa / t.apresentado * 100 : 0;
+  const mil = reais;
+  const teto = v.deputados.filter(d => d.ms >= 60);
+  const medias = teto.map(d => d.m).sort((a,b)=>a-b);
+  const mediana = medias.length ? medias[Math.floor(medias.length/2)] : 0;
+  const faixa = medias.length ? [medias[0], medias[medias.length-1]] : [0,0];
+
+  return `
+  <div class="cartaz">
+    <h2>Piloto: a API da ALEGO, consumida</h2>
+    <p class="cap">Catalogar quem publica é metade do trabalho. Esta seção
+      consome de fato um dos dezesseis assuntos da API de Goiás — a
+      <strong>verba indenizatória</strong>, o reembolso de despesa de gabinete
+      de cada deputado, mês a mês, de ${v.periodo[0]} a ${v.periodo[1]}.</p>
+    <div class="indices">
+      ${ind("Apresentado", mil(t.apresentado), "o que os gabinetes pediram")}
+      ${ind("Indenizado", mil(t.indenizado), "o que a Casa pagou")}
+      ${ind("Glosado", pct(pctG, 2), mil(t.glosa) + " recusados")}
+      ${ind("Deputados", num(t.nDeputados), `${t.nCasados} casam com eleito à ALEGO`)}
+    </div>
+    <div class="nota" style="margin-top:14px">
+      <strong>Verba indenizatória não é salário nem emenda.</strong> É custeio de
+      gabinete, pago pela própria Assembleia. Somar com emenda seria misturar o
+      orçamento do Executivo com reembolso da Casa — naturezas diferentes, contas
+      separadas.
+    </div>
+  </div>
+
+  <div class="cartaz">
+    <h2>Dois achados que saem de uma subtração</h2>
+    <p class="cap">Nenhum dos dois é publicado como indicador em lugar nenhum.
+      Os dois saem de comparar duas colunas que a API já entrega.</p>
+    <ul class="lista-fatos">
+      <li><strong>Quase nada é recusado: ${pct(pctG, 2)} do apresentado.</strong>
+        De ${mil(t.apresentado)} pedidos, ${mil(t.glosa)} foram glosados. A
+        diferença entre <em>apresentado</em> e <em>indenizado</em> mede decisão
+        administrativa, e a decisão é praticamente sempre aprovar.</li>
+      <li><strong>Todo mundo usa o teto.</strong> Entre os ${num(teto.length)}
+        deputados com cinco anos ou mais de série, a média mensal fica entre
+        ${mil(faixa[0])} e ${mil(faixa[1])}, com mediana de
+        <span class="num">${mil(mediana)}</span>. Não há quem gaste pouco: a
+        verba é usada como piso, não como limite.</li>
+      <li><strong>E isso muda o que a pergunta "quem gasta mais" significa.</strong>
+        Se todos batem no teto, ordenar por valor total ordena por tempo de
+        mandato, não por comportamento. O que distingue é a glosa — e ela é
+        rara o bastante para que os poucos casos mereçam olhar.</li>
+    </ul>
+  </div>
+
+  <div class="cartaz">
+    <h2>Por deputado</h2>
+    <p class="cap">Ordenado pelo total indenizado no período. O ponto marca quem
+      casa com um eleito à ALEGO nos pleitos que temos.</p>
+    <div class="rolagem"><table id="t-verbas"></table></div>
+    <p class="cap" style="margin-top:10px">Cobertura: 91 dos 96 meses entre
+      ${v.periodo[0]} e ${v.periodo[1]} responderam. A primeira varredura trouxe
+      só 37 — as requisições que falhavam eram lidas como ausência de dado, e
+      dois anos inteiros apareciam vazios. Com três tentativas por mês, o dado
+      apareceu.</p>
+  </div>`;
+}
+
+function tabelaPiloto() {
+  const v = (D.estados.GO || {}).vb;
+  const el = document.getElementById("t-verbas");
+  if (!v || !el) return;
+  tabela(el, ["Deputado(a)","Indenizado","Média mensal","Glosado","Meses"],
+    v.deputados.slice(0, 20).map(d => [
+      esc(d.n) + (d.el ? ' <span style="color:var(--accent)">●</span>' : ""),
+      reais(d.t), reais(d.m), pct(d.pg, 2), d.ms]));
+}
+
 /* ---------- API: o que as assembleias publicam ----------
    Levantamento próprio. Não existe catálogo público de quais assembleias
    legislativas estaduais oferecem dado aberto, e a resposta importa para este
@@ -1562,6 +1642,8 @@ function pintarApi() {
     </ul>
   </div>
 
+  ${secaoPiloto()}
+
   <div class="cartaz">
     <h2>O que dá para fazer com isso</h2>
     <p class="cap">O levantamento não entrega emenda, mas entrega outra coisa —
@@ -1570,7 +1652,8 @@ function pintarApi() {
       <li><strong>Custo de gasto legislativo comparado.</strong> Folha, diárias e
         verba indenizatória por deputado são publicados por várias casas no mesmo
         formato conceitual. Dá para comparar quanto custa um deputado estadual
-        entre estados — que ninguém compila.</li>
+        entre estados — que ninguém compila. <em>O piloto acima já fez isso para
+        Goiás; falta repetir onde houver API.</em></li>
       <li><strong>Um mapa de transparência com método.</strong> Dezenove de 27
         respondem alguma coisa; quatro têm API confirmada. Esse número é aferível
         e repetível, ao contrário dos selos de transparência que circulam sem
@@ -1587,6 +1670,7 @@ function pintarApi() {
     </div>
   </div>`;
 
+  tabelaPiloto();
   tabela(document.getElementById("t-casas"),
     ["UF","Casa","Situação","Onde","Observação"],
     linhas.sort((a,b) => (b.conf - a.conf) || (b.n - a.n) || a.uf.localeCompare(b.uf))
