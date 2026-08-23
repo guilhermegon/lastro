@@ -759,3 +759,28 @@ por natureza.
 Nove seções, três tabelas, dezesseis fatos. Zero falhas de contraste nos dois
 temas. O título volta a ser "Cadê o Voto?" e a gaveta de estados some, porque a
 aba não é de um estado.
+
+## 2026-08-23 — Espírito Santo entra, e dois defeitos de pareamento no caminho
+
+Segunda esfera estadual no ar: GO e ES. O seletor continua aparecendo só onde há
+base, e agora são duas.
+
+**O contraste entre as esferas é o produto.** No Espírito Santo, o federal
+rastreia R$ 181,8 mi de R$ 2,90 bi ao município — 6,3%, alcançando 69 de 78. O
+estadual rastreia R$ 240,8 mi de R$ 291,9 mi — 82,5%, alcançando 77 de 78. Menos
+dinheiro, muito mais visível. E o topo muda: federal é Cariacica, estadual é
+Vitória.
+
+**Dois defeitos meus, os dois de pareamento, os dois pegos por número absurdo.**
+
+O primeiro: o detector de formato de moeda aceitava duas casas decimais e o ES
+publica `11250,0000`, com quatro. A vírgula virava separador de milhar e o total
+deu R$ 217 bilhões num estado cujo orçamento é fração disso.
+
+O segundo: o `CodigoMunicipio` do ES tem **seis** dígitos, não sete — é o código
+do IBGE sem o dígito verificador. `320332` é o `3203320` de Marataízes. Eu
+preenchi zero à esquerda e o pareamento deu exatamente zero de 78 municípios.
+
+Os dois erraram por ordens de grandeza, e é por isso que foram vistos. Um erro de
+10% teria passado nos dois casos — o que reforça por que este projeto trata
+pareamento como gate e não como detalhe.

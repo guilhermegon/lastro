@@ -220,7 +220,8 @@ nacional. O piloto responde quanto custa um estado antes de prometer 26.
       dois campos, e **nenhum arquivo publicado usa esse esquema**. O CSV de
       2026 tem zero bytes e o JSON de 2025 traz o formato antigo
 - [x] **Espírito Santo: confirmado**, e melhor que Goiás
-- [ ] Ingestão do Espírito Santo, no formato de `35_emendas_estadual_web.py`
+- [x] Ingestão do Espírito Santo (`38_emendas_es_estadual.py`): 2021–2026,
+      4.620 linhas com pagamento, 51 autores, R$ 291,9 mi, 77 de 78 municípios
 - [ ] Bahia: só PNG e ZIP na SEFAZ; abrir o ZIP antes de prometer
 
 ### Espírito Santo, medido

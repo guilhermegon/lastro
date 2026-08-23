@@ -36,7 +36,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 cfg = import_module("00_config")
 
 WEB = cfg.PROCESSED / "web"
-FONTES = {"GO": cfg.PROCESSED / "emendas_go_estadual.csv"}
+# Um ingestor por estado, de proposito: a sondagem mostrou que nao existe
+# formato comum entre portais estaduais, e um leitor generico so' esconderia
+# isso. Cada UF entra aqui depois de ter seu proprio 3x_ conferido.
+FONTES = {"GO": cfg.PROCESSED / "emendas_go_estadual.csv",
+          "ES": cfg.PROCESSED / "emendas_es_estadual.csv"}
 TOP_AUTORES = 80
 
 
