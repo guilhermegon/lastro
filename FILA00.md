@@ -190,3 +190,43 @@ como o recorte rastreável.
 **Aplicado sob a pré-autorização de progresso** (DaRulez, ordem permanente de
 2026-08-01): recomendação inequívoca, aplicada na hora, registrada aqui para
 revisão posterior.
+
+---
+
+### RAS 00 TKT 0006 — Emendas de deputado estadual
+
+| Campo | Valor |
+|---|---|
+| `type` | `BLOCKING_DECISION` |
+| `criticality` | média — define escopo, não corrige defeito |
+| `work_continues` | sim — o Emendômetro federal está no ar |
+| `status` | **ABERTO** — decisão do usuário |
+
+**summary.** Emenda de deputado estadual vai para o orçamento **do estado**, não
+da União. Não está no Portal da Transparência federal, que é a fonte de todo o
+Emendômetro atual. Não existe agregador nacional: são 26 portais estaduais, cada
+um com seu formato, e nada garante que o município de destino esteja publicado.
+
+**O que apurei em Goiás**, que é o estado-piloto e um dos portais melhores:
+
+- Existe página dedicada, `transparencia.go.gov.br/emendas-parlamentares-de-goias/`
+- A execução completa desde 2021 só sai por **painel Power BI embutido**
+  (`reportId=c6b3961c-6932-4e0a-b77e-99cd14acee45`) — sem CSV
+- As indicações de 2025/2026 estão noutro sistema, o `sislog.go.gov.br`
+- O portal de dados abertos tem três conjuntos com "emenda", e nenhum é o
+  conjunto completo: um é de uma secretaria (SERINT), um é de uma universidade
+  (UEG), e o terceiro é de **emendas constitucionais**, que são outra coisa —
+  alteração de texto de lei, não dinheiro
+
+**decision_needed.** Fazer um piloto só de Goiás por engenharia reversa do painel
+Power BI, tentar as 26 unidades, ou não fazer.
+
+**leader_recommendation.** **Piloto de Goiás, e só depois decidir o resto.** O
+projeto já fez exatamente isso uma vez — nasceu de engenharia reversa de um
+painel Power BI do TSE/GO — então o caminho é conhecido e o custo, estimável.
+Prometer as 26 unidades sem ter feito uma é o erro que este projeto evita: cada
+portal é um formato, e nem todos publicam município de destino. Um piloto
+transforma a pergunta "dá para fazer?" em "quanto custa cada estado?".
+
+Não aplico a pré-autorização aqui: não é destravar progresso de algo em curso, é
+abrir uma frente nova de escopo aberto, e isso é decisão de dono.

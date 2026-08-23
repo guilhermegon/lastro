@@ -51,7 +51,7 @@ h1, h2, h3 { font-family: Archivo, sans-serif; margin: 0; letter-spacing: -.015e
 .topo { border-bottom: 1px solid var(--line); background: var(--surface); }
 .topo-in { display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: flex-end;
   justify-content: space-between; padding: 20px 0 16px; }
-.lastro { display: block; width: 164px; margin: 0 0 14px; }
+.lastro { display: block; width: 246px; margin: 0 0 16px; }
 .lastro svg { width: 100%; height: auto; display: block; }
 .lastro-mark { fill: var(--accent); }
 .lastro-nome { fill: var(--ink); font-family: Archivo, sans-serif; font-size: 30px;
@@ -195,7 +195,7 @@ footer p { margin: 3px 0; max-width: 80ch; }
 
   .lista { max-height: 246px; }
   .topo-in { padding: 14px 0 12px; }
-  .lastro { width: 136px; margin-bottom: 10px; }
+  .lastro { width: 204px; margin-bottom: 12px; }
   .marca h1 { font-size: 1.55rem; }
   .marca > p { font-size: .8rem; }
   .cartaz { padding: 12px 13px 14px; }

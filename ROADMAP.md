@@ -193,3 +193,10 @@ localidade de aplicação.**
 
 Por UF a cobertura é 97,1% do dinheiro, inclusive nas linhas `MÚLTIPLO`. É nesse
 nível que o Emendômetro é completo, e é por isso que ele começa por UF.
+
+### Emendas de deputado estadual — aguardando decisão
+
+Não é uma extensão do Emendômetro, é outra fonte: orçamento estadual, 26 portais,
+sem agregador nacional. Em Goiás a execução completa só existe em painel Power BI
+embutido, e os CSVs de dados abertos cobrem fragmentos. Registrado como
+`RAS 00 TKT 0006` com recomendação de piloto em Goiás antes de prometer o resto.
