@@ -9,16 +9,20 @@ link.
     estadual, os 7 pleitos, 26 UFs, como o app serve   17,2 MB   nao cabe
     o mesmo, sem os blocos que so' o pipeline usa        9,9 MB
     geometria municipal das 27 unidades                  2,4 MB
+    padroes + cruzamentos das 27 unidades                0,7 MB
     indice nacional                                      0,1 MB
                                                        --------
-                                                        12,4 MB   cabe
+                                                        13,1 MB   cabe
+
+Rivais territoriais (12,2 MB so' no estadual) e vereador nas capitais (4,8 MB)
+NAO cabem junto - continuam so' no app.
 
 Os blocos descartados sao `pm` (vetores por partido sobre TODOS os candidatos,
 insumo do arrasto em `21_`) e `mm` (perfil por municipio, insumo da janela de
 captura). Nenhum dos dois e' lido por esta tela.
 
-Fica de fora, e e' so' no app: os outros quatro cargos, rivais territoriais,
-vereador nas capitais, Padroes e Cruzamentos.
+Fica de fora, e e' so' no app: os outros quatro cargos, os rivais territoriais e
+o vereador nas capitais.
 
 **A marca vem de `Logo.tsx`**, extraida do proprio componente, e nao do SVG
 solto em `dist/`. Motivo concreto: o SVG solto nao carrega a classe `lastro`,
@@ -84,8 +88,12 @@ def montar_dados():
                     "fichas": [{k: f[k] for k in FICHA if k in f}
                                for f in b["fichas"]],
                 }
+        def ler(nome):
+            f = DADOS / uf / nome
+            return json.loads(f.read_text(encoding="utf-8")) if f.exists() else None
         estados[uf] = {"m": [x["n"] for x in base["municipios"]],
-                       "g": base["geo"], "a": anos}
+                       "g": base["geo"], "a": anos,
+                       "p": ler("padroes.json"), "c": ler("cruzamentos.json")}
     return {
         "anos": indice["anos"],
         "ufs": indice["ufs"],
@@ -125,6 +133,8 @@ PAGINA = r"""<title>Cadê o Voto?</title>
   <div class="abas" role="tablist" id="abas">
     <button role="tab" data-v="nacional" aria-selected="true">Nacional</button>
     <button role="tab" data-v="estado" aria-selected="false">Estado</button>
+    <button role="tab" data-v="padroes" aria-selected="false">Padrões</button>
+    <button role="tab" data-v="cruzamentos" aria-selected="false">Cruzamentos</button>
   </div>
 </div></div>
 
@@ -179,6 +189,11 @@ PAGINA = r"""<title>Cadê o Voto?</title>
       <div class="conteudo" id="detalhe"></div>
     </div>
   </div>
+
+  <div id="v-padroes" class="oculto"><div class="conteudo" id="padroes"
+       style="padding:20px 0 40px"></div></div>
+  <div id="v-cruzamentos" class="oculto"><div class="conteudo" id="cruzamentos"
+       style="padding:20px 0 40px"></div></div>
 </main>
 
 <footer class="wrap">
@@ -186,10 +201,10 @@ PAGINA = r"""<title>Cadê o Voto?</title>
      Eleitoral, dados abertos, arquivo
      <span class="num">votacao_candidato_munzona</span>, 1º turno. Malha
      municipal e estadual: IBGE.</p>
-  <p>Esta página traz deputado estadual nas 26 unidades, de 1998 a 2022. Os
-     outros quatro cargos, os rivais territoriais, a câmara das capitais e as
-     análises de padrões e cruzamentos estão no aplicativo, que carrega os dados
-     sob demanda.</p>
+  <p>Esta página traz deputado estadual nas 26 unidades, de 1998 a 2022, com as
+     duas análises. Os outros quatro cargos, os rivais territoriais e a câmara
+     das capitais estão no aplicativo, que carrega os dados sob demanda — não
+     cabem aqui: só os rivais do estadual são 12,2 MB.</p>
   <p>O pareamento entre os nomes de município do TSE e a malha do IBGE tem 159
      correções manuais; 47.535 votos de 1998, em três municípios, seguem sem par
      e estão fora destes números.</p>
@@ -300,7 +315,7 @@ let vista = "nacional", uf = "GO", ano = D.anos[D.anos.length-1], sel = 0, filtr
 
 function lerHash() {
   const p = new URLSearchParams(location.hash.slice(1));
-  if (p.get("v") === "estado") vista = "estado";
+  if (VISTAS.includes(p.get("v"))) vista = p.get("v");
   if (p.get("uf") && D.estados[p.get("uf")]) uf = p.get("uf");
   if (D.anos.includes(+p.get("ano"))) ano = +p.get("ano");
   sel = Math.max(0, +p.get("c") || 0);
@@ -490,30 +505,230 @@ document.getElementById("busca").addEventListener("input", e => {
   filtro = e.target.value; sel = 0; pintarEstado();
 });
 
+/* ---------- série temporal ----------
+   Um eixo só, sempre. Duas medidas de escalas diferentes viram dois gráficos,
+   nunca um com dois eixos — é o erro de gráfico mais comum que existe. */
+function linha(series, eixoX, casas, altura) {
+  altura = altura || 190;
+  const L=620, ml=40, mr=14, mt=14, mb=26;
+  const vals = series.flatMap(s=>s.pontos).filter(v=>v!=null);
+  if (!vals.length) return `<p class="indice exp">Sem dado para o período.</p>`;
+  const hi = Math.max(...vals)*1.1;
+  const px = i => ml + (L-ml-mr)*i/Math.max(eixoX.length-1,1);
+  const py = v => mt + (altura-mt-mb)*(1 - v/(hi||1));
+  let out = `<svg viewBox="0 0 ${L} ${altura}" role="img" aria-label="série temporal">`;
+  for (const v of [0, hi/2, hi])
+    out += `<line x1="${ml}" x2="${L-mr}" y1="${py(v)}" y2="${py(v)}" stroke="var(--line)" stroke-width="1"/>`
+        +  `<text x="${ml-6}" y="${py(v)+3}" text-anchor="end" font-size="10" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace">${v.toFixed(casas)}</text>`;
+  for (const s of series) {
+    const pts = s.pontos.map((v,i)=> v==null?null:[px(i),py(v)]).filter(Boolean);
+    if (!pts.length) continue;
+    out += `<path d="M${pts.map(q=>q[0].toFixed(1)+","+q[1].toFixed(1)).join("L")}" fill="none" stroke="var(${s.cor})" stroke-width="2.5" stroke-linejoin="round"/>`;
+    pts.forEach((q,i)=> out += `<circle cx="${q[0]}" cy="${q[1]}" r="${i===pts.length-1?5:3.5}" fill="var(${s.cor})" stroke="var(--surface)" stroke-width="2"/>`);
+  }
+  eixoX.forEach((r,i)=> out += `<text x="${px(i)}" y="${altura-8}" text-anchor="middle" font-size="11" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace">${r}</text>`);
+  return out + "</svg>";
+}
+const chip = (cor, txt) =>
+  `<span class="item"><span class="swatch" style="background:var(${cor})"></span>${txt}</span>`;
+
+/* ---------- Padrões ---------- */
+const TIPOS = {"Concentrado-Dominante":"--s1","Disperso-Dominante":"--s3",
+  "Concentrado-Compartilhado":"--s4","Disperso-Difuso":"--s5"};
+
+function pintarPadroes() {
+  const alvo = document.getElementById("padroes");
+  const p = D.estados[uf].p, n = D.estados[uf].m.length;
+  const nome = esc(nomeUF.get(uf)||uf);
+  if (!p || !p.serie.length) {
+    alvo.innerHTML = `<p class="indice exp">Sem análise de padrões para ${nome}.</p>`;
+    return; }
+  const anos = p.serie.map(s=>s.ano), capt = p.captura;
+
+  alvo.innerHTML = `
+  <div class="cartaz">
+    <h2>Como as bases mudaram, ${anos[0]} a ${anos[anos.length-1]}</h2>
+    <p class="cap">Medianas entre os eleitos de cada pleito, não médias: a
+      distribuição é assimétrica e a média seria puxada pelos casos extremos.</p>
+    ${linha([{rotulo:"Municípios efetivos",cor:"--accent",pontos:p.serie.map(s=>s.ef)}],anos,1)}
+    <p class="cap" style="margin-top:10px">Municípios efetivos — quanto menor, mais a
+      votação depende de poucas cidades. Em ${nome} o teto é ${num(n)}.</p>
+    ${linha([{rotulo:"Maior município",cor:"--s1",pontos:p.serie.map(s=>s.t1)},
+             {rotulo:"Domínio médio",cor:"--s5",pontos:p.serie.map(s=>s.dom)}],anos,1)}
+    <div class="legenda">${chip("--s1","Maior município, % do total do eleito")}
+      ${chip("--s5","Domínio médio, % que ele detém onde atua")}</div>
+  </div>
+
+  <div class="cartaz">
+    <h2>Que tipo de deputado o estado elege</h2>
+    <p class="cap">Cruzamento de concentração (10 ou menos municípios efetivos) com
+      domínio (10% ou mais em média). Os cortes são escolha analítica, não do TSE.</p>
+    <div class="rolagem"><table id="ttipo"></table></div>
+  </div>
+
+  <div class="cartaz">
+    <h2>A janela de captura municipal</h2>
+    <p class="cap">Fatia do maior candidato no total de votos nominais do município,
+      por porte do eleitorado. Valores medianos; cor mais quente significa mais capturado.</p>
+    <div class="rolagem"><table id="tcapt"></table></div>
+    <div class="nota" style="margin-top:12px">
+      <strong>Existe um tamanho ótimo de captura.</strong> Município pequeno demais não
+      sustenta candidato próprio e acaba repartido entre os vizinhos; grande demais,
+      ninguém domina. O pico costuma ficar numa faixa intermediária — em estados com
+      poucos municípios o padrão some, porque não há faixas suficientes.
+    </div>
+  </div>
+
+  <div class="cartaz">
+    <h2>O preço da cadeira</h2>
+    <p class="cap">Quociente eleitoral aproximado — total de nominais dividido pelas
+      cadeiras — e a votação do último eleito, que é o corte real de entrada.</p>
+    <div class="rolagem"><table id="tcusto"></table></div>
+  </div>`;
+
+  tabela(document.getElementById("ttipo"), ["Pleito", ...Object.keys(TIPOS)],
+    p.tipologia.map(l => [l.ano, ...Object.keys(TIPOS).map(t => {
+      const q = l.tipos[t] || 0;
+      return `${q} <span style="color:var(--ink-3);font-size:.7rem">(${pct(q/l.n*100,0)})</span>`;
+    })]));
+
+  /* A escala de cor da captura é por LINHA, não pela tabela toda: cada pleito
+     tem seu próprio nível, e uma escala global esconderia a forma da curva
+     dentro do ano, que é justamente o que interessa aqui. */
+  const el = document.getElementById("tcapt");
+  el.innerHTML = "<thead><tr>" + ["Pleito", ...capt.faixas].map(h=>`<th>${h}</th>`).join("") +
+    "</tr></thead><tbody>" + capt.anos.map(a => {
+      const vs = a.t1.filter(v=>v!=null);
+      const lo = Math.min(...vs,0), hi = Math.max(...vs,1);
+      return `<tr><td class="n">${a.ano}</td>` + a.t1.map(v => {
+        if (v == null) return `<td class="n">—</td>`;
+        const c = RAMPA[Math.min(4, Math.max(0, Math.floor((v-lo)/((hi-lo)||1)*5)))];
+        return `<td class="n" style="background:var(${c});color:var(${c.replace("--s","--tinta-s")})">${dec(v,1)}</td>`;
+      }).join("") + "</tr>";
+    }).join("") + "</tbody><tfoot><tr><td>Municípios</td>" +
+    ((capt.anos[capt.anos.length-1]||{}).n||[]).map(q=>`<td class="n">${q}</td>`).join("") +
+    "</tr></tfoot>";
+
+  tabela(document.getElementById("tcusto"),
+    ["Pleito","Cadeiras","Nominais","Quociente","Último eleito","Candidatos","Por cadeira"],
+    p.custo.map(c => [c.ano, c.cad, num(c.tot), num(Math.round(c.qe)), num(c.ult),
+      c.cand, dec(c.cand/Math.max(c.cad,1),1)]));
+}
+
+/* ---------- Cruzamentos ---------- */
+const CARGOS = ["presidente","governador","senador","federal","estadual"];
+const NOME_CARGO = {presidente:"Presidente",governador:"Governador",
+  senador:"Senado",federal:"Federal",estadual:"Estadual"};
+const COR_CARGO = {presidente:"--s5",governador:"--s3",senador:"--s4",
+  federal:"--s2",estadual:"--s1"};
+
+function pintarCruzamentos() {
+  const alvo = document.getElementById("cruzamentos");
+  const c = D.estados[uf].c, n = D.estados[uf].m.length;
+  const nome = esc(nomeUF.get(uf)||uf);
+  if (!c || !c.escala.length) {
+    alvo.innerHTML = `<p class="indice exp">Sem análise de cruzamentos para ${nome}.</p>`;
+    return; }
+  const anos = [...new Set(c.escala.map(e=>e.ano))].sort();
+  const arr = c.arrasto.filter(a=>a.ano===ano).sort((a,b)=>b.r-a.r).slice(0,14);
+  const dup = c.duplas.filter(d=>d.ano===ano).slice(0,15);
+
+  alvo.innerHTML = `
+  <div class="cartaz">
+    <h2>Cada cargo se disputa numa escala diferente</h2>
+    <p class="cap">Municípios efetivos, mediana por pleito. Nos cargos majoritários
+      usa-se o mais votado no estado, não o vencedor da eleição — para presidente os
+      dois raramente coincidem, e é a geografia local que interessa aqui.</p>
+    ${linha(CARGOS.map(cg => ({rotulo:NOME_CARGO[cg], cor:COR_CARGO[cg],
+      pontos: anos.map(a => { const e = c.escala.find(x=>x.cargo===cg&&x.ano===a);
+        return e ? e.ef : null; })})), anos, 1)}
+    <div class="legenda">${CARGOS.map(cg=>chip(COR_CARGO[cg],NOME_CARGO[cg])).join("")}</div>
+    <div class="nota" style="margin-top:12px">
+      <strong>O teto é o número de municípios do estado.</strong> ${nome} tem ${num(n)},
+      e nenhum cargo pode passar disso. Em estados pequenos os cinco cargos se aproximam
+      por limitação aritmética, não porque a disputa seja parecida — por isso a coluna
+      de fração, abaixo, é a comparável.
+    </div>
+    <div class="rolagem" style="margin-top:12px"><table id="tescala"></table></div>
+  </div>
+
+  <div class="cartaz">
+    <h2>O partido anda junto entre os cargos?</h2>
+    <p class="cap">Correlação, entre os municípios do estado, da fatia do partido no
+      deputado estadual e no federal em ${ano}. Perto de 1, o partido tem a mesma
+      geografia nos dois cargos — máquina coordenada. Perto de 0, as duas disputas
+      correm soltas: candidatos independentes dividindo só a legenda.</p>
+    ${arr.length ? `<div class="rolagem"><table id="tarr"></table></div>`
+      : `<p class="indice exp">Nenhum partido com presença em pelo menos metade dos
+         municípios nos dois cargos neste pleito.</p>`}
+    <p class="cap" style="margin-top:10px">Só entram partidos presentes em metade dos
+      municípios ou mais, nos dois cargos. Sem esse corte, uma legenda com voto em
+      poucas cidades correlaciona alto por acaso e aparece no topo sem dizer nada
+      sobre território.</p>
+  </div>
+
+  <div class="cartaz">
+    <h2>Duplas estadual e federal com o mesmo mapa</h2>
+    <p class="cap">Para cada deputado estadual, o federal cujo mapa municipal mais se
+      parece com o dele em ${ano}.</p>
+    <div class="rolagem"><table id="tdup"></table></div>
+    <div class="nota" style="margin-top:12px">
+      <strong>Isto não prova campanha casada.</strong> Dois candidatos concentrados na
+      mesma cidade têm mapas quase idênticos por geometria, sem combinação nenhuma —
+      por isso as afinidades chegam perto de 1. A tabela mostra coincidência
+      territorial; a intenção o dado não revela. O número informativo é o de baixo.
+    </div>
+    ${c.mesmoPartido.length ? `<p class="cap" style="margin-top:14px">Entre as duplas
+      mais parecidas, quantas dividem a mesma legenda:</p>` +
+      linha([{rotulo:"Mesmo partido",cor:"--accent",pontos:c.mesmoPartido.map(m=>m.pct)}],
+            c.mesmoPartido.map(m=>m.ano), 0, 150) : ""}
+  </div>`;
+
+  tabela(document.getElementById("tescala"),
+    ["Cargo","Municípios efetivos","Fração do estado","Maior município"],
+    CARGOS.map(cg => { const e = c.escala.find(x=>x.cargo===cg&&x.ano===ano);
+      return e ? [NOME_CARGO[cg], dec(e.ef,1), pct(e.fr,1), pct(e.t1,1)] : null;
+    }).filter(Boolean));
+  if (arr.length) tabela(document.getElementById("tarr"),
+    ["Partido","Correlação","Municípios"],
+    arr.map(a => [esc(a.partido), dec(a.r,3), a.nm]));
+  tabela(document.getElementById("tdup"),
+    ["Estadual","Federal","Mesmo partido","Afinidade"],
+    dup.map(d => [`${esc(d.e)} <span style="color:var(--ink-3)">${esc(d.ep)}</span>`,
+      `${esc(d.f)} <span style="color:var(--ink-3)">${esc(d.fp)}</span>`,
+      d.mp ? "sim" : "não", dec(d.af,4)]));
+}
+
 /* ---------- navegação ---------- */
 function irPara(v) { vista = v; render(); }
 
-function render() {
-  const naEstado = vista === "estado";
-  document.getElementById("v-nacional").classList.toggle("oculto", naEstado);
-  document.getElementById("v-estado").classList.toggle("oculto", !naEstado);
-  for (const b of document.querySelectorAll("#abas button"))
-    b.setAttribute("aria-selected", String((b.dataset.v === "estado") === naEstado));
+const VISTAS = ["nacional","estado","padroes","cruzamentos"];
+const SUB = {
+  nacional: "Distribuição espacial do voto para deputado estadual em cada unidade da federação, de 1998 a 2022, município a município.",
+  estado: "Onde cada deputado estadual eleito tirou voto, município a município, de 1998 a 2022.",
+  padroes: "O que muda na geografia do voto ao longo de sete pleitos, e que tipo de deputado o estado elege.",
+  cruzamentos: "Como os cinco cargos se relacionam no mesmo território, e o que anda junto entre eles.",
+};
 
-  /* O título só nomeia o estado quando é o estado que está na tela. */
-  document.getElementById("titulo").textContent = naEstado
-    ? `Cadê o Voto ${PREP[uf]||"em"} ${nomeUF.get(uf)||uf}?` : "Cadê o Voto?";
+function render() {
+  for (const v of VISTAS)
+    document.getElementById("v-"+v).classList.toggle("oculto", v !== vista);
+  for (const b of document.querySelectorAll("#abas button"))
+    b.setAttribute("aria-selected", String(b.dataset.v === vista));
+
+  /* O título só nomeia o estado quando o que está na tela é de um estado. */
+  document.getElementById("titulo").textContent = vista === "nacional"
+    ? "Cadê o Voto?" : `Cadê o Voto ${PREP[uf]||"em"} ${nomeUF.get(uf)||uf}?`;
   document.title = document.getElementById("titulo").textContent;
-  document.getElementById("sub").textContent = naEstado
-    ? `Onde cada deputado estadual eleito tirou voto, município a município, de 1998 a 2022.`
-    : "Distribuição espacial do voto para deputado estadual em cada unidade da federação, de 1998 a 2022, município a município.";
+  document.getElementById("sub").textContent = SUB[vista];
   document.getElementById("atual").textContent =
     `${nomeUF.get(uf)||uf} · ${num(D.estados[uf].m.length)} municípios`;
   for (const b of document.querySelectorAll("#estados button"))
     b.setAttribute("aria-pressed", String(b.dataset.uf === uf));
 
   gravarHash();
-  if (naEstado) pintarEstado(); else pintarNacional();
+  ({nacional: pintarNacional, estado: pintarEstado,
+    padroes: pintarPadroes, cruzamentos: pintarCruzamentos}[vista])();
   esconderDica();
 }
 

@@ -526,3 +526,29 @@ pleitos nas 26 UFs são 17,2 MB como o app serve, mas 9,9 MB sem os blocos `pm` 
 Estado, e três formas de entrar num estado: clique no mapa, clique no nome da
 tabela, ou a gaveta. O estado vai na hash, então dá para mandar um estado
 específico por link.
+
+## 2026-08-23 — as abas de inferência entram no artefato
+
+O usuário perguntou onde estavam as abas de inferência. Estavam só no app: eu
+tinha deixado Padrões e Cruzamentos de fora do artefato por causa do teto de
+16 MB. Medindo em vez de supor — de novo — os dois arquivos somam **0,74 MB**
+nas 27 unidades. Cabiam desde sempre.
+
+O artefato passou de 13,0 para 13,7 MB, com quatro abas: Nacional, Estado,
+Padrões, Cruzamentos.
+
+O que **não** cabe, e continua só no app: rivais territoriais (12,2 MB só no
+estadual) e vereador nas capitais (4,8 MB). Qualquer um dos dois estoura o teto.
+
+**Um defeito de leitura que o print do usuário revelou.** Havia um retângulo
+escuro no meio do mapa de Goiás, nos dois mapas, que parecia buraco de
+renderização. Não era: `--sem-voto` no tema escuro era `#232E31` contra um
+`--surface` de `#161E21`, e o traço entre municípios é `var(--surface)`. Uma
+mancha de municípios sem voto adjacentes se fundia num bloco sem borda visível.
+A categoria existia e estava correta — só não dava para ler. `--sem-voto` no
+escuro foi para `#2E3A3D`. Vale para o app também, que divide o mesmo
+`tokens.css`.
+
+Conferido que os números do artefato batem com o pipeline: o arrasto do PT em
+Goiás 2022 sai 0,617 em 246 municípios, que é o valor validado — o mesmo que
+saía errado em 0,344 quando era calculado só sobre os eleitos.
