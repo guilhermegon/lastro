@@ -604,3 +604,30 @@ dinheiro onde o que há é ausência de rastreabilidade.
 
 O artefato foi de 13,7 para 15,0 MB. O teto de 16 agora está perto, e é ele que
 decide o que ainda cabe — o cruzamento voto × emenda vai precisar ser magro.
+
+## 2026-08-23 — o dinheiro segue o voto, e o número sobrevive
+
+**60,1% da emenda de um deputado cai nos 10 municípios onde ele mais votou.**
+Sozinho, esse número não vale nada: Goiânia recebe muito voto e muita emenda de
+quase todo deputado goiano, porque é grande.
+
+A linha de base é o que o torna legível — a **mesma** emenda medida contra o
+reduto de **outro** deputado da mesma UF e do mesmo pleito dá 5,7%. Se o dinheiro
+fosse para a cidade grande por ser grande, cairia no reduto alheio também e o
+excesso zeraria. Sobram +15,9 pp.
+
+E a escada de robustez anda para o lado certo: exigindo ao menos 10 municípios
+rastreáveis, o excesso ponderado por dinheiro fica em +24,5 pp e é positivo em
+91% dos casos. Artefato de denominador pequeno encolhe sob filtro; este cresce.
+
+Fica na tela a ressalva de que isso mede a fatia rastreável — mediana de 1,9% da
+carteira de cada deputado.
+
+**Duas mudanças pedidas no meio do caminho, ambas certas.** Real por habitante e
+por km², do Censo 2022 do IBGE: as três medidas contam histórias diferentes em
+Goiás — absoluto é Goiânia com R$ 22,8 mi, por habitante é Campos Verdes com
+R$ 527, por km² é Valparaíso com R$ 141 mil. E a gaveta "Qual seu estado?"
+desceu para dentro das abas de estado, sumindo no Nacional, onde o mapa já é o
+seletor.
+
+Artefato em 15,2 MB de 16.

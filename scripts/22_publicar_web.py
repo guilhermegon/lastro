@@ -94,6 +94,8 @@ def main():
     print(f"total publicado: {total/1024/1024:.1f} MB")
     print(f"maior arquivo: {maior[1]} com {maior[0]/1024:.0f} KB")
     print()
+    com_dem = sum(1 for uf in ufs_dir if (DESTINO / uf / "demografia.json").exists())
+    print(f"demografia (população e área, Censo 2022) em {com_dem} UFs")
     com_em = sum(1 for uf in ufs_dir if (DESTINO / uf / "emendas.json").exists())
     print(f"emendas em {com_em} UFs"
           + (", agregado nacional publicado" if (DESTINO / "emendas_br.json").exists()

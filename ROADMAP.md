@@ -125,9 +125,36 @@ isso tem a ver com onde ele tirou voto?
       nacional + 1,2 MB por UF, reconciliando exato nos dois níveis
 - [x] Aba **Emendômetro** no artefato: mapa municipal acumulado, filtro por
       exercício e por autor, ranking nacional por UF, cobertura declarada na
-      tela. Artefato foi de 13,7 para **15,0 MB** — o teto de 16 está perto, e
-      é ele que decide o que ainda cabe
-- [ ] Cruzamento voto × emenda: o deputado manda dinheiro para o próprio reduto?
+      tela. Artefato em **15,2 MB** — o teto de 16 está perto, e é ele que
+      decide o que ainda cabe
+- [x] Cruzamento voto × emenda (`32_cruzamento_voto_emenda.py`): sim, e o
+      efeito sobrevive a toda checagem — cresce quando se exige mais dado
+- [x] Real por habitante e por km² (`33_demografia.py`, Censo 2022 do IBGE)
+- [x] "Qual seu estado?" virou subaba: some no Nacional, onde o mapa é o seletor
+
+### O achado do cruzamento
+
+Mediana do país: **60,1% da emenda de um deputado cai nos 10 municípios onde ele
+mais votou**, contra **5,7%** que cairia no reduto de outro deputado do mesmo
+estado e pleito. Excesso de **+15,9 pp**.
+
+A linha de base é o que dá sentido ao número. Goiânia recebe muito voto *e*
+muita emenda de quase todo deputado goiano, porque é grande — sem descontar
+isso, qualquer medida de sobreposição sai alta e diz "cidade grande é grande nas
+duas contas".
+
+**E o efeito não encolhe quando se exige mais dado — ele cresce:**
+
+| mín. municípios | n | excesso | ponderado por R$ | positivo em |
+|---|---|---|---|---|
+| 1 | 1.082 | +15,9 pp | +28,9 pp | 66% |
+| 3 | 703 | +20,0 pp | +27,2 pp | 77% |
+| 5 | 428 | +17,9 pp | +24,9 pp | 83% |
+| 10 | 197 | +17,2 pp | **+24,5 pp** | **91%** |
+
+Se fosse artefato de denominador pequeno, sumiria sob filtro. A ressalva que fica
+na tela: isso mede o dinheiro rastreável, mediana de 1,9% da carteira de cada
+deputado. O sentido é sólido, a magnitude fala do recorte.
 
 ### Duas coberturas diferentes, e as duas precisam aparecer
 

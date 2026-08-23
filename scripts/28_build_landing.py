@@ -94,7 +94,8 @@ def montar_dados():
         estados[uf] = {"m": [x["n"] for x in base["municipios"]],
                        "g": base["geo"], "a": anos,
                        "p": ler("padroes.json"), "c": ler("cruzamentos.json"),
-                       "e": ler("emendas.json")}
+                       "e": ler("emendas.json"), "d": ler("demografia.json"),
+                       "ve": ler("voto_emenda.json")}
     return {
         "anos": indice["anos"],
         "ufs": indice["ufs"],
@@ -127,12 +128,6 @@ PAGINA = r"""<title>Cadê o Voto?</title>
     <div class="seg" role="group" aria-label="Pleito" id="anos"></div>
   </div>
 
-  <details class="gaveta" id="gaveta">
-    <summary><span class="seta">&#9656;</span> Qual seu estado?
-      <span class="atual" id="atual"></span></summary>
-    <div class="estados" id="estados"></div>
-  </details>
-
   <div class="abas" role="tablist" id="abas">
     <button role="tab" data-v="nacional" aria-selected="true">Nacional</button>
     <button role="tab" data-v="estado" aria-selected="false">Estado</button>
@@ -140,6 +135,14 @@ PAGINA = r"""<title>Cadê o Voto?</title>
     <button role="tab" data-v="cruzamentos" aria-selected="false">Cruzamentos</button>
     <button role="tab" data-v="emendas" aria-selected="false">Emendômetro</button>
   </div>
+
+  <!-- Escolher estado só faz sentido nas abas de estado. No Nacional o mapa
+       é o seletor: clicar num estado abre a tela dele. -->
+  <details class="gaveta" id="gaveta">
+    <summary><span class="seta">&#9656;</span> Qual seu estado?
+      <span class="atual" id="atual"></span></summary>
+    <div class="estados" id="estados"></div>
+  </details>
 </div></div>
 
 <main class="wrap">
@@ -204,6 +207,12 @@ PAGINA = r"""<title>Cadê o Voto?</title>
       <aside class="rail">
         <div class="rail-bloco rail-primario">
           <p class="rail-titulo" id="rotAutores">Autor(a)</p>
+          <div class="seg" role="group" aria-label="Medida" id="emMedida"
+               style="margin-bottom:8px">
+            <button data-m="abs" aria-pressed="true">R$</button>
+            <button data-m="hab">por hab.</button>
+            <button data-m="km">por km²</button>
+          </div>
           <div class="seg" role="group" aria-label="Exercício" id="emAnos"
                style="margin-bottom:8px"></div>
           <div class="lista" id="listaAutores"></div>
@@ -724,7 +733,33 @@ function pintarCruzamentos() {
    O mapa abre acumulado por causa do segundo número — num ano só, um estado
    como Goiás mostra 17 municípios e o mapa sugere ausência de dinheiro onde o
    que há é ausência de rastreabilidade. */
-let emAno = "todos", emAutor = -1;
+let emAno = "todos", emAutor = -1, emMedida = "abs";
+
+/* Reais absolutos, por habitante e por km2 respondem coisas diferentes, e
+   nenhuma e' a leitura certa sozinha. O mapa em reais e' quase um mapa de
+   populacao — cidade grande recebe mais porque e' grande. Por habitante inverte
+   o retrato; por km2 inverte de novo, favorecendo o pequeno e denso. */
+const MEDIDA = {
+  abs: {rot: "Valor pago", un: "", fmt: v => reais(v)},
+  hab: {rot: "Valor pago por habitante", un: " por hab.",
+        fmt: v => "R$ " + dec(v, v < 100 ? 2 : 0)},
+  km:  {rot: "Valor pago por km²", un: " por km²",
+        fmt: v => "R$ " + dec(v, v < 100 ? 2 : 0)},
+};
+
+/* Divide elemento a elemento pelo denominador demográfico. Município sem dado
+   no Censo vira null e some do mapa como "sem dado" — nunca zero, que
+   dividiria e daria infinito. */
+function normalizar(vals, medida) {
+  if (medida === "abs") return vals;
+  const d = D.estados[uf].d;
+  if (!d) return vals;
+  const den = medida === "hab" ? d.pop : d.area;
+  return vals.map((v, i) => {
+    const q = den[i];
+    return (q == null || q <= 0) ? 0 : v / q;
+  });
+}
 
 const reais = v => v >= 1e9 ? "R$ " + dec(v/1e9,2) + " bi"
               : v >= 1e6 ? "R$ " + dec(v/1e6,1) + " mi"
@@ -799,15 +834,19 @@ function pintarEmendas() {
       `<span class="lv">${reais(a.t)}</span></button>`).join("");
 
   const a = emAutor >= 0 ? ag.autores[emAutor] : null;
-  const vals = a ? (() => { const v = new Array(n).fill(0);
+  const brutos = a ? (() => { const v = new Array(n).fill(0);
       for (const [i,x] of a.mun) v[i] = x; return v; })() : ag.tot;
+  const med = MEDIDA[emMedida] || MEDIDA.abs;
+  const vals = normalizar(brutos, emMedida);
   const cortes = quantis(vals);
+  for (const b of document.querySelectorAll("#emMedida button"))
+    b.setAttribute("aria-pressed", String(b.dataset.m === emMedida));
   const P = projDe(uf);
   const pctMun = ag.cobertura.pago > 0 ? ag.cobertura.pagoMun/ag.cobertura.pago*100 : 0;
 
-  const top = vals.map((v,i)=>({i,v})).filter(x=>x.v>0)
+  const top = vals.map((v,i)=>({i,v,bruto:brutos[i]})).filter(x=>x.v>0)
     .sort((x,y)=>y.v-x.v).slice(0,20);
-  const somaVals = vals.reduce((x,y)=>x+y,0);
+  const somaBrutos = brutos.reduce((x,y)=>x+y,0);
 
   alvo.innerHTML = `
   <div class="nota">
@@ -831,7 +870,10 @@ function pintarEmendas() {
 
   <div class="cartaz">
     <h2>Para onde foi o dinheiro${a ? " de "+esc(a.n) : ""}</h2>
-    <p class="cap">Valor pago por município${emAno==="todos" ? ", somando 2015 a 2026" : `, exercício de ${emAno}`}.
+    <p class="cap">${med.rot} em cada município${emAno==="todos" ? ", somando 2015 a 2026" : `, exercício de ${emAno}`}.
+      ${emMedida === "abs"
+        ? "Em reais absolutos o mapa é quase um mapa de população — cidade grande recebe mais porque é grande. Troque a medida à esquerda para inverter o retrato."
+        : `População e área do Censo 2022 (IBGE).${emMedida==="km" ? " Por quilômetro quadrado favorece o município pequeno e denso." : " Por habitante favorece o município pequeno que recebeu bem."}`}
       ${a ? "" : "Clique num autor à esquerda para ver só a carteira dele."}</p>
     <div id="m-emendas">
       <svg viewBox="0 0 ${P.L} ${P.H}" role="img" aria-label="Emendas por município">
@@ -852,6 +894,8 @@ function pintarEmendas() {
       <div class="rolagem"><table id="tautores"></table></div></div>
   </div>
 
+  <div class="cartaz" id="c-cruz"></div>
+
   <div class="cartaz">
     <h2>O país inteiro, por unidade da federação</h2>
     <p class="cap">Aqui a cobertura é outra: <strong>97,1% do dinheiro</strong>
@@ -860,20 +904,42 @@ function pintarEmendas() {
     <div class="rolagem"><table id="tbr"></table></div>
   </div>`;
 
-  legenda(document.getElementById("leg-emendas"), cortes, false, "Sem emenda rastreável");
-  ligarMapa(document.querySelector("#m-emendas svg"), i =>
-    `<strong>${esc(est.m[i]||"")}</strong>` +
-    (vals[i]>0 ? `<span class="num">${reais(vals[i])}</span>` : "sem emenda rastreável"));
+  const legFmt = document.getElementById("leg-emendas");
+  legFmt.innerHTML =
+    `<span class="item"><span class="swatch" style="background:var(--sem-voto)"></span>Sem emenda rastreável</span>` +
+    cortes.map((v,i) => `<span class="item"><span class="swatch" style="background:var(${RAMPA[i]})"></span>` +
+      (i===0 ? "até " + med.fmt(v) : med.fmt(cortes[i-1]) + " a " + med.fmt(v)) + "</span>").join("");
 
+  const dem = D.estados[uf].d;
+  ligarMapa(document.querySelector("#m-emendas svg"), i => {
+    if (!(brutos[i] > 0)) return `<strong>${esc(est.m[i]||"")}</strong>sem emenda rastreável`;
+    let txt = `<strong>${esc(est.m[i]||"")}</strong><span class="num">${reais(brutos[i])}</span>`;
+    if (emMedida !== "abs" && dem) {
+      const q = emMedida === "hab" ? dem.pop[i] : dem.area[i];
+      txt += q == null ? "<br>sem dado no Censo 2022"
+           : `<br><span class="num">${med.fmt(vals[i])}</span>${med.un}` +
+             `<br>${num(Math.round(q))}${emMedida==="hab" ? " habitantes" : " km²"}`;
+    }
+    return txt;
+  });
+
+  // em reais absolutos a coluna normalizada seria a mesma; nao repetir
   tabela(document.getElementById("tmun"),
-    ["Município","Valor pago","% do total"],
-    top.map(x => [esc(est.m[x.i]||"—"), reais(x.v), pct(x.v/somaVals*100)]));
+    emMedida === "abs"
+      ? ["Município", "Valor pago", "% do total"]
+      : ["Município", med.rot, "Valor pago", "% do total"],
+    top.map(x => emMedida === "abs"
+      ? [esc(est.m[x.i]||"—"), reais(x.bruto), pct(x.bruto/somaBrutos*100)]
+      : [esc(est.m[x.i]||"—"), med.fmt(x.v), reais(x.bruto),
+         pct(x.bruto/somaBrutos*100)]));
 
   tabela(document.getElementById("tautores"),
     ["Autor(a)","Emendas","Valor pago","Munic.","Área principal"],
     ag.autores.slice(0,20).map(x => [
       esc(x.n) + (x.el ? ' <span style="color:var(--accent)">●</span>' : ""),
       x.ne, reais(x.t), x.nm, esc(x.fn||"—")]));
+
+  pintarCruzamento();
 
   if (D.emendasBR) {
     const m = new Map();
@@ -892,6 +958,11 @@ function pintarEmendas() {
   }
 }
 
+document.getElementById("emMedida").addEventListener("click", e => {
+  const b = e.target.closest("button[data-m]");
+  if (!b) return;
+  emMedida = b.dataset.m; pintarEmendas();
+});
 document.getElementById("emAnos").addEventListener("click", e => {
   const b = e.target.closest("button[data-a]");
   if (!b) return;
@@ -902,6 +973,68 @@ document.getElementById("listaAutores").addEventListener("click", e => {
   if (!b) return;
   emAutor = +b.dataset.i; pintarEmendas();
 });
+
+/* ---------- o dinheiro segue o voto? ----------
+   A medida ingênua não serve: Goiânia recebe muito voto E muita emenda de quase
+   todo deputado goiano, porque é grande. Por isso cada deputado é comparado com
+   uma linha de base pareada — o MESMO dinheiro dele medido contra o reduto dos
+   OUTROS deputados da mesma UF e do mesmo pleito. Se a emenda vai para a cidade
+   grande por ser grande, ela cai no reduto dos outros também e o excesso zera. */
+function pintarCruzamento() {
+  const alvo = document.getElementById("c-cruz");
+  if (!alvo) return;
+  const ve = D.estados[uf].ve, nome = esc(nomeUF.get(uf)||uf);
+  if (!ve || !ve.afericao || !ve.afericao.n) {
+    alvo.innerHTML = `<h2>O dinheiro segue o voto?</h2>
+      <p class="cap">Sem pares suficientes em ${nome} para medir.</p>`;
+    return;
+  }
+  const a = ve.afericao;
+  const firmes = ve.deputados.filter(d => d.nm >= (ve.minMun || 3));
+  alvo.innerHTML = `
+    <h2>O dinheiro segue o voto?</h2>
+    <p class="cap">Para cada deputado federal eleito, quanto da emenda dele caiu
+      nos ${ve.topReduto} municípios onde ele mais votou — e quanto cairia no
+      reduto de <em>outro</em> deputado do mesmo estado e pleito. A segunda
+      medida é a linha de base: ela carrega o efeito do tamanho da cidade, e é
+      contra ela que a primeira tem de ser lida.</p>
+    <div class="indices">
+      ${ind("No próprio reduto", pct(a.obs,1), "mediana em "+nome)}
+      ${ind("No reduto alheio", pct(a.nulo,1), "a mesma emenda, outro mapa de voto")}
+      ${ind("Excesso", (a.exc>=0?"+":"")+dec(a.exc,1)+" pp", "o que sobra depois de descontar o acaso")}
+      ${ind("Acima de zero", `${a.acima} de ${a.n}`, "deputados com excesso positivo")}
+    </div>
+    ${ve.escada && ve.escada.length ? `
+    <p class="cap" style="margin-top:14px"><strong>O efeito encolhe quando se
+      exige mais dado?</strong> No país inteiro, não — ele cresce. É o contrário
+      do que aconteceria se fosse artefato de denominador pequeno.</p>
+    <div class="rolagem"><table id="tescada"></table></div>` : ""}
+    <div class="nota" style="margin-top:14px">
+      <strong>Isto mede ${pct(a.cob,1)} do dinheiro, na mediana.</strong> Só a
+      emenda cuja localidade de aplicação nomeia um município entra na conta, e
+      em ${nome} isso é uma fração pequena da carteira de cada deputado. O
+      sentido do resultado é sólido; a magnitude fala do que é rastreável, não
+      do orçamento inteiro.
+    </div>
+    ${firmes.length ? `<p class="cap" style="margin-top:14px">Os que mais
+      concentraram no próprio reduto, entre os que têm ao menos
+      ${ve.minMun} municípios rastreáveis:</p>
+      <div class="rolagem"><table id="tcruz"></table></div>` : ""}`;
+
+  if (ve.escada && ve.escada.length) tabela(document.getElementById("tescada"),
+    ["Mín. de municípios","Deputados","No reduto","Base","Excesso","Ponderado por R$","Positivo"],
+    ve.escada.map(e => [e.minMun, num(e.n), pct(e.obs,1), pct(e.nulo,1),
+      (e.exc>=0?"+":"")+dec(e.exc,1)+" pp", (e.pond>=0?"+":"")+dec(e.pond,1)+" pp",
+      pct(e.acima/e.n*100,0)]));
+
+  if (firmes.length) tabela(document.getElementById("tcruz"),
+    ["Deputado(a)","Pleito","Reduto","No reduto","Base","Excesso","Munic.","Rastreado"],
+    firmes.slice(0,12).map(d => [
+      `${esc(d.n)} <span style="color:var(--ink-3)">${esc(d.p)}</span>`,
+      d.ano, esc(d.reduto), pct(d.obs,0), pct(d.nulo,0),
+      (d.exc>=0?"+":"")+dec(d.exc,0)+" pp", d.nm,
+      d.cob == null ? "—" : pct(d.cob,1)]));
+}
 
 /* ---------- navegação ---------- */
 function irPara(v) { vista = v; render(); }
@@ -928,6 +1061,9 @@ function render() {
   document.getElementById("sub").textContent = SUB[vista];
   document.getElementById("atual").textContent =
     `${nomeUF.get(uf)||uf} · ${num(D.estados[uf].m.length)} municípios`;
+  const g = document.getElementById("gaveta");
+  g.classList.toggle("oculto", vista === "nacional");
+  if (vista === "nacional") g.open = false;
   for (const b of document.querySelectorAll("#estados button"))
     b.setAttribute("aria-pressed", String(b.dataset.uf === uf));
 
