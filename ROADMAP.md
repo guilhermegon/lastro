@@ -420,3 +420,93 @@ Cada casa responde o que a outra não responde. Pernambuco tem API REST
 (`/api/v1/`) com `parlamentares` e `remuneracao`, que é outro conceito — não
 verba de gabinete. Minas tem Swagger, mas não achei a especificação por
 tentativa e parei de caçar.
+
+## Marco 12 — gasto administrativo das Casas, e uma correção
+
+- [x] **Gasto administrativo da ALEGO** (`42_alego_administrativo.py`):
+  orçamento da Casa, diárias, terceirizados, contratos
+- [x] **Gasto administrativo da CLDF** (`44_cldf_administrativo.py`): folha
+  nominal, despesa, duodécimo, terceirizados
+- [x] **Correção de uma afirmação publicada** (`45_emenda_nas_assembleias.py`)
+- [x] Delta-encoding do vetor municipal: 15,9 → 13,9 MB, round-trip verificado
+- [ ] **Verba indenizatória da ALMG** (`43_almg_verbas.py`): varredura rodando
+
+### A afirmação que estava errada no ar
+
+Publicamos, na aba API e na Sobre, que **"das 27 assembleias, nenhuma publica
+emenda parlamentar"**. A CLDF publica: um conjunto chamado, literalmente,
+`emendas-parlamentares`, cinco CSV de 2021 a 2025.
+
+O ponto de fundo sobrevive — são dezoito colunas de execução orçamentária
+(`VL_EMENDA`, `VL_EMPENHADO`, `NOME_UO`, `PT`), **sem coluna de autor e sem
+coluna de município**, então não respondem "quem mandou dinheiro para onde". E o
+DF é caso especial de qualquer forma: é estado e município ao mesmo tempo.
+
+**Mas a frase absoluta era falsa, e o modo como nasceu é o problema.** Foi
+escrita a partir do padrão que eu via, com a mesma confiança dos números que eu
+tinha testado. `45_` separa as duas perguntas que ela confundia numa só:
+
+1. A Casa publica **algum** conjunto chamado emenda? → o DF publica
+2. Esse conjunto é **utilizável** (autor E município)? → nenhum é
+
+### A folha nominal do DF, e três defeitos meus antes da tela
+
+A CLDF publica o que nenhuma outra casa publica: 107 folhas mensais, pessoa a
+pessoa, com cargo, lotação e remuneração, de setembro de 2017 a julho de 2026.
+
+**O que ela mostra em julho de 2026:** 2.623 pessoas, R$ 59,85 mi de folha
+bruta. **993 comissionados para 871 concursados** — livre nomeação é maioria por
+cabeça, mas não por dinheiro (o concursado individual custa 3,3× o
+comissionado). **448 inativos custam R$ 15,3 mi, mais que os 993 comissionados
+em atividade (R$ 10,8 mi).** Os 24 deputados são 1,4% da folha: o custo do
+Legislativo quase não é o parlamentar, é a estrutura em volta.
+
+Em oito anos o quadro cresceu 37% (1.919 → 2.623) e a folha 99% em reais
+correntes. Os dois números não são igualmente sólidos e a tela diz por quê: a
+contagem não depende de inflação, o valor em reais não foi deflacionado.
+
+**Os três defeitos, todos meus, todos pegos antes de publicar:**
+
+- **5.052 linhas de pagamento não são 5.052 pessoas.** Uma pessoa aparece em
+  várias folhas no mesmo mês. A primeira versão relatou **48 deputados
+  distritais num DF que tem 24** — e foi esse absurdo que denunciou o resto.
+- **Um `\d{4}-\d{2}` estrito apagou cinco anos.** Os arquivos se chamam
+  `2022-01`, mas também `2025-7` (sem zero), `2024-08 ` (com espaço) e
+  `2017-09 - Quadro Desmonstrativo de Pessoal`. O regex descartou quatro meses
+  de 2025 em silêncio e começou a série em 2022. É o mesmo erro de sempre com
+  cara nova: presumir padrão onde não há, e ler "não bate com o meu padrão"
+  como "não existe".
+- **O esquema muda em nove anos:** 20, 21 e 23 colunas, com o acento se movendo
+  dentro do próprio cabeçalho (`Subsídio` → `Subsidio`). Casar por nome literal
+  apagava a coluna sem avisar. Agora casa por nome normalizado.
+
+**E uma checagem que passou:** a folha bruta (R$ 59,85 mi) contra a despesa
+paga da Casa (R$ 77,82 mi), que vem de arquivo independente. A folha é 77% do
+mês. Duas fontes que poderiam divergir e não divergem.
+
+**Uma ressalva declarada na tela:** o bruto é **piso**, não total. Só a folha
+principal detalha os créditos; as secundárias trazem as colunas de crédito
+zeradas e apenas o líquido — R$ 4,98 mi em julho cujo bruto o arquivo não diz.
+
+### Minas: o grão mais completo dos três
+
+A ALMG tem API v2 documentada (a especificação está em
+`/api/ajuda/swagger/endpoints/lastest`, que só se acha olhando o que a página
+carrega — as tentativas por endereço plausível davam 500). São 108 endpoints.
+
+O de verba indenizatória devolve **deputado × mês × categoria**, com detalhe
+nota a nota dentro: `valorDespesa` e `valorReembolsado` (a glosa, que só Goiás
+dava), `descTipoDespesa` (a categoria, que só o DF dava) e `nomeEmitente` +
+`cpfCnpj` (o fornecedor). **É a união dos três**, e a única das casas onde dá
+para perguntar qual fornecedor atende quantos deputados.
+
+**A janela é móvel e isso não é comportamento:** cerca de 18 meses por
+deputado, de fevereiro de 2025 em diante. É política de publicação, não início
+da verba — série longa ali descreveria a retenção da ALMG achando que descreve
+gasto.
+
+**O limite de requisição é publicado e obedecido:** a ALMG declara no site duas
+requisições simultâneas e um segundo entre elas, sob pena de bloqueio sem
+aviso. São dois workers com pausa de um segundo. A varredura leva o tempo que
+levar.
+

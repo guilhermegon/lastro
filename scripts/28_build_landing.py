@@ -2038,7 +2038,7 @@ function pintarApi() {
         Dos portais do Executivo, cinco tinham conjunto de emenda em formato
         tabular, dois deles com autor e município. Das assembleias, o único
         conjunto de emenda que existe não traz nem um nem outro.</li>
-      <li><strong>Esta correção estava errada no ar.</strong> Publicamos que
+      <li><strong>Esta linha aqui em cima estava errada, e ficou no ar.</strong> Publicamos que
         <em>nenhuma</em> das 27 publicava emenda. Publicava: o DF. A frase
         tinha sido escrita a partir do padrão que víamos, não de um teste — o
         erro exato contra o qual o resto desta página se protege. O teste agora
