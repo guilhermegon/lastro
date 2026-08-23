@@ -714,3 +714,28 @@ estadual, R$ 46,1 mi em 73. Não é o estado sendo mais transparente por virtude
 
 Zero falhas de contraste nos dois temas. Artefato em 15,8 MB de 16 — o teto
 agora é a restrição que decide o próximo passo.
+
+## 2026-08-23 — a sondagem que matou uma ambição
+
+O roadmap pedia "decidir se vale ir para os outros 25". A decisão estava
+impossível porque faltava o insumo — e o insumo era medição minha, não juízo do
+usuário. Sondei os 27 portais estaduais de dados abertos.
+
+**Dez de 27 respondem CKAN. Seis têm algum conjunto com "emenda parlamentar".
+Cinco em formato tabular. E abrindo os cinco, sobram três de verdade: GO, PE e
+ES.** Paraíba só tem "Orçamento" genérico; Santa Catarina foi falso positivo —
+o casamento era com portarias de COVID.
+
+Isso responde e encerra: **o Emendômetro estadual nacional não existe como
+produto uniforme.** Dezessete portais nem respondem API. Fazer os 25 seria 25
+projetos de raspagem, um por um, sem garantia de trazerem autor e município.
+
+O que vale é o oposto de ambicioso: **mais dois estados.** Pernambuco tem quatro
+conjuntos da SEPLAG em CSV, incluindo "Emendas Especiais - PIX" próprias do
+estado — o instrumento federal replicado localmente, que é achado por si só.
+Espírito Santo tem "Emendas Parlamentares do Estado" da SEFAZ, e separa as
+federais das estaduais, o que poupa trabalho.
+
+A ressalva do script vale para os dois: achar o conjunto não garante autor e
+município dentro. Em Goiás o conjunto certo estava lá e eu o descartei pelo nome
+do órgão. Abrir antes de prometer.

@@ -211,7 +211,37 @@ nacional. O piloto responde quanto custa um estado antes de prometer 26.
       dentro do Emendômetro, que só aparece onde há base estadual. Aplicado sob
       a pré-autorização — uma aba vazia em 26 estados é pior que a ausência do
       botão, e a pergunta que interessa é comparativa
-- [ ] Decidir, com o custo medido, se vale ir para os outros 25
+- [x] **Decidido: não vale ir para os 25 — vale ir para 2 ou 3**
+      (`36_sonda_portais_estaduais.py`). Aplicado sob a pré-autorização, com a
+      sondagem em mãos
+- [ ] Pernambuco: `dados.pe.gov.br`, quatro conjuntos da SEPLAG em CSV+JSON,
+      inclusive "Emendas Especiais - PIX" próprias do estado
+- [ ] Espírito Santo: `dados.es.gov.br`, "Emendas Parlamentares do Estado"
+      (SEFAZ) em CSV — e um conjunto separado para as federais
+- [ ] Bahia: só PNG e ZIP na SEFAZ; abrir o ZIP antes de prometer
+
+### A sondagem que tornou a decisão possível
+
+Sondados os 27 portais estaduais de dados abertos:
+
+| | |
+|---|---|
+| respondem CKAN | **10 de 27** |
+| têm conjunto com "emenda parlamentar" | 6 |
+| em formato tabular | 5 — BA, ES, GO, PB, PE |
+
+E abrindo os cinco, o número real cai de novo: PB só tem "Orçamento" genérico e
+SC foi falso positivo (o casamento era com portarias de COVID). **Sobram três
+com dado de emenda estadual de verdade: GO, PE e ES.**
+
+Isto responde a pergunta e mata a ambição: **o Emendômetro estadual nacional não
+existe como produto uniforme.** Dezessete portais nem respondem API. Os outros
+exigiriam raspagem ou engenharia reversa de painel, um por um, sem garantia de
+que tragam autor e município.
+
+A ressalva do próprio script continua valendo: achar o conjunto não garante o
+conteúdo. Em Goiás o conjunto certo estava lá e foi descartado pelo nome do
+órgão. PE e ES precisam ser abertos antes de virarem promessa.
 
 ### O que a comparação já mostra em Goiás
 
