@@ -499,3 +499,30 @@ O link público é `dist/cade_o_voto.html`, gerado por `28_build_landing.py`: a
 tela nacional sozinha, 117 KB, autocontida. O app com os 27 estados e as oito
 abas serve 80 MB sob demanda e precisa de hospedagem — não cabe em artefato, e
 foi por isso que ele deixou de ser página única.
+
+## 2026-08-23 — o layout quebrado e a página de estado que faltava
+
+O usuário abriu o link e achou duas coisas: layout destruído, e estado que não
+leva a lugar nenhum. As duas procedem, e a causa da primeira é instrutiva.
+
+**O logo comeu o cabeçalho.** Inlinei `dist/logo-lastro-marca.svg`, o arquivo
+solto, em vez da marcação de `Logo.tsx`. O SVG solto não carrega a classe
+`lastro`, então a regra `.lastro { width: 164px }` não pegava — e o
+`svg { width: 100%; height: auto }` global do projeto fez o logo ocupar os 344px
+da coluna, com 308px de altura. O `<h1>` foi parar em y=330. Corrigido extraindo
+o SVG do próprio `Logo.tsx` e envolvendo em `<span class="lastro">`, que é o que
+o CSS espera. Logo: 344×308 → 164×43. Cabeçalho: 443px → 287px.
+
+**A lição do método, não do bug:** na primeira publicação eu conferi os números
+por consulta ao DOM — contagens, textos, totais — e não olhei o desenho. Tudo
+que medi estava certo. Geometria de elemento (`getBoundingClientRect`) teria
+pego em um passo, e passou a fazer parte da conferência.
+
+**A página de estado não existia** — eu tinha dito que ficaria só no app, por
+causa do teto de 16 MB do artefato. Medindo em vez de supor: o estadual dos 7
+pleitos nas 26 UFs são 17,2 MB como o app serve, mas 9,9 MB sem os blocos `pm` e
+`mm`, que só o pipeline usa. Com a geometria municipal (2,4 MB) e o índice, dá
+13,0 MB — cabe. O artefato passou a ter as duas telas, com abas Nacional e
+Estado, e três formas de entrar num estado: clique no mapa, clique no nome da
+tabela, ou a gaveta. O estado vai na hash, então dá para mandar um estado
+específico por link.
