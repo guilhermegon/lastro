@@ -124,7 +124,8 @@ def montar_dados():
                        "vb": ler("alego_verbas.json"),
                        "cv": ler("cldf_verbas.json"),
                        "ad": ler("alego_admin.json"),
-                       "ca": ler("cldf_admin.json")}
+                       "ca": ler("cldf_admin.json"),
+                       "av": ler("almg_verbas.json")}
     return {
         "anos": indice["anos"],
         "ufs": indice["ufs"],
@@ -1738,6 +1739,135 @@ function tabelaAdmin() {
       pct(t.pessoas ? e.q/t.pessoas*100 : 0, 1)]));
 }
 
+/* ---------- terceiro piloto: Minas ----------
+   A mesma verba de Goiás e do DF, no único grão que junta as três dimensões:
+   glosa, categoria e fornecedor, todas amarradas ao deputado. */
+function secaoMG() {
+  const v = (D.estados.MG || {}).av;
+  if (!v || !v.total) return "";
+  const t = v.total, ct = v.categorias || [], fo = v.fornecedores || {},
+        dp = v.deputados || {};
+  const cat1 = ct[0], cat2 = ct[1];
+  const jan = (v.janela || ["",""]).map(x => x.replace("-", "/"));
+  const meses = (v.janela || []).length === 2
+    ? (parseInt(v.janela[1].slice(0,4))*12 + parseInt(v.janela[1].slice(5)))
+      - (parseInt(v.janela[0].slice(0,4))*12 + parseInt(v.janela[0].slice(5))) + 1
+    : 0;
+
+  return `
+  <div class="cartaz">
+    <h2>Terceiro piloto: Minas, e o grão que junta tudo</h2>
+    <p class="cap">A ALMG publica a <strong>mesma</strong> verba indenizatória
+      de Goiás e do DF, mas no único formato que traz as três dimensões ao mesmo
+      tempo: <strong>quanto foi pedido e quanto foi pago</strong> (a glosa, que
+      só Goiás dava), <strong>em que categoria</strong> (que só o DF dava) e
+      <strong>para qual fornecedor</strong> — tudo amarrado ao deputado, o que o
+      DF não amarra.</p>
+    <div class="indices">
+      ${ind("Notas", num(t.notas), jan[0] + " a " + jan[1])}
+      ${ind("Deputados", num(t.deputados), num(t.mesesDeputado) + " meses-deputado")}
+      ${ind("Pago", reais(t.pago), "de " + reais(t.pedido) + " pedidos")}
+      ${ind("Glosado", pct(t.pctGlosa, 2), reais(t.glosa) + " recusados")}
+    </div>
+    <div class="nota" style="margin-top:12px">
+      <strong>A janela é móvel, e isso não é comportamento.</strong> A API
+      devolve cerca de ${meses} meses por deputado, de ${jan[0]} em diante. Não é
+      que a verba tenha começado ali: é política de publicação. Uma série longa
+      daqui, ou uma comparação com os anos de Goiás, descreveria a política de
+      retenção da ALMG achando que descreve gasto — por isso não há tendência
+      temporal nesta seção.
+    </div>
+  </div>
+
+  ${ct.length ? `<div class="cartaz">
+    <h2>No que a verba mineira é gasta</h2>
+    <p class="cap">A categoria vem no próprio registro, sem depender de
+      interpretar texto livre.${cat1 ? ` O maior item é
+      <strong>${esc(cat1.n.toLowerCase())}</strong>, com
+      ${pct(cat1.v/t.pago*100,1)} do pago${cat2 ? `; o segundo,
+      ${esc(cat2.n.toLowerCase())}, com ${pct(cat2.v/t.pago*100,1)}` : ""}.` : ""}</p>
+    <div class="rolagem"><table id="t-mg-cat"></table></div>
+  </div>` : ""}
+
+  ${fo.distintos ? `<div class="cartaz">
+    <h2>A pergunta que só Minas responde</h2>
+    <p class="cap">O DF dá o fornecedor mas não diz de qual deputado é a nota;
+      Goiás diz o deputado mas não dá o fornecedor. Minas dá os dois — então dá
+      para perguntar <strong>qual fornecedor atende quantos gabinetes</strong>,
+      que é uma pergunta sobre concentração de mercado, não sobre gasto.</p>
+    <div class="indices">
+      ${ind("CNPJ distintos", num(fo.distintos), "no período")}
+      ${ind("Atendem mais de um", num(fo.compartilhados),
+            pct(fo.distintos ? fo.compartilhados/fo.distintos*100 : 0, 1) + " dos fornecedores")}
+    </div>
+    <div class="rolagem" style="margin-top:12px"><table id="t-mg-forn"></table></div>
+    <div class="nota" style="margin-top:12px">
+      <strong>Atender vários gabinetes não é irregularidade.</strong> Uma
+      locadora de veículos ou uma gráfica grande naturalmente aparece em muitas
+      notas. O número mede concentração do mercado que vive da verba, e é isso
+      que ele está dizendo — nada além.
+    </div>
+  </div>` : ""}
+
+  ${dp.medianaMensal ? `<div class="cartaz">
+    <h2>Por deputado, e por que é mediana</h2>
+    <p class="cap">A mediana mensal de cada deputado, e depois a mediana dessas
+      medianas: <span class="num">${reais(dp.medianaMensal)}</span> por mês. A
+      faixa vai de ${reais(dp.minMensal)} a ${reais(dp.maxMensal)}.</p>
+    <div class="rolagem"><table id="t-mg-dep"></table></div>
+    <div class="nota" style="margin-top:12px">
+      <strong>Não é total por deputado, e a diferença importa.</strong> A janela
+      publicada não tem o mesmo tamanho para todos — quem assumiu depois tem
+      menos meses. Somar produziria um ranking que mede tempo de mandato dentro
+      da janela, não gasto. A coluna de meses fica à vista por isso.
+    </div>
+  </div>` : ""}
+
+  <div class="cartaz">
+    <h2>As três casas, lado a lado</h2>
+    <p class="cap">Mesma verba, mesma finalidade legal, três formatos. O que
+      cada uma deixa perguntar é diferente — e nenhuma foi desenhada pensando em
+      quem quer comparar.</p>
+    <div class="rolagem"><table id="t-tres"></table></div>
+    <div class="nota" style="margin-top:12px">
+      <strong>Não somamos as três nem tiramos média entre elas.</strong> Os
+      períodos não coincidem, o grão não coincide, e Goiás publica o pedido
+      enquanto o DF publica só o pago. Um total "das três casas" sairia redondo e
+      não significaria nada.
+    </div>
+  </div>`;
+}
+
+function tabelaMG() {
+  const v = (D.estados.MG || {}).av;
+  if (!v || !v.total) return;
+  const t = v.total;
+  const ec = document.getElementById("t-mg-cat");
+  if (ec) tabela(ec, ["Categoria","Pago","% do pago","Notas"],
+    (v.categorias || []).map(c => [esc(c.n), reais(c.v),
+      pct(t.pago ? c.v/t.pago*100 : 0, 1), num(c.q)]));
+
+  const ef = document.getElementById("t-mg-forn");
+  if (ef) tabela(ef, ["Fornecedor","Gabinetes atendidos","Valor"],
+    ((v.fornecedores || {}).top || []).map(f => [esc(f.n), num(f.dep), reais(f.v)]));
+
+  const ed = document.getElementById("t-mg-dep");
+  if (ed) tabela(ed, ["Deputado","Partido","Mediana mensal","Meses publicados"],
+    ((v.deputados || {}).top || []).map(d => [esc(d.n), esc(d.p),
+      reais(d.v), num(d.m)]));
+
+  const e3 = document.getElementById("t-tres");
+  if (e3) tabela(e3,
+    ["", "Goiás (ALEGO)", "DF (CLDF)", "Minas (ALMG)"],
+    [["grão", "mês, por deputado", "comprovante", "deputado × mês × categoria"],
+     ["glosa", "sim", "não: só o pago", "sim"],
+     ["categoria", "não", "sim, mas 68,3% do valor sem", "sim"],
+     ["fornecedor", "não", "sim", "sim, com CNPJ"],
+     ["autor da nota", "sim", "não", "sim"],
+     ["período", "8 anos", "12 anos", "janela móvel de ~18 meses"],
+     ["acesso", "API REST", "CKAN, CSV", "API REST, limite publicado"]]);
+}
+
 /* ---------- o DF como órgão: a folha nominal ----------
    Goiás dá o total de pessoal no orçamento; o DF dá nome a nome, com lotação.
    É a única das três casas onde dá para separar quadro próprio de gabinete. */
@@ -2050,6 +2180,7 @@ function pintarApi() {
   ${secaoAdminDF()}
   ${secaoPiloto()}
   ${secaoDF()}
+  ${secaoMG()}
 
   <div class="cartaz">
     <h2>O que dá para fazer com isso</h2>
@@ -2081,6 +2212,7 @@ function pintarApi() {
   tabelaAdminDF();
   tabelaPiloto();
   tabelaDF();
+  tabelaMG();
   tabela(document.getElementById("t-casas"),
     ["UF","Casa","Situação","Onde","Observação"],
     linhas.sort((a,b) => (b.conf - a.conf) || (b.n - a.n) || a.uf.localeCompare(b.uf))
