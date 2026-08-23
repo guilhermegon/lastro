@@ -347,3 +347,31 @@ A lição de método: o detector estático **acha** o que a inspeção do DOM co
 ou desmente, e nenhum dos dois basta sozinho. A varredura de contraste no DOM
 vivo, percorrendo tema e aba, é o que fecha a conta — e foi ela que provou que os
 dez restantes são ruído.
+
+
+## A ALEGO tem API, e ela não tem emendas
+
+Sondado em 2026-08-23, porque seria a fonte mais direta possível para o
+Emendômetro estadual de Goiás.
+
+**A API existe e é bem documentada**: `transparencia.al.go.leg.br/api/transparencia`,
+com URL parametrizada (`{formato}` json ou csv, `{ano}`, `{mês}`) e dezesseis
+assuntos — verbas indenizatórias, diárias, remunerações, execução orçamentária,
+orçamento, programa-ações, licitações, contratos, convênios, expedientes,
+diários. Os endpoints documentados respondem 200.
+
+**Nenhum deles é emenda parlamentar.** Testados `emendas`,
+`emendas-parlamentares`, `emenda`, `emendas_parlamentares` e `indicacoes`: os
+cinco dão 404. E `expedientes` (220 registros) não menciona emenda.
+
+Isso é coerente com a divisão institucional, não é omissão: a ALEGO publica o
+gasto **da própria Casa** — sua folha, seus contratos, suas diárias. A emenda
+parlamentar é indicação de deputado sobre o orçamento do **Executivo**, e é
+executada pelas secretarias. Por isso o dado vive na SERINT e no portal de dados
+abertos do estado, que é de onde `34_emendas_go_estadual.py` já o tira.
+
+Uma pista que não deu certo: `remuneracoes` inclui "Deputados, servidores ativos
+e estagiários", e uma lista oficial de nomes parlamentares poderia melhorar o
+casamento autor↔eleito, hoje em 61% em Goiás. Mas o endpoint devolveu zero
+registros em todos os pares ano/mês testados (2023, 2024, 2025). Fica registrado
+como pista, não como caminho.
