@@ -95,7 +95,8 @@ def montar_dados():
                        "g": base["geo"], "a": anos,
                        "p": ler("padroes.json"), "c": ler("cruzamentos.json"),
                        "e": ler("emendas.json"), "d": ler("demografia.json"),
-                       "ve": ler("voto_emenda.json")}
+                       "ve": ler("voto_emenda.json"),
+                       "ee": ler("emendas_estadual.json")}
     return {
         "anos": indice["anos"],
         "ufs": indice["ufs"],
@@ -216,6 +217,8 @@ PAGINA = r"""<title>Cadê o Voto?</title>
       <aside class="rail">
         <div class="rail-bloco rail-primario">
           <p class="rail-titulo" id="rotAutores">Autor(a)</p>
+          <div class="seg" role="group" aria-label="Esfera" id="emEsfera"
+               style="margin-bottom:8px"></div>
           <div class="seg" role="group" aria-label="Tipo de emenda" id="emTipo"
                style="margin-bottom:8px">
             <button data-t="todas" aria-pressed="true">Todas</button>
@@ -798,6 +801,14 @@ function pintarCruzamentos() {
    como Goiás mostra 17 municípios e o mapa sugere ausência de dinheiro onde o
    que há é ausência de rastreabilidade. */
 let emAno = "todos", emAutor = -1, emMedida = "abs", emTipo = "todas";
+let emEsfera = "federal";
+
+/* Federal e estadual são orçamentos diferentes com o mesmo nome. O seletor só
+   aparece onde existe a base estadual — hoje, Goiás — porque um botão que leva
+   a uma tela vazia em 26 estados é pior que a ausência do botão. */
+function fonteEmendas() {
+  return emEsfera === "estadual" ? D.estados[uf].ee : D.estados[uf].e;
+}
 
 /* "Emenda Pix" é o apelido da Transferência Especial: o dinheiro cai direto na
    conta do município, sem convênio, sem finalidade definida no orçamento e sem
@@ -839,7 +850,7 @@ const reais = v => v >= 1e9 ? "R$ " + dec(v/1e9,2) + " bi"
               : "R$ " + dec(v,0);
 
 function emBlocos() {
-  const e = D.estados[uf].e;
+  const e = fonteEmendas();
   if (!e) return null;
   return emAno === "todos" ? Object.values(e.anos)
                            : (e.anos[emAno] ? [e.anos[emAno]] : []);
@@ -849,7 +860,7 @@ function emAgregado() {
   /* Soma os anos escolhidos num único vetor municipal e numa lista de autores.
      Somar aqui, e não no pipeline, é o que deixa o filtro de exercício ser
      recorte e não outro arquivo. */
-  const e = D.estados[uf].e, n = D.estados[uf].m.length;
+  const e = fonteEmendas(), n = D.estados[uf].m.length;
   const bl = emBlocos();
   if (!bl || !bl.length) return null;
   const tot = new Array(n).fill(0), totPix = new Array(n).fill(0);
@@ -905,7 +916,18 @@ function pintarEmendas() {
   const est = D.estados[uf], nome = esc(nomeUF.get(uf)||uf);
   const n = est.m.length;
 
-  const anosEm = est.e ? Object.keys(est.e.anos).sort() : [];
+  /* Trocar de estado pode tirar o chão da esfera estadual: se o novo estado
+     não tem base própria, volta para federal em vez de mostrar tela vazia. */
+  if (emEsfera === "estadual" && !est.ee) emEsfera = "federal";
+  const fonte = fonteEmendas();
+  document.getElementById("emEsfera").innerHTML = est.ee
+    ? `<button data-s="federal"${emEsfera==="federal"?' aria-pressed="true"':''}>Federal</button>` +
+      `<button data-s="estadual"${emEsfera==="estadual"?' aria-pressed="true"':''}>Estadual</button>`
+    : "";
+  // Transferência Especial é instrumento federal: o filtro não faz sentido aqui
+  document.getElementById("emTipo").classList.toggle("oculto", emEsfera === "estadual");
+  if (emEsfera === "estadual") emTipo = "todas";
+  const anosEm = fonte ? Object.keys(fonte.anos).sort() : [];
   document.getElementById("emAnos").innerHTML = est.e
     ? [`<button data-a="todos"${emAno==="todos"?' aria-pressed="true"':''}>Todos</button>`]
         .concat(anosEm.map(a=>`<button data-a="${a}"${a===emAno?' aria-pressed="true"':''}>${a}</button>`)).join("")
@@ -946,19 +968,30 @@ function pintarEmendas() {
 
   alvo.innerHTML = `
   <div class="nota">
-    <strong>Esta aba mostra o que é rastreável até o município, e isso é uma
-    fatia.</strong> Em ${nome}, ${reais(ag.cobertura.pagoMun)} dos
-    ${reais(ag.cobertura.pago)} pagos em emendas individuais têm um município
-    declarado — <span class="num">${pct(pctMun,1)}</span>. O resto está em
-    <em>MÚLTIPLO</em> ou dirigido ao estado inteiro, e o arquivo do Portal da
-    Transparência não diz para onde foi. O valor é o que saiu do caixa
-    (pago + restos a pagar pagos), nunca o empenhado.
+    ${emEsfera === "estadual" ? `
+      <strong>Emendas de deputado estadual, orçamento de ${nome}.</strong>
+      Outra fonte e outro orçamento: vem dos dados abertos do estado, não do
+      Portal da Transparência federal. Aqui
+      <span class="num">${pct(pctMun,1)}</span> do valor nomeia um município —
+      muito mais que no federal, e não por virtude: a emenda estadual é menor e
+      quase sempre aponta uma cidade, enquanto a federal vai com frequência
+      para <em>MÚLTIPLO</em> ou para o estado inteiro.
+      ${reais(ag.cobertura.pagoMun)} de ${reais(ag.cobertura.pago)}.
+    ` : `
+      <strong>Esta aba mostra o que é rastreável até o município, e isso é uma
+      fatia.</strong> Em ${nome}, ${reais(ag.cobertura.pagoMun)} dos
+      ${reais(ag.cobertura.pago)} pagos em emendas individuais têm um município
+      declarado — <span class="num">${pct(pctMun,1)}</span>. O resto está em
+      <em>MÚLTIPLO</em> ou dirigido ao estado inteiro, e o arquivo do Portal da
+      Transparência não diz para onde foi. O valor é o que saiu do caixa
+      (pago + restos a pagar pagos), nunca o empenhado.
+    `}
   </div>
 
   <div class="cartoes">
     ${cartao("Rastreável ao município", reais(a ? a.total : ag.pago), a ? esc(a.n) : `de ${reais(ag.cobertura.pago)} no estado`)}
     ${cartao("Emendas", num(a ? a.ne : ag.emendas), emAno==="todos" ? "2015–2026" : `exercício ${emAno}`)}
-    ${emTipo === "todas" ? cartao("Sendo Pix",
+    ${emTipo === "todas" && emEsfera !== "estadual" ? cartao("Sendo Pix",
         pct(ag.pagoTodas > 0 ? (a ? a.pix/Math.max(a.t,1) : ag.pagoPix/ag.pagoTodas)*100 : 0, 1),
         reais(a ? a.pix : ag.pagoPix) + " em transferência especial") : ""}
     ${cartao("Municípios alcançados", num(a ? a.nm : ag.nMun), "de "+num(n))}
@@ -1004,7 +1037,7 @@ function pintarEmendas() {
 
   <div class="cartaz" id="c-cruz"></div>
 
-  <div class="cartaz">
+  <div class="cartaz${emEsfera === "estadual" ? " oculto" : ""}">
     <h2>O país inteiro, por unidade da federação</h2>
     <p class="cap">Aqui a cobertura é outra: <strong>97,1% do dinheiro</strong>
       individual tem UF, inclusive o que está em <em>MÚLTIPLO</em>. É o nível em
@@ -1047,9 +1080,11 @@ function pintarEmendas() {
       esc(x.n) + (x.el ? ' <span style="color:var(--accent)">●</span>' : ""),
       x.ne, reais(x.t), x.nm, esc(x.fn||"—")]));
 
-  pintarCruzamento();
+  const cx = document.getElementById("c-cruz");
+  if (cx) cx.classList.toggle("oculto", emEsfera === "estadual");
+  if (emEsfera !== "estadual") pintarCruzamento();
 
-  if (D.emendasBR) {
+  if (D.emendasBR && emEsfera !== "estadual") {
     const m = new Map();
     for (const r of D.emendasBR.uf) {
       if (emAno !== "todos" && String(r.ano) !== emAno) continue;
@@ -1066,6 +1101,12 @@ function pintarEmendas() {
   }
 }
 
+document.getElementById("emEsfera").addEventListener("click", e => {
+  const b = e.target.closest("button[data-s]");
+  if (!b) return;
+  emEsfera = b.dataset.s; emAutor = -1; emAno = "todos";
+  pintarEmendas(); montarSumario("emendas"); observarSecoes("emendas");
+});
 document.getElementById("emTipo").addEventListener("click", e => {
   const b = e.target.closest("button[data-t]");
   if (!b) return;
@@ -1158,7 +1199,9 @@ function montarSumario(vista) {
   const ol = document.getElementById("sum-" + vista);
   const cx = document.querySelector("#v-" + vista + " .conteudo");
   if (!ol || !cx) return;
-  const titulos = [...cx.querySelectorAll(".cartaz > h2")];
+  const titulos = [...cx.querySelectorAll(".cartaz > h2")]
+    .filter(h => !h.parentElement.classList.contains("oculto")
+                 && h.parentElement.offsetParent !== null);
   ol.innerHTML = titulos.map((h, i) => {
     h.id = h.id || `s-${vista}-${i}`;
     return `<li><button data-alvo="${h.id}">${esc(h.textContent)}</button></li>`;
@@ -1215,7 +1258,8 @@ function observarSecoes(vista) {
   if (!observador) return;
   observador.disconnect();
   const cx = document.querySelector("#v-" + vista + " .conteudo");
-  if (cx) for (const h of cx.querySelectorAll(".cartaz > h2")) observador.observe(h);
+  if (cx) for (const h of cx.querySelectorAll(".cartaz > h2"))
+    if (!h.parentElement.classList.contains("oculto")) observador.observe(h);
 }
 
 /* ---------- navegação ---------- */

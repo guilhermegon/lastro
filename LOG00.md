@@ -692,3 +692,25 @@ do TSE não.
 Cinco nomes seguem sem par, R$ 1,5 mi, e quatro nem são município. "RIO DOCE"
 pode ser Aparecida do Rio Doce, mas *pode ser* não entra em override: par errado
 põe dinheiro no município errado, que é pior que dinheiro sem município.
+
+## 2026-08-23 — esfera estadual no Emendômetro
+
+Fusão, não aba nova. Aplicado sob a pré-autorização, com recomendação
+inequívoca: uma aba que existe só em Goiás ficaria vazia em 26 estados, e a
+pergunta que interessa é comparativa — o deputado estadual manda dinheiro para o
+mesmo tipo de lugar que o federal?
+
+O seletor de esfera só aparece onde há base estadual. Trocar para um estado sem
+base volta sozinho para federal, em vez de mostrar tela vazia. E na esfera
+estadual somem três coisas que são do federal por natureza: o filtro de Pix
+(Transferência Especial é instrumento da União), o cruzamento voto × emenda e a
+tabela nacional por UF.
+
+**A comparação em Goiás é o resultado.** O federal rastreia R$ 316,2 mi ao
+município (6,5%) e alcança 170 de 246; o estadual rastreia R$ 2,61 bi (65%) e
+alcança os 246. A maior carteira federal é de R$ 21,8 mi em 19 municípios; a
+estadual, R$ 46,1 mi em 73. Não é o estado sendo mais transparente por virtude —
+é que a emenda federal é maior por unidade e vai com frequência para `MÚLTIPLO`.
+
+Zero falhas de contraste nos dois temas. Artefato em 15,8 MB de 16 — o teto
+agora é a restrição que decide o próximo passo.

@@ -207,8 +207,24 @@ nacional. O piloto responde quanto custa um estado antes de prometer 26.
 - [x] Normalizado com `cod_ibge` (`34_emendas_go_estadual.py`): 22.310 linhas,
       2019–2025, R$ 4,0 bi, 246 municípios em 2022
 - [x] Casamento com deputado estadual eleito: 61% dos autores, 76% do dinheiro
-- [ ] Aba do Emendômetro estadual, ou fusão com a federal
+- [x] **Fusão, não aba nova** (`35_emendas_estadual_web.py`): seletor de esfera
+      dentro do Emendômetro, que só aparece onde há base estadual. Aplicado sob
+      a pré-autorização — uma aba vazia em 26 estados é pior que a ausência do
+      botão, e a pergunta que interessa é comparativa
 - [ ] Decidir, com o custo medido, se vale ir para os outros 25
+
+### O que a comparação já mostra em Goiás
+
+| | federal | estadual |
+|---|---|---|
+| rastreável ao município | R$ 316,2 mi (6,5%) | **R$ 2,61 bi (65%)** |
+| municípios alcançados | 170 de 246 | **246 de 246** |
+| maior carteira | Major Vitor Hugo, R$ 21,8 mi em 19 municípios | Amilton Filho, R$ 46,1 mi em **73** |
+
+A emenda estadual é mais dinheiro rastreável, mais espalhada e nomeia município
+quase sempre. Não por virtude do estado: a emenda federal é maior por unidade e
+frequentemente vai para `MÚLTIPLO` ou para o estado inteiro. Área principal nos
+dois: saúde.
 
 ### O custo real de um estado, medido
 
