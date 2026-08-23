@@ -222,7 +222,26 @@ nacional. O piloto responde quanto custa um estado antes de prometer 26.
 - [x] **Espírito Santo: confirmado**, e melhor que Goiás
 - [x] Ingestão do Espírito Santo (`38_emendas_es_estadual.py`): 2021–2026,
       4.620 linhas com pagamento, 51 autores, R$ 291,9 mi, 77 de 78 municípios
-- [ ] Bahia: só PNG e ZIP na SEFAZ; abrir o ZIP antes de prometer
+- [x] **Bahia: descartada para o mapa.** O ZIP da SEFAZ tem cinco tabelas do
+      FIPLAN. `DESPESAS` traz `Nome do Deputado` e `Valor Pago`, mas **nenhuma
+      das cinco tem município** — nem `PAGAMENTOS`, que só tem razão social do
+      credor e objeto. Renderia ranking por deputado sem geografia, que não é o
+      produto
+
+### Placar final do estadual, com todos os candidatos abertos
+
+| estado | autor | município | situação |
+|---|---|---|---|
+| Goiás | sim | sim, 65,8% do valor | **no ar** |
+| Espírito Santo | sim | sim, 82,5% do valor | **no ar** |
+| Pernambuco | não | não | descartado — só empenho |
+| Bahia | sim | **não** | descartado — sem geografia |
+| outros 23 | — | — | sem dado acessível |
+
+**Dois de 27.** E os dois descartes só apareceram abrindo o arquivo: Pernambuco
+publica um dicionário que descreve campos que nenhum arquivo tem, e a Bahia tem
+o deputado mas não o lugar. Nenhuma das duas coisas se vê pela descrição do
+conjunto.
 
 ### Espírito Santo, medido
 

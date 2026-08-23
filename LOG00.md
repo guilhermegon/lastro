@@ -784,3 +784,22 @@ preenchi zero à esquerda e o pareamento deu exatamente zero de 78 municípios.
 Os dois erraram por ordens de grandeza, e é por isso que foram vistos. Um erro de
 10% teria passado nos dois casos — o que reforça por que este projeto trata
 pareamento como gate e não como detalhe.
+
+## 2026-08-23 — Bahia descartada, e o placar fecha
+
+O ZIP da SEFAZ tem cinco tabelas do FIPLAN. A `DESPESAS` traz `Nome do Deputado`
+e `Valor Pago`; a `PAGAMENTOS` traz razão social do credor e objeto. **Nenhuma
+das cinco tem município.** Autor sim, geografia não — e sem geografia não há
+mapa, que é o produto.
+
+Abri a tabela errada na primeira tentativa (a de centralização, com quatro
+colunas de código) e quase concluí que o ZIP era inútil. Cinco tabelas exigem
+abrir as cinco.
+
+**Placar final: dois de 27.** Goiás e Espírito Santo entregues; Pernambuco e
+Bahia descartados depois de abertos; 23 sem dado acessível.
+
+E os dois descartes só apareceram abrindo o arquivo. Pernambuco publica
+dicionário descrevendo campos que nenhum arquivo tem; a Bahia tem o deputado mas
+não o lugar. Nenhuma das duas coisas se vê pela descrição do conjunto — que foi
+exatamente o erro que cometi ao escrever a linha do roadmap sobre PE.
