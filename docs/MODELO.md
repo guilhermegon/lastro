@@ -233,3 +233,70 @@ Duas armadilhas que a replicação amplia, tratadas no código e não só no tex
   Paulo 57; Macapá, Boa Vista e Vitória têm 2. **Palmas tem 1 nos sete pleitos** —
   lá não há geografia interna nenhuma, e a tela diz isso em vez de desenhar uma
   barra de 100%.
+
+## O pareamento TSE ↔ IBGE, e a armadilha de 23 milhões de votos
+
+Descoberto em 2026-08-22 por `26_audita_pareamento.py`, que existe justamente
+porque a falha é **silenciosa**: em `19_` e `23_`, a linha cujo município não
+pareia com a malha do IBGE é descartada, e o mapa fica com aparência de certo —
+o município some do total sem que nada avise.
+
+**O que eram os 153 órfãos.** A hipótese natural — município do IBGE que ficou
+sem par — está errada: eram 153 nomes órfãos do lado do TSE contra apenas 5
+municípios do IBGE sem voto nenhum. Quase todo alvo já recebia voto. O que
+acontece é que **o TSE mudou a grafia ao longo da série**: "MOJI GUAÇU" nos
+pleitos antigos, "MOGI GUAÇU" nos recentes. A grafia nova pareia, a velha não, e
+o município perde só os anos antigos.
+
+Por isso o estrago não estava no mapa de um ano — estava na **linha do tempo**,
+que é muito mais difícil de enxergar:
+
+| ano | perda nacional | pior UF |
+|---|---|---|
+| 1998 | 1,98% | PE 8,9% |
+| 2002 | 1,66% | PE 10,0% |
+| 2006 | 1,12% | RO 9,5% |
+| 2010 | 0,44% | RO 9,4% |
+| 2014 | 0,13% | RO 3,1% |
+| 2018 | 0,14% | RO 2,9% |
+| 2022 | 0,12% | RO 2,9% |
+
+Uma série de concentração lida assim mostraria Pernambuco "crescendo" de 1998 a
+2022 por puro artefato de pareamento.
+
+**Por que Goiás nunca pegou.** O teste-ouro (`06_verifica.py`) valida GO, onde o
+pareamento é 246/246 por construção — as 9 correções manuais de 2026-08-21 já
+cobriam tudo. O gate era real e continuou passando enquanto 26 unidades sangravam.
+
+### Como os pares foram estabelecidos
+
+Casar por semelhança de texto é perigoso: um par errado **não perde voto**, põe
+voto no município errado, o que é pior. Por isso cada proposta passou por um
+crivo baseado no dado, não no texto:
+
+| Método | O que resolve | n |
+|---|---|---|
+| `colapso` | idênticos sem espaços — "Sant'Ana" vs "SANTANA" | 5 |
+| `apostrofo` | "D'Oeste" vs "DO OESTE" | 10 |
+| `prefixo` | nome curto virando oficial — "CAMPOS" → Campos dos Goytacazes | 19 |
+| `parecido` | grafia divergente — "PIRACUNUNGA" → Pirassununga | 88 |
+| `complementar` | o nome novo aparece exatamente nos anos em que o velho some | 11 |
+| `disjunto` | candidatos que nunca dividem pleito, o mais próximo no texto | 11 |
+| `renomeacao` | hipótese de renomeação confirmada por cobertura exata da série | 6 |
+
+**O crivo que decide:** duas grafias do mesmo lugar nunca aparecem no mesmo
+arquivo — um município não vota duas vezes no mesmo pleito. Se aparecem juntas,
+são lugares diferentes. Isso reprovou três propostas plausíveis (AMAPARI →
+Amapá, SÃO MIGUEL DE TOUROS → São Miguel, ESPÍRITO SANTO DO OESTE → Espírito
+Santo) e depois **identificou o alvo certo** de uma delas: São Miguel do Gostoso.
+
+O mesmo teste derrubou dois palpites de renomeação que pareciam óbvios
+(ANSELMO DA FONSECA → Mulungu do Morro, ESPÍRITO SANTO DO OESTE → Jandaíra).
+
+**Resultado:** 23.063.701 → **47.535 votos** sem par (99,79% recuperado). Restam
+três nomes, todos da Bahia e do Rio Grande do Norte, todos só em 1998, listados
+por `26_audita_pareamento.py` a cada execução.
+
+**Mudança de esquema:** `municipios_tse_ibge.csv` ganhou a coluna `uf`. A chave
+passou a ser `(uf, nome)` porque "LUISIANIA" existe no Paraná e em São Paulo
+apontando para municípios diferentes, e uma chave só de nome não cabe os dois.

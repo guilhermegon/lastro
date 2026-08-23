@@ -1,8 +1,8 @@
 import { CARGOS, NOME_CARGO, type Cargo } from "../tipos";
 
-export type Vista = Cargo | "vereador" | "padroes" | "cruzamentos";
+export type Vista = "nacional" | Cargo | "vereador" | "padroes" | "cruzamentos";
 
-/** Ordem decrescente de escopo — presidente até vereador — e depois as duas
+/** Ordem decrescente de escopo — o país, depois presidente até vereador — e as duas
  *  abas de análise, que não são cargo. A barra rola na horizontal no celular:
  *  sem isso, as últimas abas ficam fora da tela e sem como chegar nelas. */
 export function Abas({ atual, aoTrocar, cargosDisponiveis, temVereador, cidade }: {
@@ -13,6 +13,7 @@ export function Abas({ atual, aoTrocar, cargosDisponiveis, temVereador, cidade }
   cidade: string | undefined;
 }) {
   const itens: { id: Vista; rotulo: string; ativo: boolean }[] = [
+    { id: "nacional" as Vista, rotulo: "Nacional", ativo: true },
     ...CARGOS.map((c) => ({
       id: c as Vista, rotulo: NOME_CARGO[c], ativo: cargosDisponiveis.includes(c),
     })),

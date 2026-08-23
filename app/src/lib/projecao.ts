@@ -57,14 +57,24 @@ export function projetar(
   return { caminhos, largura: larguraAlvo, altura };
 }
 
-/** Mesma projeção para a malha do Brasil, que vem em GeoJSON e não em array. */
+/**
+ * A malha do Brasil vem em GeoJSON e o resto do projeto trabalha com anéis de
+ * pontos. Só o anel externo de cada polígono entra: buracos não existem numa
+ * malha de UFs, e num MultiPolygon cada ilha vira o seu próprio anel.
+ */
+export function feicoesParaGeo(
+  feicoes: { coordinates: number[][][] | number[][][][]; type: string }[],
+): GeometriaMunicipio[] {
+  return feicoes.map((g) => {
+    const polys = (g.type === "Polygon" ? [g.coordinates] : g.coordinates) as number[][][][];
+    return polys.map((p) => p[0] as [number, number][]) as GeometriaMunicipio;
+  });
+}
+
+/** Mesma projeção para a malha do Brasil. */
 export function projetarFeicoes(
   feicoes: { coordinates: number[][][] | number[][][][]; type: string }[],
   larguraAlvo = 520,
 ): Projecao {
-  const comoLista = feicoes.map((g) => {
-    const polys = (g.type === "Polygon" ? [g.coordinates] : g.coordinates) as number[][][][];
-    return polys.map((p) => p[0] as [number, number][]) as GeometriaMunicipio;
-  });
-  return projetar(comoLista, larguraAlvo);
+  return projetar(feicoesParaGeo(feicoes), larguraAlvo);
 }

@@ -30,3 +30,7 @@ docs/_*.json
 Thumbs.db
 *.pyc
 __pycache__/
+
+# arquivos de trabalho da investigação de pareamento — regeneráveis por 27_
+data/overrides/_*.csv
+data/overrides/_*.json

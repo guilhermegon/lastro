@@ -201,7 +201,10 @@ def main():
     escore = dict(zip(esp["partido_norm"], esp["escore"]))
     banda = dict(zip(esp["partido_norm"], esp["banda"]))
     ov = pd.read_csv(cfg.OVERRIDES / "municipios_tse_ibge.csv", dtype=str)
-    corr = dict(zip(ov["nome_norm_tse"], ov["cod_ibge"]))
+    # chave (uf, nome): "LUISIANIA" existe no PR e em SP apontando para
+    # municipios diferentes, e uma chave so de nome nao cabe os dois
+    corr = {(u, n): c for u, n, c in
+            zip(ov["uf"], ov["nome_norm_tse"], ov["cod_ibge"])}
 
     saida = {uf: {c: {} for c in CARGOS} for uf in indice}
     for cargo in CARGOS:
@@ -219,7 +222,8 @@ def main():
                 if falta.any():
                     # O override so vale para codigo DESTA UF: "VALPARAISO"
                     # existe em GO e em SP, e a correcao de GO ja vazou para SP.
-                    sug = g.loc[falta, "nome_norm"].map(corr)
+                    sug = g.loc[falta, "nome_norm"].map(
+                        lambda n: corr.get((uf, n)))
                     cod = cod.fillna(sug.where(sug.isin(set(indice[uf]))))
                 g = g.assign(cod_ibge=cod)
                 g = g[g["cod_ibge"].notna()]

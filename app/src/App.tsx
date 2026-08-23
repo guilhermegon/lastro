@@ -18,6 +18,7 @@ import { VistaCargo } from "./vistas/VistaCargo";
 import { VistaPadroes } from "./vistas/VistaPadroes";
 import { VistaCruzamentos } from "./vistas/VistaCruzamentos";
 import { VistaVereador } from "./vistas/VistaVereador";
+import { VistaNacional } from "./vistas/VistaNacional";
 
 /**
  * O estado da tela mora na URL: `?uf=GO&ano=2022&v=estadual&c=0`.
@@ -30,17 +31,17 @@ import { VistaVereador } from "./vistas/VistaVereador";
 interface Selecao { uf: Sigla; ano: number; vista: Vista; cand: number }
 
 function ehVista(v: string): v is Vista {
-  return v === "padroes" || v === "cruzamentos" || v === "vereador"
-    || (CARGOS as string[]).includes(v);
+  return v === "nacional" || v === "padroes" || v === "cruzamentos"
+    || v === "vereador" || (CARGOS as string[]).includes(v);
 }
 
 function lerURL(): Selecao {
   const p = new URLSearchParams(location.search);
-  const v = p.get("v") ?? "estadual";
+  const v = p.get("v") ?? "nacional";
   return {
     uf: (p.get("uf") ?? "GO").toUpperCase(),
     ano: Number(p.get("ano") ?? 2022),
-    vista: ehVista(v) ? v : "estadual",
+    vista: ehVista(v) ? v : "nacional",
     cand: Number(p.get("c") ?? 0),
   };
 }
@@ -89,6 +90,10 @@ export default function App() {
     let vivo = true;
     const v = sel.vista;
     setCarregando(true);
+    if (v === "nacional") {           // já está tudo no índice
+      setCarregando(false);
+      return () => { vivo = false; };
+    }
     const pedido =
       v === "padroes" ? carregarPadroes(sel.uf).then((d) => vivo && setPadroes(d))
       : v === "cruzamentos" ? carregarCruzamentos(sel.uf).then((d) => vivo && setCruz(d))
@@ -115,8 +120,9 @@ export default function App() {
   useEffect(() => {
     if (!indice) return;
     const r = indice.ufs.find((u) => u.s === sel.uf);
-    document.title = r ? `Cadê o Voto ${noEstado(r.s, r.n)}?` : "Cadê o Voto?";
-  }, [indice, sel.uf]);
+    document.title = r && sel.vista !== "nacional"
+      ? `Cadê o Voto ${noEstado(r.s, r.n)}?` : "Cadê o Voto?";
+  }, [indice, sel.uf, sel.vista]);
 
   const trocarUF = useCallback((uf: Sigla) => {
     setSel((s) => ({ ...s, uf, cand: 0 }));
@@ -145,8 +151,9 @@ export default function App() {
   const nMun = resumo?.nm ?? base?.municipios.length ?? 0;
   const agregado = indice.agregado.find((a) => a.uf === sel.uf && a.ano === sel.ano);
   const anosComDado = indice.anos;
-  const titulo = resumo ? `Cadê o Voto ${noEstado(resumo.s, resumo.n)}?`
-                        : "Cadê o Voto?";
+  const nacional = sel.vista === "nacional";
+  const titulo = resumo && !nacional
+    ? `Cadê o Voto ${noEstado(resumo.s, resumo.n)}?` : "Cadê o Voto?";
 
   return (
     <>
@@ -157,9 +164,12 @@ export default function App() {
               <Logo />
               <h1>{titulo}</h1>
               <p>
-                Onde cada candidato tirou voto
-                {nMun > 2 && <>, município a município</>}, em todos os cargos,
-                de 1998 a 2022.
+                {nacional
+                  ? "Distribuição espacial do voto para deputado estadual em cada"
+                    + " unidade da federação, de 1998 a 2022, município a município."
+                  : <>Onde cada candidato tirou voto
+                      {nMun > 2 && <>, município a município</>}, em todos os
+                      cargos, de 1998 a 2022.</>}
               </p>
             </div>
             <div className="seg" role="group" aria-label="Pleito">
@@ -187,6 +197,13 @@ export default function App() {
           <p className="indice exp" style={{ padding: "14px 0 0" }}>
             Carregando {sel.uf}…
           </p>
+        )}
+
+        {nacional && (
+          <VistaNacional indice={indice} ano={sel.ano}
+                         aoEscolher={(uf) => setSel((s) => ({
+                           ...s, uf, vista: "estadual", cand: 0 }))}
+                         aoInspecionar={setDica} />
         )}
 
         {sel.vista === "padroes" && padroes && (

@@ -12,6 +12,9 @@ interface Props {
   /** conteúdo do balão para o município i */
   descrever: (i: number, valor: number) => ReactNode;
   aoInspecionar: (d: EstadoDica | null) => void;
+  /** quando existe, cada feição vira alvo de clique — é assim que o mapa
+   *  nacional serve de porta de entrada para o estado */
+  aoClicar?: (i: number) => void;
 }
 
 /**
@@ -22,7 +25,8 @@ interface Props {
  * `touchStart` o mapa vira desenho mudo no celular — dá para ver a mancha e não
  * dá para saber o que ela é.
  */
-export function Mapa({ geo, valores, cortes, rotulo, descrever, aoInspecionar }: Props) {
+export function Mapa({ geo, valores, cortes, rotulo, descrever, aoInspecionar,
+                       aoClicar }: Props) {
   const { caminhos, largura, altura } = useMemo(() => projetar(geo), [geo]);
 
   return (
@@ -44,6 +48,8 @@ export function Mapa({ geo, valores, cortes, rotulo, descrever, aoInspecionar }:
               const t = e.touches[0];
               if (t) mostrar(t.clientX, t.clientY);
             }}
+            onClick={aoClicar ? () => aoClicar(i) : undefined}
+            style={aoClicar ? { cursor: "pointer" } : undefined}
           />
         );
       })}

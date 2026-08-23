@@ -117,7 +117,10 @@ def main():
     print(f"{len(ufs)} UFs, adjacência da malha completa", flush=True)
 
     ov = pd.read_csv(cfg.OVERRIDES / "municipios_tse_ibge.csv", dtype=str)
-    corr = dict(zip(ov["nome_norm_tse"], ov["cod_ibge"]))
+    # chave (uf, nome): "LUISIANIA" existe no PR e em SP apontando para
+    # municipios diferentes, e uma chave so de nome nao cabe os dois
+    corr = {(u, n): c for u, n, c in
+            zip(ov["uf"], ov["nome_norm_tse"], ov["cod_ibge"])}
     cods = {uf: set(indice[uf]) for uf in ufs}
 
     # resultado[uf][cargo][ano] = bloco
@@ -145,7 +148,8 @@ def main():
                 cod = g["nome_norm"].map(mapa[uf])
                 falta = cod.isna()
                 if falta.any():
-                    sug = g.loc[falta, "nome_norm"].map(corr)
+                    sug = g.loc[falta, "nome_norm"].map(
+                        lambda n: corr.get((uf, n)))
                     cod = cod.fillna(sug.where(sug.isin(cods[uf])))
                 g = g.assign(cod_ibge=cod)
                 g = g[g["cod_ibge"].notna()]
