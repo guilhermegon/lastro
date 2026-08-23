@@ -70,18 +70,32 @@ não são renumerados (`preserve_historical_numbers: true`).
 |---|---|
 | `type` | `TRACKING_NO_APPROVAL` |
 | `criticality` | baixa |
-| `work_continues` | não se aplica — não há trabalho em curso |
-| `status` | **ABERTO** — aguardando pedido do usuário |
+| `work_continues` | sim |
+| `status` | **FECHADO** — entregue, 2026-08-23 |
 
-**summary.** O pipeline é parametrizado por `UF` e `UF_IBGE` em `scripts/00_config.py`
-e os zips do TSE já são nacionais, então rodar para outro estado não exige reescrever
-nada. Precisariam de revisão apenas: (a) as correções de nome de município em
-`data/overrides/municipios_tse_ibge.csv`, que são específicas de Goiás; (b) o número de
-cadeiras (`N_CADEIRAS`), que varia por UF; (c) o teste-ouro, que só existe para Goiás
-porque o painel de referência é goiano — em outra UF não haveria contra o que conferir.
+**Fechado por entrega, não por decisão.** RT não alcançou este ticket: ele nunca teve
+`leader_recommendation`, e a política não força decisão onde não há recomendação. O que
+o fechou foi o fato de o pedido já estar cumprido — as 26 unidades estão no ar, nos
+cinco cargos, com Padrões, Cruzamentos, rivais territoriais e vereador nas capitais.
 
-**decision_needed.** Nenhuma agora. Ticket de rastreio: só executar se o usuário pedir
-uma UF específica.
+**As três ressalvas do summary original envelheceram, e vale registrar como:**
+
+- *"as correções de nome de município são específicas de Goiás"* — eram nove, de Goiás.
+  Hoje são **159**, cobrindo 27 unidades, e a chave virou `(uf, nome)`. A investigação
+  que as produziu está em [`docs/MODELO.md`](docs/MODELO.md); ela recuperou 23 milhões
+  de votos que sumiam em silêncio.
+- *"o número de cadeiras varia por UF"* — resolvido: `N_CADEIRAS_CARGO` sai do próprio
+  dado, contando os eleitos de cada pleito.
+- *"o teste-ouro só existe para Goiás, em outra UF não haveria contra o que conferir"* —
+  **esta era a ressalva séria, e estava certa.** A resposta foi criar um segundo gate
+  que não depende de painel externo: `15_valida_nacional.py` exige que o recorte de
+  Goiás dentro dos arquivos do Brasil seja idêntico ao pipeline de Goiás, em 34
+  combinações cargo/ano. Não valida as outras 26 diretamente — valida a máquina que as
+  produz. E `26_audita_pareamento.py` cobre o flanco que nenhum dos dois via.
+
+**summary (no momento da abertura).** O pipeline é parametrizado por `UF` e `UF_IBGE` em
+`scripts/00_config.py` e os zips do TSE já são nacionais, então rodar para outro estado
+não exigiria reescrever nada.
 
 ---
 
