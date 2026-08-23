@@ -18,6 +18,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 cfg = import_module("00_config")
+geo = import_module("04_geo")
 
 ORIGEM = cfg.PROCESSED / "web"
 DESTINO = cfg.ROOT / "app" / "public" / "dados"
@@ -67,6 +68,20 @@ def main():
         if (ORIGEM / uf / "vereador.json").exists():
             v = json.loads((ORIGEM / uf / "vereador.json").read_text(encoding="utf-8"))
             r["capital"] = v["cidade"]
+            # o indice da capital na ordenacao de base.json. Guardado aqui, e
+            # nao procurado por nome no navegador: a grafia varia entre bases
+            # e um mapa marcando a cidade errada e' pior que um sem marca.
+            alvo = geo.normalizar(v["cidade"])
+            for i, m in enumerate(base["municipios"]):
+                if geo.normalizar(m["n"]) == alvo:
+                    r["capIdx"] = i
+                    break
+            else:
+                print(f"  AVISO {uf}: capital {v['cidade']} não achada na malha")
+        elif uf == "DF":
+            # o DF nao tem vereador, mas tem capital — e ela e' o unico municipio
+            r["capital"] = base["municipios"][0]["n"]
+            r["capIdx"] = 0
         resumo.append(r)
 
     # o agregado nacional de emendas viaja junto: 35 KB, e e' o unico arquivo

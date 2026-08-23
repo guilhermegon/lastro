@@ -194,9 +194,15 @@ localidade de aplicação.**
 Por UF a cobertura é 97,1% do dinheiro, inclusive nas linhas `MÚLTIPLO`. É nesse
 nível que o Emendômetro é completo, e é por isso que ele começa por UF.
 
-### Emendas de deputado estadual — aguardando decisão
+## Marco 9 — emendas de deputado estadual, piloto em Goiás
 
-Não é uma extensão do Emendômetro, é outra fonte: orçamento estadual, 26 portais,
-sem agregador nacional. Em Goiás a execução completa só existe em painel Power BI
-embutido, e os CSVs de dados abertos cobrem fragmentos. Registrado como
-`RAS 00 TKT 0006` com recomendação de piloto em Goiás antes de prometer o resto.
+Aprovado pelo usuário em 2026-08-23 (`RAS 00 TKT 0006`). Não é extensão do
+Emendômetro: é outra fonte — orçamento estadual, 26 portais, sem agregador
+nacional. O piloto responde quanto custa um estado antes de prometer 26.
+
+- [x] Capital sinalizada nos mapas municipais (âncora de leitura)
+- [ ] Alcançar o dado do painel Power BI de Goiás
+      (`reportId=c6b3961c-6932-4e0a-b77e-99cd14acee45`)
+- [ ] Normalizar com `cod_ibge`, para cair no mesmo mapa do federal
+- [ ] Casar autor com deputado **estadual** eleito (já temos os eleitos de GO)
+- [ ] Decidir, com custo medido em mãos, se vale ir para os outros 25

@@ -287,7 +287,18 @@ function projetar(feicoes, L) {
       if(p[1]<y0)y0=p[1]; if(p[1]>y1)y1=p[1]; } }
   if (!isFinite(x0)) return {L, H:100, d: feicoes.map(()=>"")};
   const k = Math.cos((y0+y1)/2*Math.PI/180), e = L/((x1-x0)*k||1);
+  const px = p => [(p[0]-x0)*k*e, (y1-p[1])*e];
+  /* Centro do maior anel, não de todos: um município com ilhas teria o centro
+     puxado para o mar pela média de tudo. */
+  const centro = f => {
+    if (!f || !f.length) return null;
+    const a = f.reduce((m,x) => x.length > m.length ? x : m, f[0]);
+    let sx = 0, sy = 0;
+    for (const p of a) { const q = px(p); sx += q[0]; sy += q[1]; }
+    return [sx/a.length, sy/a.length];
+  };
   return {L, H: Math.max(120, Math.round((y1-y0)*e)),
+    c: feicoes.map(centro),
     d: feicoes.map(f => !f ? "" : f.map(a => "M"+a.map(p =>
       ((p[0]-x0)*k*e).toFixed(1)+","+((y1-p[1])*e).toFixed(1)).join("L")+"Z").join(" "))};
 }
@@ -319,6 +330,30 @@ function tabela(el, cab, linhas, rodape) {
       i===0 ? `<td>${v}</td>` : `<td class="n">${v}</td>`).join("") + "</tr>").join("") +
     "</tbody>" + (rodape ? "<tfoot><tr>" + rodape.map((v,i) =>
       i===0 ? `<td>${v}</td>` : `<td class="n">${v}</td>`).join("") + "</tr></tfoot>" : "");
+}
+
+/* ---------- marca da capital ----------
+   Serve de âncora: num mapa de 246 manchas coloridas sem nenhum rótulo, o
+   leitor não sabe onde está olhando. A capital é o ponto de referência que
+   quase todo mundo reconhece.
+
+   Desenhada com um halo da cor da superfície por baixo: o marcador cai sobre
+   qualquer uma das cinco cores da rampa, e sem o halo ele some no verde-escuro
+   e some de novo no vermelho. */
+function marcaCapital(P) {
+  const r = D.ufs.find(u => u.s === uf);
+  if (!r || r.capIdx == null) return "";
+  const c = P.c && P.c[r.capIdx];
+  if (!c) return "";
+  const [x, y] = c;
+  const nome = esc(r.capital || "");
+  return `<g class="capital" aria-hidden="true">` +
+    `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5.2" fill="var(--surface)" opacity=".85"/>` +
+    `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="var(--ink)"/>` +
+    `<text x="${(x+7).toFixed(1)}" y="${(y+3.5).toFixed(1)}" font-size="11"` +
+    ` font-family="IBM Plex Sans, sans-serif" font-weight="600"` +
+    ` stroke="var(--surface)" stroke-width="3" paint-order="stroke"` +
+    ` fill="var(--ink)">${nome}</text></g>`;
 }
 
 /* ---------- balão ---------- */
@@ -471,7 +506,7 @@ function pintarEstado() {
   const mapa = (id, vals, cortes, rot) =>
     `<svg viewBox="0 0 ${P.L} ${P.H}" role="img" aria-label="${rot}" data-m="${id}">` +
     P.d.map((d,i) => d ? `<path d="${d}" class="mun" data-i="${i}" fill="${corDe(vals[i],cortes)}"></path>` : "").join("") +
-    "</svg>";
+    marcaCapital(P) + "</svg>";
 
   const top = f.mi.map((idx,k) => ({
       nome: est.m[idx] || "—", v: f.mv[k],
@@ -950,6 +985,7 @@ function pintarEmendas() {
     <div id="m-emendas">
       <svg viewBox="0 0 ${P.L} ${P.H}" role="img" aria-label="Emendas por município">
         ${P.d.map((d,i)=> d ? `<path d="${d}" class="mun" data-i="${i}" fill="${corDe(vals[i],cortes)}"></path>` : "").join("")}
+        ${marcaCapital(P)}
       </svg>
     </div>
     <div class="legenda" id="leg-emendas"></div>

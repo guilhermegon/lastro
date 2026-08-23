@@ -200,7 +200,11 @@ revisão posterior.
 | `type` | `BLOCKING_DECISION` |
 | `criticality` | média — define escopo, não corrige defeito |
 | `work_continues` | sim — o Emendômetro federal está no ar |
-| `status` | **ABERTO** — decisão do usuário |
+| `status` | **DECIDIDO** — usuário aprovou o piloto de Goiás, 2026-08-23 |
+
+**Resposta do usuário: fazer o piloto de Goiás.** É a recomendação do líder,
+aplicada. O piloto responde "quanto custa cada estado?" antes de qualquer
+promessa sobre os outros 25.
 
 **summary.** Emenda de deputado estadual vai para o orçamento **do estado**, não
 da União. Não está no Portal da Transparência federal, que é a fonte de todo o
