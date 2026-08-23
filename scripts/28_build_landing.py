@@ -146,10 +146,10 @@ PAGINA = r"""<title>Cadê o Voto?</title>
           <h2>Concentração do voto por estado</h2>
           <p class="cap">Cada estado colorido pela <strong>fração dos seus
             municípios</strong> que a votação mediana dos eleitos efetivamente
-            ocupa. <span style="color:var(--s1)">&#9632;</span> vermelho = voto
-            concentrado em poucos municípios;
-            <span style="color:var(--s5)">&#9632;</span> verde = espalhado pelo
-            estado. <strong>Clique num estado para abrir a tela dele.</strong></p>
+            ocupa. <span class="swatch" style="display:inline-block;vertical-align:-2px;background:var(--s1)"></span>
+            vermelho = voto concentrado em poucos municípios;
+            <span class="swatch" style="display:inline-block;vertical-align:-2px;background:var(--s5)"></span>
+            verde = espalhado pelo estado. <strong>Clique num estado para abrir a tela dele.</strong></p>
           <div id="mapaBR"></div>
           <div class="legenda" id="legBR"></div>
           <div class="rolagem" style="margin-top:16px"><table id="tconc"></table></div>
@@ -519,7 +519,7 @@ function linha(series, eixoX, casas, altura) {
   let out = `<svg viewBox="0 0 ${L} ${altura}" role="img" aria-label="série temporal">`;
   for (const v of [0, hi/2, hi])
     out += `<line x1="${ml}" x2="${L-mr}" y1="${py(v)}" y2="${py(v)}" stroke="var(--line)" stroke-width="1"/>`
-        +  `<text x="${ml-6}" y="${py(v)+3}" text-anchor="end" font-size="10" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace">${v.toFixed(casas)}</text>`;
+        +  `<text x="${ml-6}" y="${py(v)+3}" text-anchor="end" font-size="11" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace">${v.toFixed(casas)}</text>`;
   for (const s of series) {
     const pts = s.pontos.map((v,i)=> v==null?null:[px(i),py(v)]).filter(Boolean);
     if (!pts.length) continue;

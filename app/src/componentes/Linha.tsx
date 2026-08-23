@@ -23,7 +23,7 @@ export function Linha({ eixoX, series, casas = 1, altura = 190 }: {
         <g key={v}>
           <line x1={ml} x2={L - mr} y1={py(v)} y2={py(v)}
                 stroke={token("--line")} strokeWidth={1} />
-          <text x={ml - 6} y={py(v) + 3} textAnchor="end" fontSize={10}
+          <text x={ml - 6} y={py(v) + 3} textAnchor="end" fontSize={11}
                 fill={token("--ink-3")} fontFamily="IBM Plex Mono, monospace">
             {v.toFixed(casas)}
           </text>

@@ -68,10 +68,12 @@ export function VistaNacional({ indice, ano, aoEscolher, aoInspecionar }: {
         <p className="cap">
           Cada estado colorido pela <strong>fração dos seus municípios</strong>{" "}
           que a votação mediana dos eleitos efetivamente ocupa, em {ano}.{" "}
-          <span style={{ color: "var(--s1)" }}>■</span> vermelho = voto
+          <span className="swatch" style={{ display: "inline-block",
+                verticalAlign: -2, background: "var(--s1)" }} /> vermelho = voto
           concentrado em poucos municípios;{" "}
-          <span style={{ color: "var(--s5)" }}>■</span> verde = espalhado pelo
-          estado. Clique num estado para abrir a tela dele.
+          <span className="swatch" style={{ display: "inline-block",
+                verticalAlign: -2, background: "var(--s5)" }} /> verde =
+          espalhado pelo estado. Clique num estado para abrir a tela dele.
         </p>
 
         <div className="mapas" style={{ gridTemplateColumns: "1fr" }}>

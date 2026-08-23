@@ -552,3 +552,33 @@ escuro foi para `#2E3A3D`. Vale para o app também, que divide o mesmo
 Conferido que os números do artefato batem com o pipeline: o arrasto do PT em
 Goiás 2022 sai 0,617 em 246 municípios, que é o valor validado — o mesmo que
 saía errado em 0,344 quando era calculado só sobre os eleitos.
+
+## 2026-08-23 — auditoria de design com o impeccable
+
+O usuário apontou `pbakaus/impeccable` e perguntou se dava para usar. Dá: ele
+traz 59 regras determinísticas que rodam offline, sem LLM e sem chave.
+
+Primeira rodada no artefato: 16 achados. Última: 12, e os 12 são falsos
+positivos verificados um a um. O detalhe está em `docs/MODELO.md`.
+
+O ganho real foi de contraste. `--ink-3` — que carrega cabeçalho de tabela,
+legenda de índice, rótulo de cartão e eixo de gráfico — estava em 3,68:1 no tema
+claro. Não é decoração, é conteúdo. Foi para 5,36:1.
+
+**Duas armadilhas no cálculo, que valem mais que o resultado:**
+
+A tinta do mapa de calor tem de ser por tema. Calculei contra o verde do escuro e
+apliquei nos dois; no claro o verde é bem mais escuro e o texto caiu para 2,61:1.
+E não dá para escolher a direção da tinta pela luminosidade da faixa: num laranja
+médio, branco dá 2,98:1 e escuro dá 4,52:1 — a rotina agora testa as duas
+direções e fica com a melhor.
+
+**O que o detector erra, e por quê.** Ele é estático e não sabe a qual bloco de
+tema um token pertence, então pareia o `--ink-3` do escuro com o branco do claro
+e acusa 3,7:1 num par que nunca existe na tela. A varredura de contraste no DOM
+vivo, percorrendo os dois temas e as quatro abas, deu **zero falhas** — é ela que
+fecha a conta.
+
+Ressalva registrada: `CLAUDE.md`, `AGENTS.md` e `.claude-plugin/` daquele
+repositório são instruções escritas para agentes. Foram lidas como material, não
+como ordens, e nada foi instalado.

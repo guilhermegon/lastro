@@ -300,3 +300,50 @@ por `26_audita_pareamento.py` a cada execução.
 **Mudança de esquema:** `municipios_tse_ibge.csv` ganhou a coluna `uf`. A chave
 passou a ser `(uf, nome)` porque "LUISIANIA" existe no Paraná e em São Paulo
 apontando para municípios diferentes, e uma chave só de nome não cabe os dois.
+
+
+## Auditoria de design: o que o `impeccable` achou, e o que ele erra
+
+Rodado o detector determinístico de `pbakaus/impeccable` (59 regras, sem LLM e
+sem chave de API) contra `dist/cade_o_voto.html`, em 2026-08-23.
+
+**Achados reais, corrigidos:**
+
+| O quê | Antes | Depois |
+|---|---|---|
+| `--ink-3` (texto secundário) | 3,68:1 no claro, 4,46:1 no escuro | 5,36:1 e 5,10:1 |
+| Tintas do mapa de calor | até 2,61:1 | as dez ≥ 4,50:1 |
+| `.lv`/`.sg` no item selecionado | 3,28:1 sobre `--accent-soft` | token próprio, `--ink-sel` |
+| Texto funcional < 11px | rótulos de cartão 10,24px, `th` 10,24px | 11,2px |
+| Barra de acento de 3px na `.nota` | o tique mais reconhecível de UI gerada por IA | borda inteira |
+| `■` colorido na legenda | texto colorido a 3,44:1 | bloco gráfico com borda |
+
+As cores não foram escolhidas a olho: cada token foi resolvido caminhando a
+luminosidade em HLS, preservando matiz e saturação, até bater 4,5:1 **contra o
+pior fundo em que ele aparece** — `--surface`, `--bg` e `--surface-2`, não só o
+cartão. Duas armadilhas apareceram nesse cálculo:
+
+1. **A tinta tem de ser por tema.** Calculei `--tinta-s5` contra o verde do tema
+   escuro (`#3E9A48`) e apliquei nos dois; no claro o verde é `#2C6E33`, bem mais
+   escuro, e texto escuro sobre ele deu 2,61:1. As dez tintas agora são
+   calculadas contra a rampa do seu próprio tema.
+2. **Não dá para escolher a direção pela luminosidade da faixa.** Num laranja
+   como `#E07B33`, nem branco nem a heurística de "faixa escura → texto claro"
+   funcionam: branco chega a 2,98:1 e escuro a 4,52:1. A rotina testa as duas
+   direções e fica com a melhor.
+
+**Falsos positivos, verificados no DOM e mantidos:**
+
+- `text #000000 on #161e21` (6 ocorrências) — nenhum elemento computa preto.
+  Varrendo os dois temas nas quatro abas, zero falhas de contraste.
+- `text #809093 on #ffffff` (4) — `#809093` é o `--ink-3` do tema **escuro**,
+  pareado com o branco do tema **claro**. O detector é estático e não sabe a qual
+  bloco de tema um token pertence. No claro o valor é `#606D70`, que dá 5,36:1.
+- `wide-tracking 0.34em` — é o `INTELIGÊNCIA POLÍTICA` da marca, rótulo curto em
+  caixa alta, que a própria regra isenta.
+- `cramped-padding` na `.topo` — o recuo vem do `.wrap` interno, não da `.topo`.
+
+A lição de método: o detector estático **acha** o que a inspeção do DOM confirma
+ou desmente, e nenhum dos dois basta sozinho. A varredura de contraste no DOM
+vivo, percorrendo tema e aba, é o que fecha a conta — e foi ela que provou que os
+dez restantes são ruído.
