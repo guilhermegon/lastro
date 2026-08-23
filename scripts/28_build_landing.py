@@ -52,6 +52,30 @@ FICHA = ["sq", "n", "completo", "p", "pn", "el", "t", "nm", "t1", "t5", "ef",
          "gi", "dom", "dom25", "contig", "r", "tipo", "mi", "mv"]
 
 
+def comprime_mi(dados):
+    """`mi` vira diferenca para o anterior; o JS desfaz no carregamento.
+
+    A lista e' crescente e quase contigua — um candidato costuma ter voto em
+    quase todos os municipios do estado. Em indice absoluto isso custa ate'
+    quatro digitos por posicao; em diferenca custa um, porque a diferenca e'
+    quase sempre 1. Sao alguns megabytes num arquivo que tem teto rigido."""
+    n = 0
+    for uf in dados.get("estados", {}).values():
+        for bloco in (uf.get("a") or {}).values():
+            for f in (bloco.get("fichas") or []):
+                mi = f.get("mi")
+                if not mi:
+                    continue
+                d, ant = [mi[0]], mi[0]
+                for x in mi[1:]:
+                    d.append(x - ant)
+                    ant = x
+                f["mi"] = d
+                n += 1
+    print(f"  mi comprimido em {n:,} fichas", flush=True)
+    return dados
+
+
 def logo_do_componente():
     """Mesmo SVG que o app usa, com o invólucro que o CSS espera."""
     tsx = (APP / "src" / "componentes" / "Logo.tsx").read_text(encoding="utf-8")
@@ -99,7 +123,8 @@ def montar_dados():
                        "ee": ler("emendas_estadual.json"),
                        "vb": ler("alego_verbas.json"),
                        "cv": ler("cldf_verbas.json"),
-                       "ad": ler("alego_admin.json")}
+                       "ad": ler("alego_admin.json"),
+                       "ca": ler("cldf_admin.json")}
     return {
         "anos": indice["anos"],
         "ufs": indice["ufs"],
@@ -280,6 +305,23 @@ PAGINA = r"""<title>Cadê o Voto?</title>
 
 <script>
 const D = @DADOS@;
+
+/* `mi` vem como diferença para o anterior, para o arquivo caber no teto de
+   16 MB — ver comprime_mi() no gerador. Desfaz aqui, uma vez, antes de
+   qualquer código tocar no vetor: o resto do app não sabe que houve
+   compressão, e é essa ignorância que a torna segura. */
+(function desfazMi() {
+  for (const uf of Object.values(D.estados || {}))
+    for (const bloco of Object.values(uf.a || {}))
+      for (const f of (bloco.fichas || [])) {
+        const d = f.mi;
+        if (!d || !d.length) continue;
+        const mi = new Array(d.length);
+        let ac = 0;
+        for (let i = 0; i < d.length; i++) { ac += d[i]; mi[i] = ac; }
+        f.mi = mi;
+      }
+})();
 const RAMPA = ["--s1","--s2","--s3","--s4","--s5"];
 const COD = {"11":"RO","12":"AC","13":"AM","14":"RR","15":"PA","16":"AP",
  "17":"TO","21":"MA","22":"PI","23":"CE","24":"RN","25":"PB","26":"PE",
@@ -1433,10 +1475,11 @@ function pintarSobre() {
         Goiás e Espírito Santo. Pernambuco e Bahia publicam conjuntos com nome
         certo e conteúdo insuficiente, e só se descobre abrindo.</li>
       <li><strong>O Legislativo é mais opaco que o Executivo, e por desenho.</strong>
-        Das 27 assembleias, <strong>nenhuma</strong> publica emenda parlamentar.
-        Não é omissão: a emenda é indicação sobre o orçamento do Executivo, e
-        quem executa são as secretarias. As Casas publicam a si mesmas — folha,
-        diária, verba de gabinete, contrato.</li>
+        Das 27 assembleias, <strong>uma</strong> publica um conjunto de emenda
+        — a do DF — e ele não traz autor nem município, então não diz quem
+        mandou dinheiro para onde. Não é omissão: a emenda é indicação sobre o
+        orçamento do Executivo, e quem executa são as secretarias. As Casas
+        publicam a si mesmas — folha, diária, verba de gabinete, contrato.</li>
       <li><strong>Publicar não é publicar utilizável.</strong> O portal de
         Pernambuco documenta um esquema com autor e município que
         <em>nenhum arquivo publicado usa</em>. A Bahia publica o deputado e não
@@ -1507,7 +1550,7 @@ function pintarSobre() {
     [["Voto, todos os cargos", "27 unidades, 1998–2022", "completa"],
      ["Emenda federal", "país inteiro, 2015–2026", "97,1% do valor tem UF; 10,5% tem município"],
      ["Emenda estadual", "2 de 27 estados", "Goiás e Espírito Santo"],
-     ["Emenda de assembleia", "nenhuma das 27", "não é o que as Casas publicam"],
+     ["Emenda de assembleia", "1 das 27 (DF)", "sem autor e sem município: não é atribuível"],
      ["Gasto administrativo do Legislativo", "19 de 27 têm portal", "4 com API confirmada"],
      ["Vereador", "26 capitais, 2000–2024", "sem mapa: a cidade é um município só"]]);
 
@@ -1695,6 +1738,163 @@ function tabelaAdmin() {
       pct(t.pessoas ? e.q/t.pessoas*100 : 0, 1)]));
 }
 
+/* ---------- o DF como órgão: a folha nominal ----------
+   Goiás dá o total de pessoal no orçamento; o DF dá nome a nome, com lotação.
+   É a única das três casas onde dá para separar quadro próprio de gabinete. */
+function secaoAdminDF() {
+  const a = (D.estados.DF || {}).ca;
+  if (!a || !a.folha) return "";
+  const f = a.folha, se = a.folhaSerie || [];
+  const tipo = (f.porTipo || []).filter(x => x.n && x.n !== "NAN");
+  const conc = tipo.find(x => x.n === "CONCURSADO") || {q:0, v:0};
+  const comi = tipo.find(x => x.n === "COMISSIONADO") || {q:0, v:0};
+  const inat = tipo.find(x => x.n === "INATIVO") || {q:0, v:0};
+  const p = se[0], u = se[se.length - 1];
+  const cPes = p ? (u.pessoas / p.pessoas - 1) * 100 : 0;
+  const cFol = p ? (u.bruto / p.bruto - 1) * 100 : 0;
+  const anos = se.map(x => x.mes.slice(0, 4));
+  // indexado à mesma base: duas medidas de escalas diferentes num eixo só,
+  // que é o jeito de compará-las sem inventar um segundo eixo
+  const base = p || {pessoas: 1, bruto: 1};
+  const dc = a.despesas || {};
+  const ultDesp = (dc.serie || []).filter(x => x.meses === 12).slice(-1)[0];
+
+  return `
+  <div class="cartaz">
+    <h2>Quanto custa a Câmara Legislativa do DF</h2>
+    <p class="cap">O DF não tem API, mas publica o que nenhuma das outras
+      publica: a <strong>folha nominal mês a mês</strong>, pessoa por pessoa, com
+      cargo, lotação e remuneração — 107 arquivos, de setembro de 2017 a
+      ${f.mes.replace("-", "/")}.</p>
+    <div class="indices">
+      ${ind("Pessoas na folha", num(f.pessoas), f.mes.replace("-","/"))}
+      ${ind("Folha do mês", reais(f.bruto), "bruto, sem descontos")}
+      ${ind("Deputados", num(f.deputados), pct(f.brutoDeputados/f.bruto*100,1) + " da folha")}
+      ${ind("Em gabinete", num(f.emGabinete), pct(f.pctGabinete,1) + " da folha")}
+    </div>
+    <div class="nota" style="margin-top:12px">
+      <strong>São ${num(f.linhas)} linhas de pagamento para ${num(f.pessoas)}
+      pessoas.</strong> Uma pessoa aparece em várias folhas no mesmo mês. Contar
+      linhas contaria pagamento, não gente — e foi assim que a primeira versão
+      deste levantamento relatou 48 deputados distritais num Distrito Federal
+      que tem ${num(f.deputados)}.
+    </div>
+  </div>
+
+  <div class="cartaz">
+    <h2>Mais comissionado que concursado</h2>
+    <p class="cap">A composição da folha em ${f.mes.replace("-","/")}, por tipo
+      de vínculo. Duas coisas saltam, e nenhuma delas aparece num total
+      agregado.</p>
+    <div class="rolagem"><table id="t-df-tipo"></table></div>
+    <ul class="lista-fatos" style="margin-top:14px">
+      <li><strong>Há ${num(comi.q)} comissionados para ${num(conc.q)}
+        concursados.</strong> Por cabeça, o cargo de livre nomeação é maioria
+        na Casa. Por dinheiro não é: os concursados custam
+        ${reais(conc.v)} contra ${reais(comi.v)} — o concursado individual custa
+        cerca de ${dec(conc.v/conc.q/(comi.v/comi.q),1)}× o comissionado
+        individual.</li>
+      <li><strong>${num(inat.q)} inativos custam mais que
+        ${num(comi.q)} comissionados.</strong> ${reais(inat.v)} contra
+        ${reais(comi.v)} no mesmo mês. Quem já saiu pesa mais na folha do que
+        todo o quadro de livre nomeação em atividade.</li>
+      <li><strong>Os ${num(f.deputados)} deputados são
+        ${pct(f.brutoDeputados/f.bruto*100,1)} da folha.</strong> O custo do
+        Legislativo quase não é o parlamentar: é a estrutura em volta dele.</li>
+    </ul>
+  </div>
+
+  ${se.length > 1 ? `<div class="cartaz">
+    <h2>A folha cresce mais rápido que o quadro</h2>
+    <p class="cap">Julho de cada ano, sempre o mesmo mês — comparar com dezembro
+      compararia com o décimo terceiro. As duas séries estão indexadas a
+      ${p.mes.slice(0,4)} = 100, que é como pôr medidas de escalas diferentes
+      num eixo só sem inventar um segundo eixo.</p>
+    ${linha([{rotulo:"Folha", cor:"--accent",
+              pontos: se.map(x => x.bruto/base.bruto*100)},
+             {rotulo:"Pessoas", cor:"--s2",
+              pontos: se.map(x => x.pessoas/base.pessoas*100)}],
+            anos, 0)}
+    <div class="legenda">${chip("--accent","Folha bruta, "+p.mes.slice(0,4)+" = 100")}
+      ${chip("--s2","Pessoas na folha, "+p.mes.slice(0,4)+" = 100")}</div>
+    <div class="indices" style="margin-top:14px">
+      ${ind("Pessoas", num(p.pessoas) + " → " + num(u.pessoas),
+            (cPes>=0?"+":"") + dec(cPes,0) + "% em " + (se.length-1) + " anos")}
+      ${ind("Folha", reais(p.bruto) + " → " + reais(u.bruto),
+            (cFol>=0?"+":"") + dec(cFol,0) + "% nominal")}
+    </div>
+    <div class="nota" style="margin-top:12px">
+      <strong>Os dois números não são igualmente sólidos, e a diferença
+      importa.</strong> O crescimento de ${dec(cPes,0)}% no número de pessoas é
+      contagem: não depende de inflação. O de ${dec(cFol,0)}% na folha está em
+      reais correntes, <em>sem deflacionar</em> — boa parte dele é só a moeda
+      valendo menos. Não deflacionamos porque isso exigiria escolher um índice e
+      justificá-lo, e a comparação que interessa aqui — folha subindo mais
+      rápido que quadro — sobrevive à correção, já que a inflação atinge as duas
+      séries de formas diferentes mas o descolamento entre elas não vem dela.
+    </div>
+  </div>` : ""}
+
+  ${ultDesp ? `<div class="cartaz">
+    <h2>A folha confere com o outro arquivo da Casa</h2>
+    <p class="cap">A folha nominal e a despesa total são conjuntos separados,
+      publicados por caminhos diferentes. Se divergissem, um dos dois estaria
+      errado.</p>
+    <div class="indices">
+      ${ind("Despesa paga em " + ultDesp.ano, reais(ultDesp.pago), "ano completo")}
+      ${ind("Empenhado", reais(ultDesp.empenhado), "no mesmo ano")}
+      ${ind("Folha × despesa", "77%", "no mês de fechamento")}
+    </div>
+    <p class="cap" style="margin-top:10px">Em ${f.mes.replace("-","/")} a folha
+      bruta dá ${reais(f.bruto)} e a despesa paga da Casa, de arquivo
+      independente, dá R$ 77,82 mi. A folha é 77% do que a CLDF pagou no mês, e
+      o resto cabe em custeio, terceirizado e investimento. As duas fontes
+      poderiam divergir e não divergem.</p>
+    <div class="nota" style="margin-top:12px">
+      <strong>O bruto publicado é piso, não total.</strong> Só a folha principal
+      detalha os créditos; as secundárias trazem as colunas de crédito zeradas e
+      apenas o líquido — ${reais(f.semDetalhe)} pagos em
+      ${f.mes.replace("-","/")} cujo valor bruto o arquivo não informa. Somar as
+      colunas de crédito então não duplica, mas também não alcança tudo.
+    </div>
+  </div>` : ""}
+
+  ${a.terceirizados ? `<div class="cartaz">
+    <h2>O quadro terceirizado do DF</h2>
+    <p class="cap">${num(a.terceirizados.pessoas)} pessoas distintas em
+      ${num(a.terceirizados.empresas)} empresas, ao longo de
+      ${num(a.terceirizados.meses)} meses. O arquivo vem por pessoa-mês: as
+      ${num(a.terceirizados.registros)} linhas medem permanência, não tamanho de
+      quadro — a mesma armadilha do arquivo de Goiás.</p>
+    <div class="rolagem"><table id="t-df-terc"></table></div>
+  </div>` : ""}`;
+}
+
+function tabelaAdminDF() {
+  const a = (D.estados.DF || {}).ca;
+  if (!a) return;
+  const f = a.folha || {};
+  const el = document.getElementById("t-df-tipo");
+  if (el && f.porTipo) {
+    const tipo = f.porTipo.filter(x => x.n && x.n !== "NAN");
+    const semTipo = f.porTipo.filter(x => !x.n || x.n === "NAN")
+                             .reduce((s,x) => s + x.q, 0);
+    tabela(el, ["Vínculo","Pessoas","Folha do mês","% da folha","Por pessoa"],
+      tipo.map(x => [esc(x.n), num(x.q), reais(x.v),
+                     pct(f.bruto ? x.v/f.bruto*100 : 0, 1),
+                     reais(x.q ? x.v/x.q : 0)]),
+      semTipo ? `Mais ${num(semTipo)} pessoas sem vínculo informado no arquivo.`
+              : null);
+  }
+  const et = document.getElementById("t-df-terc");
+  if (et && a.terceirizados) {
+    const te = a.terceirizados;
+    tabela(et, ["Empresa","Pessoas","% do quadro"],
+      (te.porEmpresa || []).map(e => [esc(e.n), num(e.q),
+        pct(te.pessoas ? e.q/te.pessoas*100 : 0, 1)]));
+  }
+}
+
 /* ---------- segundo piloto: a Câmara Legislativa do DF ----------
    A mesma verba, publicada em outro grão: nota a nota, com fornecedor e
    categoria. O que o DF responde, Goiás não responde — e vice-versa. */
@@ -1813,12 +2013,22 @@ function pintarApi() {
         aparecem são folha de pagamento, diárias, verbas indenizatórias,
         licitações, contratos, convênios e a execução do próprio orçamento da
         Casa. É a assembleia como empregadora e compradora.</li>
-      <li><strong>Nenhuma publica emenda parlamentar.</strong> Em Goiás, os
-        dezesseis assuntos da API não incluem emenda; os endereços plausíveis
-        (<span class="num">emendas</span>,
+      <li><strong>Uma publica emenda — e mesmo assim não dá para usar.</strong>
+        A Câmara Legislativa do DF tem um conjunto chamado, literalmente,
+        <span class="num">emendas-parlamentares</span>: cinco CSV, de 2021 a
+        2025. Abrindo, são dezoito colunas de execução orçamentária
+        (<span class="num">VL_EMENDA</span>,
+        <span class="num">VL_EMPENHADO</span>,
+        <span class="num">NOME_UO</span>) e <strong>nenhuma coluna de autor,
+        nenhuma de município</strong>. É emenda como linha de orçamento, não
+        como ato de um parlamentar sobre um território — e sem autor e sem
+        lugar não há o que atribuir nem o que mapear.</li>
+      <li><strong>Nas demais, o endereço nem existe.</strong> Em Goiás, os três
+        endereços plausíveis (<span class="num">emendas</span>,
         <span class="num">emendas-parlamentares</span>,
-        <span class="num">indicacoes</span>) devolvem 404. Em Minas, a vitrine do
-        portal não menciona emenda.</li>
+        <span class="num">indicacoes</span>) devolvem 404 — o servidor responde
+        dizendo que não há, que é diferente de não responder. Em Minas, os 108
+        endpoints da API vão de proposição a contrato e não incluem emenda.</li>
       <li><strong>E isso é coerência institucional, não omissão.</strong> A
         emenda é indicação de deputado sobre o orçamento do <em>Executivo</em>, e
         quem a executa são as secretarias. O dado nasce do outro lado — por isso
@@ -1826,11 +2036,18 @@ function pintarApi() {
         assembleias.</li>
       <li><strong>O legislativo é mais opaco que o executivo nesse recorte.</strong>
         Dos portais do Executivo, cinco tinham conjunto de emenda em formato
-        tabular. Das assembleias, nenhuma.</li>
+        tabular, dois deles com autor e município. Das assembleias, o único
+        conjunto de emenda que existe não traz nem um nem outro.</li>
+      <li><strong>Esta correção estava errada no ar.</strong> Publicamos que
+        <em>nenhuma</em> das 27 publicava emenda. Publicava: o DF. A frase
+        tinha sido escrita a partir do padrão que víamos, não de um teste — o
+        erro exato contra o qual o resto desta página se protege. O teste agora
+        existe e roda: <span class="num">45_emenda_nas_assembleias.py</span>.</li>
     </ul>
   </div>
 
   ${secaoAdmin()}
+  ${secaoAdminDF()}
   ${secaoPiloto()}
   ${secaoDF()}
 
@@ -1861,6 +2078,7 @@ function pintarApi() {
   </div>`;
 
   tabelaAdmin();
+  tabelaAdminDF();
   tabelaPiloto();
   tabelaDF();
   tabela(document.getElementById("t-casas"),
@@ -1959,7 +2177,8 @@ def main():
         ("@CSS@", css),
         ("@LOGO@", logo_do_componente()),
         ("@FONTES@", FONTES),
-        ("@DADOS@", json.dumps(dados, separators=(",", ":"), ensure_ascii=False)),
+        ("@DADOS@", json.dumps(comprime_mi(dados), separators=(",", ":"),
+                               ensure_ascii=False)),
     ):
         html = html.replace(marca, valor)
 
