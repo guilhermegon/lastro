@@ -467,3 +467,35 @@ que é o uso oficial.
 O subtítulo perdia o sentido dizendo "em todas as unidades da federação" sob um
 título que nomeia uma: passou a descrever o estado aberto, e omite "município a
 município" onde isso não quer dizer nada — o Distrito Federal é um município só.
+
+## 2026-08-22 — a tela nacional vira a entrada, e o buraco que ela revelou
+
+O usuário mostrou a tela nacional do artefato antigo e pediu que fosse a landing
+page, com Nacional à esquerda e o estado à direita. A tela nunca tinha sido
+portada para o React — só existia no `lastro_brasil.html`. Portada em
+`VistaNacional.tsx`, virou a aba mais à esquerda e a vista padrão. Clicar num
+estado no mapa, ou no nome dele na tabela, abre a tela daquele estado.
+
+Ela não custa requisição: sai inteira do `indice.json`, os mesmos 96 KB que já
+são baixados para desenhar qualquer tela.
+
+**E foi conferindo os números dela que apareceu o defeito grande.** O artefato
+antigo dava "último eleito" 6.603 em São Paulo; o pipeline dava 45.093. Contra o
+dado bruto do TSE, 45.094 — o pipeline estava certo. Mas o **total** de São Paulo
+divergia em 6.496 votos, e voto que some sem aviso é o defeito que este projeto
+trata como gate.
+
+`26_audita_pareamento.py`, escrito para isso, achou 23.063.701 votos e 153
+municípios fora do mapa. Detalhe em `docs/MODELO.md`. O que importa aqui: **não
+era um mapa com buraco, era uma série temporal com viés** — o TSE mudou a grafia
+dos nomes ao longo dos anos, então os pleitos antigos perdiam e os recentes não.
+Pernambuco perdia 10% em 2002 e 0,1% em 2022. Uma série de concentração lida
+assim mostraria crescimento que é puro artefato.
+
+Corrigido para 47.535 votos sem par, três municípios, todos só em 1998. Os dois
+gates continuam passando: teste-ouro de Goiás e validação nacional.
+
+O link público é `dist/cade_o_voto.html`, gerado por `28_build_landing.py`: a
+tela nacional sozinha, 117 KB, autocontida. O app com os 27 estados e as oito
+abas serve 80 MB sob demanda e precisa de hospedagem — não cabe em artefato, e
+foi por isso que ele deixou de ser página única.
