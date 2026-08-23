@@ -429,7 +429,12 @@ tentativa e parei de caçar.
   nominal, despesa, duodécimo, terceirizados
 - [x] **Correção de uma afirmação publicada** (`45_emenda_nas_assembleias.py`)
 - [x] Delta-encoding do vetor municipal: 15,9 → 13,9 MB, round-trip verificado
-- [ ] **Verba indenizatória da ALMG** (`43_almg_verbas.py`): varredura rodando
+- [ ] **Verba indenizatória da ALMG** (`43_almg_verbas.py`) — AGUARDANDO a
+  varredura, que é espera legítima: 1.463 requisições ao ritmo que a própria
+  ALMG publica (duas simultâneas, um segundo entre elas, sob pena de bloqueio
+  sem aviso). A seção do artefato já está escrita e commitada, derivando todo
+  número do JSON em tempo de renderização; sem o arquivo ela retorna vazio,
+  verificado no navegador. Quando a varredura gravar, é rodar 22_ e 28_.
 
 ### A afirmação que estava errada no ar
 
