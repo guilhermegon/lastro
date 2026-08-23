@@ -158,3 +158,35 @@ nacional existir.
 
 **Ação do líder ao receber a resposta.** Portar o bloco escolhido e reabrir os demais
 como itens de roadmap na ordem definida.
+
+---
+
+### RAS 00 TKT 0005 — Cobertura do mapa municipal do Emendômetro
+
+| Campo | Valor |
+|---|---|
+| `type` | `BLOCKING_DECISION` |
+| `criticality` | alta — decide o que a aba afirma |
+| `work_continues` | sim — a base e o casamento já estão prontos |
+| `status` | **DECIDIDO** — pré-autorizado pelo líder, 2026-08-23 |
+
+**summary.** O mapa municipal de emendas cobre R$ 14,6 bi de R$ 140 bi
+individuais (10,5%), porque 76% do dinheiro está em `MÚLTIPLO` — emenda
+espalhada por municípios que o arquivo não nomeia. Existe um campo alternativo,
+o município do favorecido, com 100% de cobertura e semântica errada: Brasília
+sozinha concentra 36,4%, por ser o endereço do Fundo Nacional de Saúde.
+
+**decision_needed.** Publicar o mapa municipal com 10,5% de cobertura declarada,
+ou trocar pelo campo de favorecido, ou não publicar mapa municipal.
+
+**leader_recommendation.** **Publicar com a cobertura declarada, e nunca usar o
+favorecido.** O campo de favorecido não é uma cobertura melhor da mesma
+pergunta — é outra pergunta, respondida com aparência de mapa. É exatamente o
+"mapa errado com aparência de certo" que a regra de auditoria deste projeto
+nomeia, e a mesma razão pela qual não afrouxamos a tolerância do teste-ouro. A
+aba abre por UF, onde a cobertura é 97,1%, e o mapa municipal entra rotulado
+como o recorte rastreável.
+
+**Aplicado sob a pré-autorização de progresso** (DaRulez, ordem permanente de
+2026-08-01): recomendação inequívoca, aplicada na hora, registrada aqui para
+revisão posterior.

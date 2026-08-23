@@ -109,3 +109,37 @@ trabalho pendente.
 
 - Montar o `.pbix`: os CSVs do modelo estrela estão prontos, mas o arquivo do Power BI
   é trabalho manual no Desktop e o usuário optou pelo painel HTML como entrega visual.
+
+## Marco 8 — Emendômetro  ⏳ base pronta 2026-08-23
+
+Mesma pergunta do voto, virada para o dinheiro: onde o deputado manda emenda, e
+isso tem a ver com onde ele tirou voto?
+
+- [x] Fonte identificada e baixada: Portal da Transparência, arquivo único
+      (`30_emendas_ingest.py`). 78.454 emendas, 2015–2026, R$ 259,5 bi pagos
+- [x] Normalização com `cod_ibge`, a **mesma chave** do voto — sem pareamento
+      por nome, que é o que custou 23 milhões de votos do outro lado
+- [x] Casamento autor ↔ deputado federal eleito: 1.098 de 1.492 autores (74%),
+      R$ 108,7 bi (78% do dinheiro individual), com os 9 nomes ambíguos marcados
+- [ ] Agregados por UF e por município, no formato que o front já consome
+- [ ] Aba **Emendômetro**: mapa por UF (nível completo) e por município (o
+      subconjunto rastreável, com a cobertura declarada na tela)
+- [ ] Cruzamento voto × emenda: o deputado manda dinheiro para o próprio reduto?
+
+### A ressalva que define esta aba, e não pode ser esquecida
+
+**O mapa municipal cobre 10,5% do dinheiro individual.** Não por descuido: 76%
+do valor está declarado como `MÚLTIPLO`, uma emenda espalhada por vários
+municípios que o arquivo não nomeia. O voto é completo por construção — todo
+voto tem município. A emenda não é.
+
+**E existe um atalho falso que precisa ficar fechado.** O arquivo por favorecido
+tem município em 100% do dinheiro, e é inútil como mapa: Brasília concentra
+36,4% das emendas individuais, porque é o endereço do Fundo Nacional de Saúde e
+dos intermediários. Usar esse campo produziria um mapa bonito dizendo que
+Brasília recebe um terço das emendas do país — verdade sobre a transferência
+bancária, falso sobre onde o dinheiro chegou. **O município vem sempre da
+localidade de aplicação.**
+
+Por UF a cobertura é 97,1% do dinheiro, inclusive nas linhas `MÚLTIPLO`. É nesse
+nível que o Emendômetro é completo, e é por isso que ele começa por UF.
