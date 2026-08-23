@@ -98,7 +98,8 @@ def montar_dados():
                        "ve": ler("voto_emenda.json"),
                        "ee": ler("emendas_estadual.json"),
                        "vb": ler("alego_verbas.json"),
-                       "cv": ler("cldf_verbas.json")}
+                       "cv": ler("cldf_verbas.json"),
+                       "ad": ler("alego_admin.json")}
     return {
         "anos": indice["anos"],
         "ufs": indice["ufs"],
@@ -1419,6 +1420,42 @@ function pintarSobre() {
     </div>
   </div>
 
+<div class="cartaz">
+    <h2>O estado do dado no Brasil, medido</h2>
+    <p class="cap">Não é impressão: são três levantamentos que fizemos e que
+      podem ser repetidos pelos scripts do repositório. O retrato é desigual, e
+      a desigualdade tem forma.</p>
+    <div class="rolagem"><table id="t-estado"></table></div>
+    <ul class="lista-fatos" style="margin-top:14px">
+      <li><strong>O federal é completo; o estadual é exceção.</strong> A emenda
+        federal existe para o país inteiro, num arquivo só, atualizado o ano
+        todo. A emenda estadual existe em <strong>dois estados de 27</strong> —
+        Goiás e Espírito Santo. Pernambuco e Bahia publicam conjuntos com nome
+        certo e conteúdo insuficiente, e só se descobre abrindo.</li>
+      <li><strong>O Legislativo é mais opaco que o Executivo, e por desenho.</strong>
+        Das 27 assembleias, <strong>nenhuma</strong> publica emenda parlamentar.
+        Não é omissão: a emenda é indicação sobre o orçamento do Executivo, e
+        quem executa são as secretarias. As Casas publicam a si mesmas — folha,
+        diária, verba de gabinete, contrato.</li>
+      <li><strong>Publicar não é publicar utilizável.</strong> O portal de
+        Pernambuco documenta um esquema com autor e município que
+        <em>nenhum arquivo publicado usa</em>. A Bahia publica o deputado e não
+        o município. A ALEGO publica diárias com um registro de R$ 2,7 milhões
+        para 1,5 diária. Cada um desses casos passaria despercebido por quem
+        lesse a descrição em vez do arquivo.</li>
+      <li><strong>E o formato muda embaixo do pé.</strong> Em Goiás, sete
+        exercícios de emenda estadual têm sete esquemas diferentes, com o
+        separador virando tabulação em 2025 e a coluna de autor mudando de nome
+        três vezes. Ler por posição ou por nome fixo quebra no próximo arquivo.</li>
+    </ul>
+    <div class="nota" style="margin-top:12px">
+      <strong>Por que isto está aqui e não num relatório à parte.</strong> Quem
+      lê um número desta página tem direito de saber que ele é a exceção, não a
+      regra — e que a maior parte do que seria interessante medir simplesmente
+      não é publicada em formato que permita medir.
+    </div>
+  </div>
+
   <div class="cartaz">
     <h2>O que não fazemos</h2>
     <ul class="lista-fatos">
@@ -1464,6 +1501,15 @@ function pintarSobre() {
       registrado.</p>
     <p class="cap"><strong>Lastro — Inteligência Política.</strong></p>
   </div>`;
+
+  tabela(document.getElementById("t-estado"),
+    ["O quê","Onde existe","Cobertura"],
+    [["Voto, todos os cargos", "27 unidades, 1998–2022", "completa"],
+     ["Emenda federal", "país inteiro, 2015–2026", "97,1% do valor tem UF; 10,5% tem município"],
+     ["Emenda estadual", "2 de 27 estados", "Goiás e Espírito Santo"],
+     ["Emenda de assembleia", "nenhuma das 27", "não é o que as Casas publicam"],
+     ["Gasto administrativo do Legislativo", "19 de 27 têm portal", "4 com API confirmada"],
+     ["Vereador", "26 capitais, 2000–2024", "sem mapa: a cidade é um município só"]]);
 
   tabela(document.getElementById("t-fontes"),
     ["O quê","Fonte","Arquivo"],
@@ -1573,6 +1619,80 @@ function tabelaPiloto() {
     v.deputados.slice(0, 20).map(d => [
       esc(d.n) + (d.el ? ' <span style="color:var(--accent)">●</span>' : ""),
       reais(d.t), reais(d.m), pct(d.pg, 2), d.ms]));
+}
+
+/* ---------- gasto administrativo ----------
+   O que as assembleias publicam é a si mesmas. Então é isso que a aba API
+   pergunta: quanto custa a Casa, e no que esse dinheiro vai. */
+function secaoAdmin() {
+  const a = (D.estados.GO || {}).ad;
+  if (!a || !a.orcamento) return "";
+  const orc = a.orcamento.filter(x => x.autorizado > 0);
+  if (!orc.length) return "";
+  const p = orc[0], u = orc[orc.length - 1];
+  const cresc = (u.autorizado / p.autorizado - 1) * 100;
+  const di = a.diarias || {};
+  const te = a.terceirizados || {};
+
+  return `
+  <div class="cartaz">
+    <h2>Quanto custa a Assembleia</h2>
+    <p class="cap">O orçamento autorizado da ALEGO, ano a ano. Só o da Casa: o
+      arquivo traz também o FEMAL, um fundo à parte, e somar os dois responderia
+      outra pergunta.</p>
+    <div class="indices">
+      ${ind(String(p.ano), reais(p.autorizado), "autorizado")}
+      ${ind(String(u.ano), reais(u.autorizado), "autorizado")}
+      ${ind("Crescimento", (cresc>=0?"+":"") + dec(cresc,0) + "%", `em ${u.ano - p.ano} anos`)}
+      ${ind("Fatia de pessoal", pct(u.pessoal/u.autorizado*100, 0), `era ${pct(p.pessoal/p.autorizado*100,0)} em ${p.ano}`)}
+    </div>
+    ${linha([{rotulo:"Autorizado", cor:"--accent", pontos: orc.map(x=>x.autorizado/1e6)},
+             {rotulo:"Pessoal", cor:"--s2", pontos: orc.map(x=>x.pessoal/1e6)}],
+            orc.map(x=>x.ano), 0)}
+    <div class="legenda">${chip("--accent","Total autorizado, em R$ milhões")}
+      ${chip("--s2","Do qual, pessoal")}</div>
+    <p class="cap" style="margin-top:10px"><strong>O orçamento cresceu
+      ${dec(cresc,0)}%, mas a folha não acompanhou.</strong> A fatia de pessoal
+      caiu de ${pct(p.pessoal/p.autorizado*100,0)} para
+      ${pct(u.pessoal/u.autorizado*100,0)} — o que cresceu foi custeio e
+      investimento.</p>
+  </div>
+
+  <div class="cartaz">
+    <h2>Diárias, e por que não somamos o total</h2>
+    <p class="cap">São ${num(di.n)} registros de diária, ${num(di.nParlamentar)}
+      de parlamentar e ${num(di.nServidor)} de servidor. O valor típico é
+      <span class="num">${reais(di.unitMediana)}</span> por diária.</p>
+    <div class="nota">
+      <strong>O campo de valor não pode ser somado, e isso é achado sobre a
+      fonte.</strong> A maior "diária" do conjunto é de
+      <span class="num">R$ 2.676.075,25</span> para 1,5 diárias de um assessor,
+      com motivo sobre a edição de um evento. Há ${num(di.suspeitas)} registros
+      com valor por diária acima de R$ 5 mil, e eles concentram
+      ${reais(di.valorSuspeitas)} de ${reais(di.valorTotalBruto)} —
+      <span class="num">${pct(di.pctSuspeitas,0)} da soma vem de menos de 1% dos
+      registros</span>, e esses registros não são diárias. Por isso publicamos o
+      valor típico e a contagem, nunca o somatório.
+    </div>
+  </div>
+
+  ${te.pessoas ? `<div class="cartaz">
+    <h2>O quadro terceirizado</h2>
+    <p class="cap">${num(te.pessoas)} pessoas distintas em ${num(te.empresas)}
+      empresas. O arquivo vem por pessoa-mês: contar linhas contaria
+      ${num(te.registros)} e mediria permanência, não tamanho de quadro.</p>
+    <div class="rolagem"><table id="t-terc"></table></div>
+  </div>` : ""}`;
+}
+
+function tabelaAdmin() {
+  const a = (D.estados.GO || {}).ad;
+  const el = document.getElementById("t-terc");
+  if (!a || !el || !a.terceirizados) return;
+  const t = a.terceirizados;
+  tabela(el, ["Empresa","Pessoas","% do quadro"],
+    (t.porEmpresa || []).map(e => [esc(e.n), num(e.q),
+      pct(t.pessoas ? e.q/t.pessoas*100 : 0, 1)]));
 }
 
 /* ---------- segundo piloto: a Câmara Legislativa do DF ----------
@@ -1710,6 +1830,7 @@ function pintarApi() {
     </ul>
   </div>
 
+  ${secaoAdmin()}
   ${secaoPiloto()}
   ${secaoDF()}
 
@@ -1739,6 +1860,7 @@ function pintarApi() {
     </div>
   </div>`;
 
+  tabelaAdmin();
   tabelaPiloto();
   tabelaDF();
   tabela(document.getElementById("t-casas"),

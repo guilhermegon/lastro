@@ -881,3 +881,33 @@ cálculo que roda, dá número redondo e é falso.
 
 Os dois pilotos param em lugares complementares — Goiás revela glosa e não
 revela destino; o DF revela destino e não revela glosa.
+
+## 2026-08-23 — gasto administrativo, e o estado do dado no Sobre
+
+A aba API deixou de ser só catálogo: agora pergunta **quanto custa a Assembleia
+e no que o dinheiro vai** — que é exatamente o que as Casas publicam, já que
+nenhuma publica emenda.
+
+**O orçamento da ALEGO foi de R$ 626,9 mi em 2019 para R$ 1.019,3 mi em 2026 —
+63% em sete anos.** E a fatia de pessoal caiu de 80% para 62%: o que cresceu foi
+custeio e investimento, não folha.
+
+**Quatro empresas concentram os 574 terceirizados.**
+
+**E um achado sobre a fonte que impediu uma publicação errada.** O campo de valor
+das diárias não pode ser somado: a maior "diária" do conjunto é de
+R$ 2.676.075,25 para 1,5 diárias de um assessor, com motivo sobre edição de um
+evento. Cento e vinte e oito registros — 0,6% — concentram 41% da soma, e não são
+diárias. Publicamos o valor típico (mediana R$ 370) e a contagem, nunca o total.
+
+Três erros meus no caminho, todos de leitura apressada do dado: somei colunas de
+orçamento quando havia `total_autorizado` pronto; ignorei que há dois registros
+por ano (ALEGO e FEMAL, um fundo à parte); e ia publicar que 32,7% das diárias
+vão para parlamentares, número inteiramente produzido pelos tais 128 registros.
+
+**No Sobre entrou "O estado do dado no Brasil, medido"** — os três levantamentos
+consolidados numa tabela e quatro conclusões. A que mais importa: *publicar não é
+publicar utilizável*. Pernambuco documenta um esquema que nenhum arquivo usa, a
+Bahia publica o deputado e não o município, e a ALEGO publica uma diária de
+R$ 2,7 milhões. Nenhum desses casos aparece para quem lê a descrição em vez do
+arquivo.
