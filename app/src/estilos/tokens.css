@@ -249,3 +249,12 @@ footer p { margin: 3px 0; max-width: 80ch; }
 /* no celular o sumário fecha em si mesmo: aberto, empurraria o
    conteúdo para baixo da dobra em toda troca de aba */
 @media (max-width: 760px) { .sumario ol { max-height: 132px; overflow-y: auto; } }
+
+/* --- lista de fatos da aba Sobre --- */
+.lista-fatos { margin: 0; padding: 0; list-style: none;
+  display: flex; flex-direction: column; gap: 10px; }
+.lista-fatos > li { color: var(--ink-2); font-size: var(--step--1);
+  line-height: 1.5; padding-left: 15px; position: relative; max-width: 78ch; }
+.lista-fatos > li::before { content: ""; position: absolute; left: 0; top: .55em;
+  width: 6px; height: 6px; border-radius: 2px; background: var(--accent); }
+.lista-fatos strong { color: var(--ink); }

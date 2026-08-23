@@ -135,6 +135,7 @@ PAGINA = r"""<title>Cadê o Voto?</title>
     <button role="tab" data-v="padroes" aria-selected="false">Padrões</button>
     <button role="tab" data-v="cruzamentos" aria-selected="false">Cruzamentos</button>
     <button role="tab" data-v="emendas" aria-selected="false">Emendômetro</button>
+    <button role="tab" data-v="sobre" aria-selected="false">Sobre</button>
   </div>
 
   <!-- Escolher estado só faz sentido nas abas de estado. No Nacional o mapa
@@ -211,6 +212,12 @@ PAGINA = r"""<title>Cadê o Voto?</title>
     <aside class="rail"><div class="rail-bloco sumario">
       <p class="rail-titulo">Nesta aba</p><ol id="sum-cruzamentos"></ol></div></aside>
     <div class="conteudo" id="cruzamentos"></div></div></div>
+
+  <div id="v-sobre" class="oculto"><div class="painel">
+    <aside class="rail"><div class="rail-bloco sumario">
+      <p class="rail-titulo">Nesta aba</p><ol id="sum-sobre"></ol></div></aside>
+    <div class="conteudo" id="sobre"></div>
+  </div></div>
 
   <div id="v-emendas" class="oculto">
     <div class="painel">
@@ -1262,16 +1269,233 @@ function observarSecoes(vista) {
     if (!h.parentElement.classList.contains("oculto")) observador.observe(h);
 }
 
+/* ---------- Sobre ----------
+   Conteúdo fixo, e de propósito: é a única aba que não depende de estado nem de
+   ano. Escrita aqui, no gerador, e não num arquivo à parte, porque cada número
+   citado tem de sair do mesmo lugar que a tela usa — se o pipeline mudar e o
+   texto ficar, o texto vira mentira antiga. */
+function pintarSobre() {
+  const alvo = document.getElementById("sobre");
+  const nUF = D.ufs.length;
+  const nMun = Object.values(D.estados).reduce((s,e) => s + e.m.length, 0);
+  const c = D.emendasBR ? D.emendasBR.cobertura : null;
+  const bi = v => "R$ " + dec(v/1e9, 1) + " bi";
+
+  alvo.innerHTML = `
+  <div class="cartaz">
+    <h2>O que é isto</h2>
+    <p class="cap"><strong>Cadê o Voto?</strong> é um produto da
+      <strong>Lastro — Inteligência Política</strong>. Ele mostra onde cada
+      candidato tirou voto, município a município, e para onde cada parlamentar
+      mandou emenda — e cruza as duas coisas.</p>
+    <p class="cap">São ${num(nUF)} unidades da federação, ${num(nMun)} municípios,
+      sete pleitos de 1998 a 2022 no voto, e doze exercícios de 2015 a 2026 na
+      emenda. Todo dado é público. Nada aqui é estimativa, projeção ou pesquisa
+      de intenção: é apuração e execução orçamentária, como os órgãos
+      publicaram.</p>
+    <div class="nota">
+      <strong>O que fazemos não é achar o dado — é fazer o dado não mentir.</strong>
+      Os arquivos são abertos e qualquer um baixa. O trabalho está nas armadilhas
+      que eles contêm, e é sobre elas que esta página fala. Todo número publicado
+      sai de um script que está no repositório; se uma afirmação não é
+      reproduzível, ela não entra.
+    </div>
+  </div>
+
+  <div class="cartaz">
+    <h2>De onde vem cada número</h2>
+    <div class="rolagem"><table id="t-fontes"></table></div>
+    <p class="cap" style="margin-top:10px">O CDN do TSE recusa cliente HTTP
+      comum, requisição <span class="num">HEAD</span> e requisição com
+      <span class="num">Range</span>. Só passa em GET simples com o conjunto
+      completo de cabeçalhos de navegador — descobrir isso foi o primeiro dia
+      de trabalho, e está documentado para não ser redescoberto.</p>
+  </div>
+
+  <div class="cartaz">
+    <h2>Como o voto é contado</h2>
+    <p class="cap">Votos <strong>nominais</strong>, de <strong>1º turno</strong>,
+      agregados de zona eleitoral para município. Nominal exclui voto de legenda,
+      branco e nulo. O 1º turno é onde está a disputa territorial: no segundo
+      sobram dois nomes.</p>
+    <ul class="lista-fatos">
+      <li><strong>A coluna de votos muda ao longo da série.</strong> Em 1998 o
+        campo <span class="num">QT_VOTOS_NOMINAIS</span> vem zerado; em 2002 não
+        existe a coluna de válidos. A escolha é resolvida por soma, ano a ano,
+        nunca por regra fixa.</li>
+      <li><strong>"MÉDIA" é eleito.</strong> Quem entra pela média das sobras tem
+        situação diferente de quem entra pelo quociente. Tratar só
+        <em>"ELEITO"</em> dava 35 a 38 cadeiras numa assembleia de 41.</li>
+      <li><strong>1998 tem registro duplicado.</strong> Quatro candidaturas
+        aparecem com dois registros cada e votos contados duas vezes. Fica o
+        registro deferido.</li>
+      <li><strong>O código do candidato se repete entre anos.</strong> O mesmo
+        <span class="num">SQ_CANDIDATO</span> pertence a pessoas diferentes em
+        pleitos diferentes. A chave é o par (ano, código) — sem isso, um suplente
+        de 2010 vazava para 2014.</li>
+      <li><strong>Pessoa é pareada sem acento.</strong> A grafia do mesmo nome
+        varia dentro do próprio arquivo do TSE. Corrigir isso levou a
+        reincidência medida de 61% para 70,7%.</li>
+    </ul>
+  </div>
+
+  <div class="cartaz">
+    <h2>O pareamento com o IBGE, e os 23 milhões de votos</h2>
+    <p class="cap">O TSE nomeia municípios; o IBGE também, e diferente. Quando o
+      nome não casa, a linha é descartada — e o mapa fica com aparência de certo,
+      porque o município apenas some do total sem que nada avise.</p>
+    <p class="cap">Havia <strong>153 nomes órfãos e 23.063.701 votos</strong>
+      fora do mapa. E o estrago não era num ano: <strong>era na linha do
+      tempo</strong>. O TSE mudou a grafia ao longo da série — "MOJI GUAÇU"
+      virou "MOGI GUAÇU" — então os pleitos antigos perdiam e os recentes não.</p>
+    <div class="rolagem"><table id="t-perda"></table></div>
+    <p class="cap" style="margin-top:10px">Uma série de concentração lida assim
+      mostraria Pernambuco espalhando o voto ao longo de 24 anos por puro
+      artefato de pareamento.</p>
+    <div class="nota">
+      <strong>Como os pares foram estabelecidos.</strong> Casar por semelhança de
+      texto é perigoso: um par errado não perde voto, põe voto no município
+      errado. O crivo veio do dado, não do texto — <em>duas grafias do mesmo
+      lugar nunca dividem o mesmo pleito</em>. Isso reprovou propostas
+      plausíveis e identificou o alvo certo de uma delas. Hoje são 163 correções
+      manuais e restam <strong>47.535 votos</strong> sem par, em três municípios,
+      todos só em 1998.
+    </div>
+  </div>
+
+  <div class="cartaz">
+    <h2>Como a emenda é contada</h2>
+    <p class="cap">O valor é sempre o que <strong>saiu do caixa</strong> — pago
+      no exercício mais restos a pagar efetivamente pagos. Nunca o empenhado, que
+      é compromisso e não gasto: no país são
+      ${c ? bi(308.6e9) : "R$ 308,6 bi"} empenhados contra
+      ${c ? bi(259.5e9) : "R$ 259,5 bi"} pagos.</p>
+    <ul class="lista-fatos">
+      <li><strong>Só 10,5% do dinheiro chega a um município.</strong> Das emendas
+        individuais, 76% do valor está declarado como <em>MÚLTIPLO</em> —
+        espalhado por cidades que o arquivo não nomeia. Por UF a cobertura é
+        97,1%, e é por isso que a leitura completa é estadual, não municipal.</li>
+      <li><strong>Existe um atalho falso, e ele fica fechado.</strong> Há um
+        arquivo por favorecido com município em 100% do dinheiro. Nele,
+        <strong>Brasília concentra 36,4%</strong> das emendas individuais do
+        país — porque é o endereço do Fundo Nacional de Saúde e dos
+        intermediários. Seria um mapa completo e falso. O município aqui vem
+        sempre da localidade de aplicação.</li>
+      <li><strong>"Emenda Pix" é a Transferência Especial.</strong> Cai direto na
+        conta do município, sem convênio, sem finalidade definida no orçamento e
+        sem acompanhamento federal. São R$ 32,2 bi — 23% das individuais — e têm
+        filtro próprio porque são o dinheiro sobre o qual se sabe menos.</li>
+      <li><strong>O mapa abre acumulado.</strong> Num ano só, um estado mostra
+        poucos municípios e o mapa sugere ausência de dinheiro onde há ausência
+        de rastreabilidade. Somando 2015 a 2026, 69% dos municípios do país
+        receberam alguma emenda rastreável.</li>
+    </ul>
+  </div>
+
+  <div class="cartaz">
+    <h2>Os índices, e quando eles não se comparam</h2>
+    <p class="cap">Os mesmos índices valem para todo candidato, cargo e estado —
+      é isso que permite comparar. Mas dois deles têm limite, e ignorá-lo produz
+      leitura errada.</p>
+    <div class="rolagem"><table id="t-indices"></table></div>
+    <div class="nota" style="margin-top:12px">
+      <strong>Municípios efetivos não se comparam entre estados.</strong> Roraima
+      tem 15 municípios e Minas tem 853; um estado com 15 não pode ter 16
+      efetivos. Por isso a <em>fração do estado</em> anda junto — é ela que é
+      comparável. E <strong>semelhança de cosseno não se compara entre
+      escalas</strong>: sobre 15 municípios ela é mecanicamente maior que sobre
+      853. Serve para ordenar dentro de um estado e pleito, não entre estados.
+    </div>
+  </div>
+
+  <div class="cartaz">
+    <h2>O que não fazemos</h2>
+    <ul class="lista-fatos">
+      <li><strong>Não preenchemos lacuna com zero.</strong> Município sem dado
+        aparece como sem dado. Zero e "não sei" são coisas diferentes, e
+        confundi-las é como um mapa mente.</li>
+      <li><strong>Não afrouxamos teste para ele passar.</strong> Quando um
+        denominador não fechou com o painel de referência, a saída foi separar o
+        que é verificável do que não é e publicar a divergência — não calibrar a
+        tolerância até o verde aparecer.</li>
+      <li><strong>Não chutamos pareamento.</strong> Um município goiano segue sem
+        par porque "pode ser" outro não é evidência. Par errado põe dinheiro no
+        lugar errado, que é pior que dinheiro sem lugar.</li>
+      <li><strong>Não escondemos o denominador.</strong> Toda tela que mostra uma
+        fatia diz de quanto ela é fatia.</li>
+    </ul>
+  </div>
+
+  <div class="cartaz">
+    <h2>Onde o juízo é nosso, e não do dado</h2>
+    <p class="cap">Três camadas não saem de arquivo nenhum. São classificação
+      editorial, discutível por natureza, e ficam em arquivos separados
+      justamente para poderem ser contestadas sem tocar no código:</p>
+    <ul class="lista-fatos">
+      <li><strong>Linhagem partidária</strong> — 58 siglas reduzidas a 31
+        linhagens. PFL vira DEM vira União Brasil. Sem isso a série de 24 anos se
+        desfaz; com isso, some a informação de que houve fusão. As duas visões
+        existem.</li>
+      <li><strong>Espectro ideológico</strong> — 32 partidos em cinco faixas. É o
+        que separa "aliado" de "adversário" na análise de rivais. Trocar o
+        arquivo troca a leitura.</li>
+      <li><strong>Os cortes da tipologia</strong> — concentração e domínio viram
+        quatro perfis a partir de limiares que escolhemos, não que o TSE
+        publicou.</li>
+    </ul>
+  </div>
+
+  <div class="cartaz">
+    <h2>Fale com a gente</h2>
+    <p class="cap">Achou um número errado? É o tipo de mensagem que mais nos
+      interessa. Todo número desta página sai de um script identificado, e uma
+      correção que se confirme entra na próxima publicação com o motivo
+      registrado.</p>
+    <p class="cap"><strong>Lastro — Inteligência Política.</strong></p>
+  </div>`;
+
+  tabela(document.getElementById("t-fontes"),
+    ["O quê","Fonte","Arquivo"],
+    [["Voto, 1998–2022","Tribunal Superior Eleitoral, dados abertos",
+      "votacao_candidato_munzona"],
+     ["Emenda federal, 2015–2026","Portal da Transparência",
+      "Emendas Parlamentares (arquivo único)"],
+     ["Emenda estadual (piloto)","Dados abertos do estado",
+      "Assembleia Legislativa, via SERINT em Goiás"],
+     ["Malha municipal e estadual","IBGE","API de malhas"],
+     ["População e área","IBGE","Censo 2022, agregado 4714"]]);
+
+  tabela(document.getElementById("t-perda"),
+    ["Pleito","Perda nacional","Pior estado"],
+    [["1998","1,98%","Pernambuco, 8,9%"],
+     ["2002","1,66%","Pernambuco, 10,0%"],
+     ["2006","1,12%","Rondônia, 9,5%"],
+     ["2010","0,44%","Rondônia, 9,4%"],
+     ["2014","0,13%","Rondônia, 3,1%"],
+     ["2018","0,14%","Rondônia, 2,9%"],
+     ["2022","0,12%","Rondônia, 2,9%"]]);
+
+  tabela(document.getElementById("t-indices"),
+    ["Índice","O que mede","Cuidado"],
+    [["Municípios efetivos","Equivale a concentrar tudo nesse tanto de municípios iguais (1/HHI)","Limitado pelo tamanho do estado"],
+     ["Fração do estado","Municípios efetivos sobre o total do estado","É o número comparável entre UFs"],
+     ["Domínio médio","Fatia do candidato onde ele tem voto","—"],
+     ["Contiguidade","Voto no reduto e nos municípios que fazem fronteira","Vem da malha completa, não da simplificada"],
+     ["Gini municipal","0 = espalhado por igual, 1 = tudo num lugar","—"],
+     ["Semelhança (cosseno)","Quanto dois mapas têm o mesmo formato","Não se compara entre estados de portes diferentes"]]);
+}
+
 /* ---------- navegação ---------- */
 function irPara(v) { vista = v; render(); }
 
-const VISTAS = ["nacional","estado","padroes","cruzamentos","emendas"];
+const VISTAS = ["nacional","estado","padroes","cruzamentos","emendas","sobre"];
 const SUB = {
   nacional: "Distribuição espacial do voto para deputado estadual em cada unidade da federação, de 1998 a 2022, município a município.",
   estado: "Onde cada deputado estadual eleito tirou voto, município a município, de 1998 a 2022.",
   padroes: "O que muda na geografia do voto ao longo de sete pleitos, e que tipo de deputado o estado elege.",
   cruzamentos: "Como os cinco cargos se relacionam no mesmo território, e o que anda junto entre eles.",
   emendas: "Para onde cada parlamentar mandou emenda individual, de 2015 a 2026 — e quanto disso dá para rastrear até o município.",
+  sobre: "De onde vem cada número, como ele é contado, e as armadilhas do dado público que este trabalho existe para desarmar.",
 };
 
 function render() {
@@ -1281,21 +1505,23 @@ function render() {
     b.setAttribute("aria-selected", String(b.dataset.v === vista));
 
   /* O título só nomeia o estado quando o que está na tela é de um estado. */
-  document.getElementById("titulo").textContent = vista === "nacional"
+  const semEstado = vista === "nacional" || vista === "sobre";
+  document.getElementById("titulo").textContent = semEstado
     ? "Cadê o Voto?" : `Cadê o Voto ${PREP[uf]||"em"} ${nomeUF.get(uf)||uf}?`;
   document.title = document.getElementById("titulo").textContent;
   document.getElementById("sub").textContent = SUB[vista];
   document.getElementById("atual").textContent =
     `${nomeUF.get(uf)||uf} · ${num(D.estados[uf].m.length)} municípios`;
   const g = document.getElementById("gaveta");
-  g.classList.toggle("oculto", vista === "nacional");
-  if (vista === "nacional") g.open = false;
+  g.classList.toggle("oculto", semEstado);
+  if (semEstado) g.open = false;
   for (const b of document.querySelectorAll("#estados button"))
     b.setAttribute("aria-pressed", String(b.dataset.uf === uf));
 
   gravarHash();
   ({nacional: pintarNacional, estado: pintarEstado, padroes: pintarPadroes,
-    cruzamentos: pintarCruzamentos, emendas: pintarEmendas}[vista])();
+    cruzamentos: pintarCruzamentos, emendas: pintarEmendas,
+    sobre: pintarSobre}[vista])();
   montarSumario(vista);
   observarSecoes(vista);
   esconderDica();

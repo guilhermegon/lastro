@@ -266,3 +266,17 @@ conforme o ano. Por isso as colunas são achadas por busca, não por nome fixo.
 E o pareamento de município volta, porque aqui o dado vem por **nome**, não por
 código IBGE como no federal. Cinco nomes seguem sem par (R$ 1,5 mi) e quatro
 deles não são município: "Estado de Goiás", "PMGO", "#N/D" e um nome de pessoa.
+
+## Marco 10 — a aba Sobre
+
+- [x] Aba **Sobre** com a procedência de cada número, as regras de contagem e as
+      armadilhas do dado público. Nove seções, três tabelas, dezesseis fatos.
+
+Ela existe por dois motivos, e o segundo é comercial. O primeiro: dado eleitoral
+é dado de interesse público sob o olhar de terceiros, e quem publica número tem
+de mostrar como contou. O segundo: **o produto não é o mapa, é a confiança no
+número** — e confiança que não se demonstra não se vende. A aba transforma o
+rigor, que é invisível numa demonstração, em coisa que se lê.
+
+Escrita dentro do gerador, e não num arquivo à parte, de propósito: se o
+pipeline mudar e o texto ficar, o texto vira mentira antiga.

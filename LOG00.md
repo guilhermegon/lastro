@@ -739,3 +739,23 @@ federais das estaduais, o que poupa trabalho.
 A ressalva do script vale para os dois: achar o conjunto não garante autor e
 município dentro. Em Goiás o conjunto certo estava lá e eu o descartei pelo nome
 do órgão. Abrir antes de prometer.
+
+## 2026-08-23 — a aba Sobre
+
+Consolida o que o projeto aprendeu apanhando: a coluna de votos que muda de ano,
+o "MÉDIA" que é eleito, os registros duplicados de 1998, o código de candidato
+que se repete entre pleitos, os 23 milhões de votos perdidos no pareamento e a
+tabela de perda por ano que mostra o viés sendo temporal e não espacial.
+
+Do lado da emenda: pago e não empenhado, os 76% em MÚLTIPLO, o atalho falso do
+favorecido com Brasília em 36,4%, a emenda Pix, e por que o mapa abre acumulado.
+
+E duas seções que valem tanto quanto os números: **"O que não fazemos"** —
+lacuna não vira zero, teste não afrouxa, pareamento não se chuta, denominador
+não some — e **"Onde o juízo é nosso"**, que declara as três camadas editoriais
+(linhagem partidária, espectro ideológico, cortes da tipologia) como discutíveis
+por natureza.
+
+Nove seções, três tabelas, dezesseis fatos. Zero falhas de contraste nos dois
+temas. O título volta a ser "Cadê o Voto?" e a gaveta de estados some, porque a
+aba não é de um estado.
