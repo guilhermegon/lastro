@@ -97,7 +97,8 @@ def montar_dados():
                        "e": ler("emendas.json"), "d": ler("demografia.json"),
                        "ve": ler("voto_emenda.json"),
                        "ee": ler("emendas_estadual.json"),
-                       "vb": ler("alego_verbas.json")}
+                       "vb": ler("alego_verbas.json"),
+                       "cv": ler("cldf_verbas.json")}
     return {
         "anos": indice["anos"],
         "ufs": indice["ufs"],
@@ -1574,6 +1575,73 @@ function tabelaPiloto() {
       reais(d.t), reais(d.m), pct(d.pg, 2), d.ms]));
 }
 
+/* ---------- segundo piloto: a Câmara Legislativa do DF ----------
+   A mesma verba, publicada em outro grão: nota a nota, com fornecedor e
+   categoria. O que o DF responde, Goiás não responde — e vice-versa. */
+function secaoDF() {
+  const v = (D.estados.DF || {}).cv;
+  if (!v) return "";
+  const t = v.total;
+  const classificado = t.valor - t.semCategoria;
+  const cob = v.cobertura || [];
+  const faixa = cob.length ? [Math.min(...cob.map(c=>c.deputados)),
+                              Math.max(...cob.map(c=>c.deputados))] : [0,0];
+  return `
+  <div class="cartaz">
+    <h2>Segundo piloto: o DF, e o que a verba compra</h2>
+    <p class="cap">A Câmara Legislativa do DF publica a <strong>mesma</strong>
+      verba indenizatória, mas em outro grão: <strong>nota a nota</strong>, com
+      fornecedor, CNPJ, data e categoria. São ${num(t.notas)} comprovantes de
+      ${v.periodo[0]} a ${v.periodo[1]}, ${reais(t.valor)}.</p>
+    <p class="cap">Goiás dá o total mensal com <em>apresentado</em> e
+      <em>indenizado</em>, e por isso revela a glosa. O DF dá o destino de cada
+      real, e por isso revela <strong>no que o dinheiro é gasto</strong>. Cada
+      casa responde o que a outra não responde.</p>
+    <div class="rolagem" style="margin-top:12px"><table id="t-cat"></table></div>
+    <p class="cap" style="margin-top:10px">A mesma categoria aparece com mais de
+      uma grafia no próprio arquivo — "Locação de Veículos" e "Locação de
+      Veículo" são linhas separadas. Não fundimos: juntar por semelhança de texto
+      arriscaria fundir categorias distintas, e o leitor consegue somar.</p>
+    <div class="nota" style="margin-top:12px">
+      <strong>${pct(t.pctSemCategoria,1)} do valor não tem categoria.</strong>
+      A tabela acima fala de ${reais(classificado)} — o que sobra dos
+      ${reais(t.valor)} totais. Sem esse denominador ao lado, as fatias
+      insinuariam uma cobertura que não existe.
+    </div>
+  </div>
+
+  <div class="cartaz">
+    <h2>O que NÃO dá para comparar entre as duas casas</h2>
+    <p class="cap">A tentação é dividir e comparar gasto médio por deputado. O
+      cálculo roda e dá um número — e o número seria falso.</p>
+    <ul class="lista-fatos">
+      <li><strong>O DF tem 24 distritais e o arquivo traz de ${faixa[0]} a
+        ${faixa[1]} por ano.</strong> Em ${v.periodo[1]} são ${
+          (cob.find(c=>c.ano===v.periodo[1])||{}).deputados ?? "poucos"}. Isso não
+        é rotatividade — é publicação parcial, e uma mediana por deputado sairia
+        de um subconjunto que muda de tamanho todo ano.</li>
+      <li><strong>Glosa não existe no DF.</strong> O arquivo traz o valor pago,
+        não o pedido. A diferença que em Goiás mede decisão administrativa aqui
+        não tem como ser calculada.</li>
+      <li><strong>Categoria não existe em Goiás.</strong> A série da ALEGO é
+        total mensal; não há como saber no que foi gasto.</li>
+      <li><strong>Então a comparação fica de fora.</strong> Publicar "o deputado
+        do DF gasta um terço do goiano" seria descrever a política de publicação
+        de cada casa achando que se está descrevendo comportamento.</li>
+    </ul>
+  </div>`;
+}
+
+function tabelaDF() {
+  const v = (D.estados.DF || {}).cv;
+  const el = document.getElementById("t-cat");
+  if (!v || !el) return;
+  const base = v.total.valor - v.total.semCategoria;
+  tabela(el, ["Categoria","Valor","% do classificado","Notas"],
+    (v.categorias || []).slice(0, 10).map(c => [
+      esc(c.n), reais(c.v), pct(base > 0 ? c.v/base*100 : 0, 1), num(c.q)]));
+}
+
 /* ---------- API: o que as assembleias publicam ----------
    Levantamento próprio. Não existe catálogo público de quais assembleias
    legislativas estaduais oferecem dado aberto, e a resposta importa para este
@@ -1643,6 +1711,7 @@ function pintarApi() {
   </div>
 
   ${secaoPiloto()}
+  ${secaoDF()}
 
   <div class="cartaz">
     <h2>O que dá para fazer com isso</h2>
@@ -1671,6 +1740,7 @@ function pintarApi() {
   </div>`;
 
   tabelaPiloto();
+  tabelaDF();
   tabela(document.getElementById("t-casas"),
     ["UF","Casa","Situação","Onde","Observação"],
     linhas.sort((a,b) => (b.conf - a.conf) || (b.n - a.n) || a.uf.localeCompare(b.uf))

@@ -856,3 +856,28 @@ antes de concluir. Com três tentativas, 91 meses.
 
 Verba indenizatória não é salário nem emenda: é custeio de gabinete, pago pela
 própria Assembleia. A tela diz isso, para que ninguém some com emenda.
+
+## 2026-08-23 — segundo piloto de API: o DF
+
+A CLDF publica a mesma verba indenizatória de Goiás, em grão muito mais fino:
+nota a nota, com fornecedor, CNPJ e categoria. 20.572 comprovantes, 2013–2024.
+
+**O achado que só esse grão permite:** entre o que tem categoria, o maior item
+da verba de gabinete é **divulgação de atividade parlamentar, 27,7%**.
+Publicidade do próprio mandato. Veículos vêm logo atrás com 28,9%, somando as
+duas grafias que o arquivo usa para a mesma coisa.
+
+**E duas ressalvas que quase viraram publicação errada.** Primeiro: 68,3% do
+valor não tem categoria — a tabela original falava de 31,7% do dinheiro sem
+dizer. Segundo, e pior: eu ia publicar que o deputado do DF gasta um terço do
+goiano. O cálculo roda e dá isso. Mas a CLDF tem 24 distritais e o arquivo traz
+de 3 a 26 por ano — publicação parcial, não rotatividade. Aquele número
+descreveria a política de publicação de cada casa achando que descreve
+comportamento de gasto.
+
+**Recusei a comparação e escrevi na tela por que.** É a mesma disciplina do
+mapa por favorecido, onde Brasília aparecia com 36% das emendas: existe um
+cálculo que roda, dá número redondo e é falso.
+
+Os dois pilotos param em lugares complementares — Goiás revela glosa e não
+revela destino; o DF revela destino e não revela glosa.

@@ -389,3 +389,34 @@ abaixo do que eu sondava. E a lógica de subdomínio cortava `ale.am.gov.br` par
 `am.gov.br`, levando a sonda ao **Executivo** num levantamento sobre o
 Legislativo. Corrigidos, o resultado foi de 0 para 4 APIs e de achados
 contaminados para achados da casa certa.
+
+### Segundo piloto: Distrito Federal (`41_cldf_verbas.py`)
+
+A CLDF publica a **mesma** verba indenizatória em outro grão: nota a nota, com
+fornecedor, CNPJ e categoria. 20.572 comprovantes, 2013–2024, R$ 25,5 mi.
+
+**O que só o DF responde:** no que a verba é gasta. Entre o que tem categoria,
+**divulgação de atividade parlamentar é 27,7%** — o maior item da verba de
+gabinete é publicidade do próprio mandato. Veículos, somando as duas grafias que
+o arquivo usa, dão 28,9%.
+
+**Duas ressalvas medidas, e a segunda recusa uma comparação:**
+
+- **68,3% do valor não tem categoria.** A tabela fala de R$ 8,1 mi dos R$ 25,5 mi.
+- **A CLDF tem 24 distritais e o arquivo traz de 3 a 26 por ano.** Não é
+  rotatividade, é publicação parcial. **Não comparamos gasto por deputado com
+  Goiás**: o cálculo roda e dá "um terço", e esse número descreveria a política
+  de publicação de cada casa achando que descreve comportamento.
+
+### Onde os dois pilotos param
+
+| | Goiás (ALEGO) | DF (CLDF) |
+|---|---|---|
+| grão | mês, por deputado | comprovante |
+| revela | **glosa** (apresentado − indenizado) | **no que gasta** (categoria, fornecedor) |
+| não revela | destino do gasto | valor pedido, logo nem glosa |
+
+Cada casa responde o que a outra não responde. Pernambuco tem API REST
+(`/api/v1/`) com `parlamentares` e `remuneracao`, que é outro conceito — não
+verba de gabinete. Minas tem Swagger, mas não achei a especificação por
+tentativa e parei de caçar.
