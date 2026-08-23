@@ -39,6 +39,17 @@ FONTE = cfg.PROCESSED / "emendas.csv"
 CASAMENTO = cfg.PROCESSED / "emendas_autor_deputado.csv"
 TOP_AUTORES = 80          # por UF e por ano; o resto entra so' no agregado
 
+# "Emenda Pix" e' como se chama a Transferencia Especial: o dinheiro cai direto
+# na conta do municipio, sem convenio, sem finalidade definida no orcamento e
+# sem que o governo federal acompanhe a aplicacao. Separar isso do resto nao e'
+# detalhe de classificacao - e' a diferenca entre dinheiro com destino declarado
+# e dinheiro sem.
+PIX = "Transferências Especiais"
+
+
+def eh_pix(tipo):
+    return PIX.lower() in str(tipo).lower()
+
 
 def indices_uf():
     """Mesma ordenacao que base.json usa, para os indices baterem."""
@@ -82,9 +93,11 @@ def main():
     poruf = []
     for (uf, ano), g in d[d["uf"].notna()].groupby(["uf", "ano"]):
         com = g[g["cod_ibge"].notna()]
+        gp = g[g["tipo"].map(eh_pix)]
         poruf.append({
             "uf": uf, "ano": int(ano),
             "pago": round(float(g["pago"].sum()), 2),
+            "pix": round(float(gp["pago"].sum()), 2),
             "emp": round(float(g["empenhado"].sum()), 2),
             "n": int(g["cod_emenda"].nunique()),
             "aut": int(g["autor_norm"].nunique()),
@@ -97,6 +110,7 @@ def main():
         "uf": sorted(poruf, key=lambda r: (r["uf"], r["ano"])),
         "cobertura": {
             "pago": round(float(d["pago"].sum()), 2),
+            "pix": round(float(d.loc[d["tipo"].map(eh_pix), "pago"].sum()), 2),
             "pagoUF": round(float(d.loc[d["uf"].notna(), "pago"].sum()), 2),
             "pagoMun": round(float(d.loc[d["cod_ibge"].notna(), "pago"].sum()), 2),
             "nAutores": int(d["autor_norm"].nunique()),
@@ -128,6 +142,12 @@ def main():
             for c, v in ga.groupby("cod_ibge")["pago"].sum().items():
                 tot_mun[pos[c]] = v
 
+            # o mesmo vetor municipal, so' com o que e' Pix
+            tot_pix = np.zeros(n)
+            gp = ga[ga["tipo"].map(eh_pix)]
+            for c, v in gp.groupby("cod_ibge")["pago"].sum().items():
+                tot_pix[pos[c]] = v
+
             fichas = []
             for autor, gg in ga.groupby("autor_norm"):
                 por_mun = gg.groupby("cod_ibge")["pago"].sum()
@@ -136,9 +156,15 @@ def main():
                     continue
                 v = por_mun.to_numpy(dtype=float)
                 p = v / v.sum()
+                pix = gg[gg["tipo"].map(eh_pix)]
+                por_pix = pix.groupby("cod_ibge")["pago"].sum()
+                por_pix = por_pix[por_pix > 0]
                 fichas.append({
                     "n": str(gg["autor"].iloc[0]),
                     "t": round(float(v.sum()), 2),
+                    "pix": round(float(pix["pago"].sum()), 2),
+                    "pxi": [pos[c] for c in por_pix.index],
+                    "pxv": [round(float(x), 2) for x in por_pix.to_numpy()],
                     "emp": round(float(gg["empenhado"].sum()), 2),
                     "ne": int(gg["cod_emenda"].nunique()),
                     "nm": int(len(v)),
@@ -158,6 +184,7 @@ def main():
             todas = ga["pago"].sum()
             blocos[str(int(ano))] = {
                 "totalMun": [round(float(x), 2) for x in tot_mun],
+                "totalPix": [round(float(x), 2) for x in tot_pix],
                 "fichas": fichas[:TOP_AUTORES],
                 "pleito": {
                     "pago": round(float(todas), 2),
@@ -165,14 +192,19 @@ def main():
                     "nAutores": int(ga["autor_norm"].nunique()),
                     "nEmendas": int(ga["cod_emenda"].nunique()),
                     "nMun": int(ga["cod_ibge"].nunique()),
+                    "pix": round(float(gp["pago"].sum()), 2),
+                    "nPix": int(gp["cod_emenda"].nunique()),
                     "cortados": max(0, len(fichas) - TOP_AUTORES),
                 },
             }
         # o denominador da UF inteira, para a tela poder declarar a cobertura
         tudo_uf = d[d["uf"] == uf]
+        pix_uf = tudo_uf[tudo_uf["tipo"].map(eh_pix)]
         obj = {"anos": blocos, "cobertura": {
             "pago": round(float(tudo_uf["pago"].sum()), 2),
-            "pagoMun": round(float(g["pago"].sum()), 2)}}
+            "pagoMun": round(float(g["pago"].sum()), 2),
+            "pix": round(float(pix_uf["pago"].sum()), 2),
+            "pixMun": round(float(g[g["tipo"].map(eh_pix)]["pago"].sum()), 2)}}
         p = WEB / uf / "emendas.json"
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(json.dumps(obj, separators=(",", ":"), ensure_ascii=False),

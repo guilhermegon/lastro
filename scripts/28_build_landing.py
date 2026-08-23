@@ -147,7 +147,9 @@ PAGINA = r"""<title>Cadê o Voto?</title>
 
 <main class="wrap">
   <div id="v-nacional">
-    <div class="painel" style="grid-template-columns:1fr">
+    <div class="painel">
+      <aside class="rail"><div class="rail-bloco sumario">
+        <p class="rail-titulo">Nesta aba</p><ol id="sum-nacional"></ol></div></aside>
       <div class="conteudo">
         <div class="cartaz">
           <h2>Concentração do voto por estado</h2>
@@ -192,21 +194,34 @@ PAGINA = r"""<title>Cadê o Voto?</title>
                  aria-label="Buscar eleito">
           <div class="lista" id="lista"></div>
         </div>
+        <div class="rail-bloco sumario">
+          <p class="rail-titulo">Nesta aba</p><ol id="sum-estado"></ol></div>
       </aside>
       <div class="conteudo" id="detalhe"></div>
     </div>
   </div>
 
-  <div id="v-padroes" class="oculto"><div class="conteudo" id="padroes"
-       style="padding:20px 0 40px"></div></div>
-  <div id="v-cruzamentos" class="oculto"><div class="conteudo" id="cruzamentos"
-       style="padding:20px 0 40px"></div></div>
+  <div id="v-padroes" class="oculto"><div class="painel">
+    <aside class="rail"><div class="rail-bloco sumario">
+      <p class="rail-titulo">Nesta aba</p><ol id="sum-padroes"></ol></div></aside>
+    <div class="conteudo" id="padroes"></div></div></div>
+
+  <div id="v-cruzamentos" class="oculto"><div class="painel">
+    <aside class="rail"><div class="rail-bloco sumario">
+      <p class="rail-titulo">Nesta aba</p><ol id="sum-cruzamentos"></ol></div></aside>
+    <div class="conteudo" id="cruzamentos"></div></div></div>
 
   <div id="v-emendas" class="oculto">
     <div class="painel">
       <aside class="rail">
         <div class="rail-bloco rail-primario">
           <p class="rail-titulo" id="rotAutores">Autor(a)</p>
+          <div class="seg" role="group" aria-label="Tipo de emenda" id="emTipo"
+               style="margin-bottom:8px">
+            <button data-t="todas" aria-pressed="true">Todas</button>
+            <button data-t="pix">Só Pix</button>
+            <button data-t="def">Sem Pix</button>
+          </div>
           <div class="seg" role="group" aria-label="Medida" id="emMedida"
                style="margin-bottom:8px">
             <button data-m="abs" aria-pressed="true">R$</button>
@@ -217,6 +232,8 @@ PAGINA = r"""<title>Cadê o Voto?</title>
                style="margin-bottom:8px"></div>
           <div class="lista" id="listaAutores"></div>
         </div>
+        <div class="rail-bloco sumario">
+          <p class="rail-titulo">Nesta aba</p><ol id="sum-emendas"></ol></div>
       </aside>
       <div class="conteudo" id="emendas"></div>
     </div>
@@ -376,7 +393,7 @@ function pintarNacional() {
         `${dec(u.ef||0,1)} municípios efetivos de ${num(u.nmun)}<br>` +
         `<span style="color:var(--accent)">clique para abrir</span>`
       : "elege deputado distrital, não estadual");
-  }, i => { const s = SIG_BR[i]; if (m.has(s)) { uf = s; sel = 0; irPara("estado"); } });
+  }, i => { const s = SIG_BR[i]; if (m.has(s)) trocarUF(s); });
 
   const linhas = [...m.values()].map(a => ({...a, nome: nomeUF.get(a.uf)||a.uf}));
   tabela(document.getElementById("tconc"),
@@ -394,8 +411,20 @@ function pintarNacional() {
 
 document.querySelector("main").addEventListener("click", e => {
   const b = e.target.closest("button.ligacao");
-  if (b) { uf = b.dataset.uf; sel = 0; irPara("estado"); }
+  if (b) trocarUF(b.dataset.uf);
 });
+
+/* Trocar de estado preserva a aba aberta. Só o Nacional é exceção: lá o clique
+   num estado é um pedido para entrar nele, e "entrar" quer dizer a tela do
+   estado. Das outras abas, quem troca de estado quer a MESMA leitura noutro
+   lugar — o Emendômetro de São Paulo, não a ficha de um deputado paulista. */
+function trocarUF(novo) {
+  if (!novo || !D.estados[novo]) return;
+  uf = novo; sel = 0; emAutor = -1; filtro = "";
+  const busca = document.getElementById("busca");
+  if (busca) busca.value = "";
+  irPara(vista === "nacional" ? "estado" : vista);
+}
 
 /* ---------- estado ---------- */
 const projCache = new Map();
@@ -526,10 +555,10 @@ const ind = (rot, val, exp) =>
 document.getElementById("lista").addEventListener("click", e => {
   const b = e.target.closest("button[data-i]");
   if (!b) return;
-  sel = +b.dataset.i; gravarHash(); pintarEstado();
+  sel = +b.dataset.i; gravarHash(); pintarEstado(); montarSumario("estado"); observarSecoes("estado");
 });
 document.getElementById("busca").addEventListener("input", e => {
-  filtro = e.target.value; sel = 0; pintarEstado();
+  filtro = e.target.value; sel = 0; pintarEstado(); montarSumario("estado"); observarSecoes("estado");
 });
 
 /* ---------- série temporal ----------
@@ -733,7 +762,15 @@ function pintarCruzamentos() {
    O mapa abre acumulado por causa do segundo número — num ano só, um estado
    como Goiás mostra 17 municípios e o mapa sugere ausência de dinheiro onde o
    que há é ausência de rastreabilidade. */
-let emAno = "todos", emAutor = -1, emMedida = "abs";
+let emAno = "todos", emAutor = -1, emMedida = "abs", emTipo = "todas";
+
+/* "Emenda Pix" é o apelido da Transferência Especial: o dinheiro cai direto na
+   conta do município, sem convênio, sem finalidade definida no orçamento e sem
+   que o governo federal acompanhe a aplicação. Não é uma subcategoria contábil
+   — é a diferença entre dinheiro com destino declarado e dinheiro sem, e por
+   isso vale um filtro próprio e não uma linha numa tabela. */
+const NOME_TIPO = {todas: "todas as emendas individuais",
+                   pix: "só emendas Pix", def: "só emendas com finalidade definida"};
 
 /* Reais absolutos, por habitante e por km2 respondem coisas diferentes, e
    nenhuma e' a leitura certa sozinha. O mapa em reais e' quase um mapa de
@@ -780,30 +817,52 @@ function emAgregado() {
   const e = D.estados[uf].e, n = D.estados[uf].m.length;
   const bl = emBlocos();
   if (!bl || !bl.length) return null;
-  const tot = new Array(n).fill(0);
+  const tot = new Array(n).fill(0), totPix = new Array(n).fill(0);
   const por = new Map();
-  let pago = 0, emendas = 0, cortados = 0;
+  let pago = 0, pagoPix = 0, emendas = 0, emendasPix = 0, cortados = 0;
   for (const b of bl) {
     b.totalMun.forEach((v,i) => tot[i] += v);
-    pago += b.pleito.pago; emendas += b.pleito.nEmendas;
+    (b.totalPix || []).forEach((v,i) => totPix[i] += v);
+    pago += b.pleito.pago; pagoPix += b.pleito.pix || 0;
+    emendas += b.pleito.nEmendas; emendasPix += b.pleito.nPix || 0;
     cortados += b.pleito.cortados || 0;
     for (const f of b.fichas) {
       let a = por.get(f.n);
-      if (!a) { a = {n:f.n, t:0, ne:0, el:f.el, ufEl:f.ufEl, amb:f.amb,
-                     fn:f.fn, mun:new Map()}; por.set(f.n, a); }
-      a.t += f.t; a.ne += f.ne;
+      if (!a) { a = {n:f.n, t:0, pix:0, ne:0, el:f.el, ufEl:f.ufEl, amb:f.amb,
+                     fn:f.fn, mun:new Map(), munPix:new Map()}; por.set(f.n, a); }
+      a.t += f.t; a.pix += f.pix || 0; a.ne += f.ne;
       f.mi.forEach((idx,k) => a.mun.set(idx, (a.mun.get(idx)||0) + f.mv[k]));
+      (f.pxi || []).forEach((idx,k) => a.munPix.set(idx, (a.munPix.get(idx)||0) + f.pxv[k]));
     }
   }
+  /* "Sem Pix" é subtração, não uma terceira soma: o arquivo guarda o total e a
+     parte Pix, e o resto é a diferença. Guardar os três seria a chance de os
+     três discordarem. */
+  const recorte = (todos, pix) => emTipo === "pix" ? pix
+    : emTipo === "def" ? todos.map((v,i) => Math.max(0, v - pix[i])) : todos;
   const autores = [...por.values()].map(a => {
-    const v = [...a.mun.values()], soma = v.reduce((x,y)=>x+y,0);
+    const m = new Map();
+    for (const [i,x] of a.mun) {
+      const px = a.munPix.get(i) || 0;
+      const val = emTipo === "pix" ? px : emTipo === "def" ? Math.max(0, x - px) : x;
+      if (val > 0) m.set(i, val);
+    }
+    const v = [...m.values()], soma = v.reduce((x,y)=>x+y,0) || 1;
     const p = v.map(x => x/soma);
-    return {...a, nm: v.length,
-      ef: +(1/p.reduce((x,y)=>x+y*y,0)).toFixed(2),
-      t1: +(Math.max(...p)*100).toFixed(2)};
-  }).sort((a,b)=>b.t-a.t);
-  return {tot, autores, pago, emendas, cortados,
-          nMun: tot.filter(v=>v>0).length, cobertura: e.cobertura};
+    return {...a, mun: m, nm: v.length,
+      total: emTipo === "pix" ? a.pix
+           : emTipo === "def" ? Math.max(0, a.t - a.pix) : a.t,
+      ef: v.length ? +(1/p.reduce((x,y)=>x+y*y,0)).toFixed(2) : 0,
+      t1: v.length ? +(Math.max(...p)*100).toFixed(2) : 0};
+  }).filter(a => a.total > 0).sort((a,b)=>b.total-a.total);
+  const vals = recorte(tot, totPix);
+  return {tot: vals, totTodas: tot, totPix, autores, cortados,
+          pago: emTipo === "pix" ? pagoPix
+              : emTipo === "def" ? Math.max(0, pago - pagoPix) : pago,
+          pagoTodas: pago, pagoPix,
+          emendas: emTipo === "pix" ? emendasPix
+                 : emTipo === "def" ? Math.max(0, emendas - emendasPix) : emendas,
+          nMun: vals.filter(v=>v>0).length, cobertura: e.cobertura};
 }
 
 function pintarEmendas() {
@@ -831,11 +890,13 @@ function pintarEmendas() {
     `<span>Todos os autores</span><span class="lv">${reais(ag.pago)}</span></button>` +
     ag.autores.map((a,i) => `<button data-i="${i}"${i===emAutor?' aria-pressed="true"':''}>` +
       `<span>${esc(a.n)}${a.el?'':' <span class="lv">·</span>'}</span>` +
-      `<span class="lv">${reais(a.t)}</span></button>`).join("");
+      `<span class="lv">${reais(a.total)}</span></button>`).join("");
 
   const a = emAutor >= 0 ? ag.autores[emAutor] : null;
   const brutos = a ? (() => { const v = new Array(n).fill(0);
       for (const [i,x] of a.mun) v[i] = x; return v; })() : ag.tot;
+  for (const b of document.querySelectorAll("#emTipo button"))
+    b.setAttribute("aria-pressed", String(b.dataset.t === emTipo));
   const med = MEDIDA[emMedida] || MEDIDA.abs;
   const vals = normalizar(brutos, emMedida);
   const cortes = quantis(vals);
@@ -860,8 +921,11 @@ function pintarEmendas() {
   </div>
 
   <div class="cartoes">
-    ${cartao("Rastreável ao município", reais(a ? a.t : ag.pago), a ? esc(a.n) : `de ${reais(ag.cobertura.pago)} no estado`)}
+    ${cartao("Rastreável ao município", reais(a ? a.total : ag.pago), a ? esc(a.n) : `de ${reais(ag.cobertura.pago)} no estado`)}
     ${cartao("Emendas", num(a ? a.ne : ag.emendas), emAno==="todos" ? "2015–2026" : `exercício ${emAno}`)}
+    ${emTipo === "todas" ? cartao("Sendo Pix",
+        pct(ag.pagoTodas > 0 ? (a ? a.pix/Math.max(a.t,1) : ag.pagoPix/ag.pagoTodas)*100 : 0, 1),
+        reais(a ? a.pix : ag.pagoPix) + " em transferência especial") : ""}
     ${cartao("Municípios alcançados", num(a ? a.nm : ag.nMun), "de "+num(n))}
     ${cartao("Autores", num(ag.autores.length), a ? "" : "com emenda no estado")}
     ${a ? cartao("Municípios efetivos", dec(a.ef,1), "concentração da carteira") : ""}
@@ -870,6 +934,14 @@ function pintarEmendas() {
 
   <div class="cartaz">
     <h2>Para onde foi o dinheiro${a ? " de "+esc(a.n) : ""}</h2>
+    ${emTipo !== "todas" ? `<div class="nota" style="margin-bottom:12px">
+      <strong>${emTipo === "pix" ? "Só emendas Pix." : "Sem as emendas Pix."}</strong>
+      A Transferência Especial — o apelido é "Pix" — cai direto na conta do
+      município, sem convênio, sem finalidade definida no orçamento e sem que o
+      governo federal acompanhe a aplicação. ${emTipo === "pix"
+        ? "É o dinheiro sobre o qual se sabe menos: quem mandou e para onde, e mais nada."
+        : "O que sobra aqui é o dinheiro que tem destino declarado."}
+    </div>` : ""}
     <p class="cap">${med.rot} em cada município${emAno==="todos" ? ", somando 2015 a 2026" : `, exercício de ${emAno}`}.
       ${emMedida === "abs"
         ? "Em reais absolutos o mapa é quase um mapa de população — cidade grande recebe mais porque é grande. Troque a medida à esquerda para inverter o retrato."
@@ -958,20 +1030,26 @@ function pintarEmendas() {
   }
 }
 
+document.getElementById("emTipo").addEventListener("click", e => {
+  const b = e.target.closest("button[data-t]");
+  if (!b) return;
+  emTipo = b.dataset.t; emAutor = -1;
+  pintarEmendas(); montarSumario("emendas"); observarSecoes("emendas");
+});
 document.getElementById("emMedida").addEventListener("click", e => {
   const b = e.target.closest("button[data-m]");
   if (!b) return;
-  emMedida = b.dataset.m; pintarEmendas();
+  emMedida = b.dataset.m; pintarEmendas(); montarSumario("emendas"); observarSecoes("emendas");
 });
 document.getElementById("emAnos").addEventListener("click", e => {
   const b = e.target.closest("button[data-a]");
   if (!b) return;
-  emAno = b.dataset.a; emAutor = -1; pintarEmendas();
+  emAno = b.dataset.a; emAutor = -1; pintarEmendas(); montarSumario("emendas"); observarSecoes("emendas");
 });
 document.getElementById("listaAutores").addEventListener("click", e => {
   const b = e.target.closest("button[data-i]");
   if (!b) return;
-  emAutor = +b.dataset.i; pintarEmendas();
+  emAutor = +b.dataset.i; pintarEmendas(); montarSumario("emendas"); observarSecoes("emendas");
 });
 
 /* ---------- o dinheiro segue o voto? ----------
@@ -1036,6 +1114,74 @@ function pintarCruzamento() {
       d.cob == null ? "—" : pct(d.cob,1)]));
 }
 
+/* ---------- sumário ----------
+   Montado a partir dos <h2> que a aba acabou de desenhar, e não de uma lista
+   escrita à mão: as abas trocam de conteúdo conforme estado, ano e autor, e um
+   índice fixo ficaria mentindo assim que uma seção sumisse. */
+function montarSumario(vista) {
+  const ol = document.getElementById("sum-" + vista);
+  const cx = document.querySelector("#v-" + vista + " .conteudo");
+  if (!ol || !cx) return;
+  const titulos = [...cx.querySelectorAll(".cartaz > h2")];
+  ol.innerHTML = titulos.map((h, i) => {
+    h.id = h.id || `s-${vista}-${i}`;
+    return `<li><button data-alvo="${h.id}">${esc(h.textContent)}</button></li>`;
+  }).join("");
+  if (ol.dataset.ligado) return;
+  ol.dataset.ligado = "1";
+  ol.addEventListener("click", e => {
+    const b = e.target.closest("button[data-alvo]");
+    if (!b) return;
+    rolarAte(document.getElementById(b.dataset.alvo));
+  });
+}
+
+/* Rolagem própria em vez de scrollIntoView({behavior:"smooth"}).
+   Motivo medido, não preferência: dependendo de como a página é servida, quem
+   rola é o <body> e não o <html>, e o smooth sobre o body simplesmente não
+   acontece — o clique não saía do lugar. Aqui calculamos o destino, tentamos
+   rolar e conferimos se saiu; se não saiu, empurramos os dois elementos na mão.
+   E respeitamos prefers-reduced-motion, que é o único caso em que não animar
+   é o comportamento certo. */
+function rolarAte(alvo) {
+  if (!alvo) return;
+  const topo = () => window.pageYOffset || document.documentElement.scrollTop
+                     || document.body.scrollTop || 0;
+  const antes = topo();
+  const y = Math.max(0, alvo.getBoundingClientRect().top + antes - 12);
+  const suave = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  try { window.scrollTo({top: y, behavior: suave ? "smooth" : "auto"}); }
+  catch (_) { window.scrollTo(0, y); }
+  setTimeout(() => {
+    if (Math.abs(topo() - antes) < 2 && Math.abs(y - antes) > 2) {
+      document.documentElement.scrollTop = y;
+      document.body.scrollTop = y;
+    }
+  }, 60);
+}
+
+/* Marca no sumário a seção que está sendo lida. Um índice sem posição atual
+   diz para onde ir e não diz onde se está, que é metade do serviço. */
+const observador = "IntersectionObserver" in window
+  ? new IntersectionObserver(entradas => {
+      for (const en of entradas) {
+        if (!en.isIntersecting) continue;
+        const b = document.querySelector(`.sumario button[data-alvo="${en.target.id}"]`);
+        if (!b) continue;
+        for (const o of b.closest("ol").querySelectorAll("button"))
+          o.removeAttribute("aria-current");
+        b.setAttribute("aria-current", "true");
+      }
+    }, {rootMargin: "-10% 0px -75% 0px"})
+  : null;
+
+function observarSecoes(vista) {
+  if (!observador) return;
+  observador.disconnect();
+  const cx = document.querySelector("#v-" + vista + " .conteudo");
+  if (cx) for (const h of cx.querySelectorAll(".cartaz > h2")) observador.observe(h);
+}
+
 /* ---------- navegação ---------- */
 function irPara(v) { vista = v; render(); }
 
@@ -1070,6 +1216,8 @@ function render() {
   gravarHash();
   ({nacional: pintarNacional, estado: pintarEstado, padroes: pintarPadroes,
     cruzamentos: pintarCruzamentos, emendas: pintarEmendas}[vista])();
+  montarSumario(vista);
+  observarSecoes(vista);
   esconderDica();
 }
 
@@ -1085,9 +1233,8 @@ document.getElementById("estados").innerHTML = D.ufs
 document.getElementById("estados").addEventListener("click", e => {
   const b = e.target.closest("button[data-uf]");
   if (!b) return;
-  uf = b.dataset.uf; sel = 0; filtro = ""; document.getElementById("busca").value = "";
+  trocarUF(b.dataset.uf);
   document.getElementById("gaveta").open = false;
-  irPara("estado");
 });
 
 document.getElementById("anos").innerHTML = D.anos

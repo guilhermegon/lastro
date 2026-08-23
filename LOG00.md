@@ -631,3 +631,35 @@ desceu para dentro das abas de estado, sumindo no Nacional, onde o mapa já é o
 seletor.
 
 Artefato em 15,2 MB de 16.
+
+## 2026-08-23 — sumário, emenda Pix e dois defeitos de navegação
+
+**Sumário clicável nas cinco abas**, no trilho, montado a partir dos `<h2>` que a
+aba acabou de desenhar — não de uma lista escrita à mão. As abas trocam de
+conteúdo conforme estado, ano, autor e tipo; um índice fixo mentiria assim que
+uma seção sumisse. Ele marca a seção em leitura e acompanha a rolagem.
+
+Três abas não tinham trilho nenhum (Nacional, Padrões, Cruzamentos) e ganharam.
+
+**Um defeito medido, não suposto.** `scrollIntoView({behavior:"smooth"})` não
+rolava nada. Servida como fragmento, a página cai em modo quirks e quem rola é o
+`<body>`, não o `<html>` — e smooth sobre o body simplesmente não acontece. Agora
+a posição é calculada, a rolagem é conferida, e se não saiu do lugar os dois
+elementos são empurrados na mão. `prefers-reduced-motion` continua respeitado.
+
+**Emenda Pix separada.** É o apelido da Transferência Especial: cai direto na
+conta do município, sem convênio, sem finalidade definida e sem acompanhamento
+federal. São **R$ 32,2 bi, 23% das emendas individuais** do país. Filtro de três
+estados — todas, só Pix, sem Pix — e o "sem Pix" é subtração, não uma terceira
+soma gravada: guardar os três seria a chance de os três discordarem. Em Goiás a
+soma fecha: R$ 15,4 mi + R$ 300,8 mi = R$ 316,2 mi.
+
+O mapa do Pix é outro mapa. Em Goiás o geral tem Goiânia no topo; o Pix tem
+Planaltina.
+
+**E a troca de estado estava forçando a aba Estado.** Quem estava no Emendômetro
+de Goiás e escolhia São Paulo caía na ficha de um deputado paulista. Agora a aba
+é preservada — só o Nacional é exceção, porque lá clicar num estado é pedir para
+entrar nele.
+
+Artefato em 15,7 MB de 16.
