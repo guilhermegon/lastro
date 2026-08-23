@@ -86,9 +86,10 @@ def main():
 
     # o agregado nacional de emendas viaja junto: 35 KB, e e' o unico arquivo
     # do Emendometro que a tela precisa antes de escolher um estado
-    br = ORIGEM / "emendas_br.json"
-    if br.exists():
-        shutil.copy2(br, DESTINO / "emendas_br.json")
+    for solto in ("emendas_br.json", "assembleias.json"):
+        f = ORIGEM / solto
+        if f.exists():
+            shutil.copy2(f, DESTINO / solto)
 
     indice = {
         "anos": cfg.ANOS,

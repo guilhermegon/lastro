@@ -107,6 +107,8 @@ def montar_dados():
         "estados": estados,
         "emendasBR": json.loads((DADOS / "emendas_br.json").read_text(encoding="utf-8"))
                      if (DADOS / "emendas_br.json").exists() else None,
+        "assembleias": json.loads((DADOS / "assembleias.json").read_text(encoding="utf-8"))
+                       if (DADOS / "assembleias.json").exists() else None,
     }
 
 
@@ -135,6 +137,7 @@ PAGINA = r"""<title>Cadê o Voto?</title>
     <button role="tab" data-v="padroes" aria-selected="false">Padrões</button>
     <button role="tab" data-v="cruzamentos" aria-selected="false">Cruzamentos</button>
     <button role="tab" data-v="emendas" aria-selected="false">Emendômetro</button>
+    <button role="tab" data-v="api" aria-selected="false">API</button>
     <button role="tab" data-v="sobre" aria-selected="false">Sobre</button>
   </div>
 
@@ -212,6 +215,12 @@ PAGINA = r"""<title>Cadê o Voto?</title>
     <aside class="rail"><div class="rail-bloco sumario">
       <p class="rail-titulo">Nesta aba</p><ol id="sum-cruzamentos"></ol></div></aside>
     <div class="conteudo" id="cruzamentos"></div></div></div>
+
+  <div id="v-api" class="oculto"><div class="painel">
+    <aside class="rail"><div class="rail-bloco sumario">
+      <p class="rail-titulo">Nesta aba</p><ol id="sum-api"></ol></div></aside>
+    <div class="conteudo" id="api"></div>
+  </div></div>
 
   <div id="v-sobre" class="oculto"><div class="painel">
     <aside class="rail"><div class="rail-bloco sumario">
@@ -1485,16 +1494,120 @@ function pintarSobre() {
      ["Semelhança (cosseno)","Quanto dois mapas têm o mesmo formato","Não se compara entre estados de portes diferentes"]]);
 }
 
+/* ---------- API: o que as assembleias publicam ----------
+   Levantamento próprio. Não existe catálogo público de quais assembleias
+   legislativas estaduais oferecem dado aberto, e a resposta importa para este
+   projeto: foi procurando emenda estadual que a pergunta apareceu. */
+function pintarApi() {
+  const alvo = document.getElementById("api");
+  const A = D.assembleias;
+  if (!A) { alvo.innerHTML = `<p class="indice exp">Levantamento não publicado.</p>`; return; }
+  const linhas = Object.entries(A).map(([uf, r]) => ({uf, ...r}));
+  const comPortal = linhas.filter(r => r.n > 0);
+  const confirmadas = linhas.filter(r => r.conf);
+  const sem = linhas.filter(r => !r.n);
+
+  alvo.innerHTML = `
+  <div class="cartaz">
+    <h2>Quais assembleias publicam dado aberto</h2>
+    <p class="cap">Sondamos as 27 casas legislativas estaduais em agosto de
+      2026, tentando os caminhos onde portais legislativos brasileiros
+      costumam guardar dado aberto. Não existe catálogo público disso — este
+      levantamento é nosso, e a pergunta apareceu procurando emenda estadual.</p>
+    <div class="indices">
+      ${ind("Casas sondadas", num(linhas.length), "as 26 assembleias e a Câmara Legislativa do DF")}
+      ${ind("Com portal respondendo", num(comPortal.length), `de ${linhas.length}`)}
+      ${ind("API confirmada à mão", num(confirmadas.length), "abertas uma a uma")}
+      ${ind("Nada nos caminhos testados", num(sem.length), "o que não é prova de ausência")}
+    </div>
+    <div class="nota" style="margin-top:14px">
+      <strong>Responder não é publicar, e publicar não é publicar o que importa.</strong>
+      A sonda mede a existência da porta, não o que há atrás dela. Goiás tem API
+      documentada com dezesseis assuntos e <em>nenhum</em> é emenda parlamentar —
+      só se descobre abrindo. Da mesma forma, "nada nos caminhos testados" quer
+      dizer que não achamos, não que não exista.
+    </div>
+  </div>
+
+  <div class="cartaz">
+    <h2>Casa por casa</h2>
+    <p class="cap">Endereço onde o dado apareceu, quando apareceu. As linhas com
+      observação foram abertas manualmente.</p>
+    <div class="rolagem"><table id="t-casas"></table></div>
+  </div>
+
+  <div class="cartaz">
+    <h2>O que elas publicam — e o que nenhuma publica</h2>
+    <p class="cap">Abrindo as que respondem, o padrão é nítido e vale mais que a
+      contagem.</p>
+    <ul class="lista-fatos">
+      <li><strong>A assembleia publica a si mesma.</strong> Os assuntos que
+        aparecem são folha de pagamento, diárias, verbas indenizatórias,
+        licitações, contratos, convênios e a execução do próprio orçamento da
+        Casa. É a assembleia como empregadora e compradora.</li>
+      <li><strong>Nenhuma publica emenda parlamentar.</strong> Em Goiás, os
+        dezesseis assuntos da API não incluem emenda; os endereços plausíveis
+        (<span class="num">emendas</span>,
+        <span class="num">emendas-parlamentares</span>,
+        <span class="num">indicacoes</span>) devolvem 404. Em Minas, a vitrine do
+        portal não menciona emenda.</li>
+      <li><strong>E isso é coerência institucional, não omissão.</strong> A
+        emenda é indicação de deputado sobre o orçamento do <em>Executivo</em>, e
+        quem a executa são as secretarias. O dado nasce do outro lado — por isso
+        o Emendômetro estadual sai de portais do governo do estado, não das
+        assembleias.</li>
+      <li><strong>O legislativo é mais opaco que o executivo nesse recorte.</strong>
+        Dos portais do Executivo, cinco tinham conjunto de emenda em formato
+        tabular. Das assembleias, nenhuma.</li>
+    </ul>
+  </div>
+
+  <div class="cartaz">
+    <h2>O que dá para fazer com isso</h2>
+    <p class="cap">O levantamento não entrega emenda, mas entrega outra coisa —
+      e vale dizer o que, para não parecer que foi trabalho perdido.</p>
+    <ul class="lista-fatos">
+      <li><strong>Custo de gasto legislativo comparado.</strong> Folha, diárias e
+        verba indenizatória por deputado são publicados por várias casas no mesmo
+        formato conceitual. Dá para comparar quanto custa um deputado estadual
+        entre estados — que ninguém compila.</li>
+      <li><strong>Um mapa de transparência com método.</strong> Dezenove de 27
+        respondem alguma coisa; quatro têm API confirmada. Esse número é aferível
+        e repetível, ao contrário dos selos de transparência que circulam sem
+        critério publicado.</li>
+      <li><strong>A confirmação de onde procurar.</strong> Quem for atrás de
+        emenda estadual em qualquer estado sabe agora que a assembleia não é o
+        caminho, e economiza o dia que gastamos descobrindo.</li>
+    </ul>
+    <div class="nota" style="margin-top:12px">
+      <strong>Feito em 2026-08-23.</strong> Portal muda de endereço e de conteúdo;
+      um levantamento assim envelhece. O script que o produziu está no
+      repositório e pode ser rodado de novo — é a data que dá validade ao número,
+      não a nossa palavra.
+    </div>
+  </div>`;
+
+  tabela(document.getElementById("t-casas"),
+    ["UF","Casa","Situação","Onde","Observação"],
+    linhas.sort((a,b) => (b.conf - a.conf) || (b.n - a.n) || a.uf.localeCompare(b.uf))
+      .map(r => [r.uf, esc(r.sigla),
+        r.conf ? '<span style="color:var(--accent)">●</span> API confirmada'
+               : r.n ? "portal responde" : "nada nos caminhos testados",
+        r.url ? `<span class="num">${esc(r.url.replace(/^https?:\/\//,"").slice(0,44))}</span>` : "—",
+        esc(r.obs || "")]));
+}
+
 /* ---------- navegação ---------- */
 function irPara(v) { vista = v; render(); }
 
-const VISTAS = ["nacional","estado","padroes","cruzamentos","emendas","sobre"];
+const VISTAS = ["nacional","estado","padroes","cruzamentos","emendas","api","sobre"];
 const SUB = {
   nacional: "Distribuição espacial do voto para deputado estadual em cada unidade da federação, de 1998 a 2022, município a município.",
   estado: "Onde cada deputado estadual eleito tirou voto, município a município, de 1998 a 2022.",
   padroes: "O que muda na geografia do voto ao longo de sete pleitos, e que tipo de deputado o estado elege.",
   cruzamentos: "Como os cinco cargos se relacionam no mesmo território, e o que anda junto entre eles.",
   emendas: "Para onde cada parlamentar mandou emenda individual, de 2015 a 2026 — e quanto disso dá para rastrear até o município.",
+  api: "Quais das 27 assembleias legislativas estaduais publicam dado aberto — levantamento próprio, porque não existe catálogo.",
   sobre: "De onde vem cada número, como ele é contado, e as armadilhas do dado público que este trabalho existe para desarmar.",
 };
 
@@ -1505,7 +1618,7 @@ function render() {
     b.setAttribute("aria-selected", String(b.dataset.v === vista));
 
   /* O título só nomeia o estado quando o que está na tela é de um estado. */
-  const semEstado = vista === "nacional" || vista === "sobre";
+  const semEstado = vista === "nacional" || vista === "sobre" || vista === "api";
   document.getElementById("titulo").textContent = semEstado
     ? "Cadê o Voto?" : `Cadê o Voto ${PREP[uf]||"em"} ${nomeUF.get(uf)||uf}?`;
   document.title = document.getElementById("titulo").textContent;
@@ -1521,7 +1634,7 @@ function render() {
   gravarHash();
   ({nacional: pintarNacional, estado: pintarEstado, padroes: pintarPadroes,
     cruzamentos: pintarCruzamentos, emendas: pintarEmendas,
-    sobre: pintarSobre}[vista])();
+    api: pintarApi, sobre: pintarSobre}[vista])();
   montarSumario(vista);
   observarSecoes(vista);
   esconderDica();

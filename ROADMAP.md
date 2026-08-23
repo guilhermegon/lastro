@@ -332,3 +332,36 @@ rigor, que é invisível numa demonstração, em coisa que se lê.
 
 Escrita dentro do gerador, e não num arquivo à parte, de propósito: se o
 pipeline mudar e o texto ficar, o texto vira mentira antiga.
+
+## Marco 11 — aba API: o que as assembleias publicam
+
+- [x] Sondagem das 27 casas legislativas (`39_sonda_assembleias.py`)
+- [x] Aba **API** com o levantamento e as inferências
+
+**19 de 27 respondem** algum portal de dado aberto; **4 têm API confirmada** por
+abertura manual (GO, MG, PE, DF); 8 não devolveram nada nos caminhos testados —
+o que não é prova de ausência.
+
+### A inferência que importa
+
+**Nenhuma assembleia publica emenda parlamentar.** O que elas publicam é a si
+mesmas: folha, diárias, verbas indenizatórias, licitações, contratos, e a
+execução do próprio orçamento da Casa. A assembleia como empregadora e
+compradora, não como poder que direciona orçamento.
+
+E isso é coerência institucional, não omissão: a emenda é indicação de deputado
+sobre o orçamento do **Executivo**, executada pelas secretarias. Por isso o
+Emendômetro estadual sai dos portais do governo do estado.
+
+**O legislativo é mais opaco que o executivo neste recorte:** dos portais do
+Executivo, cinco tinham conjunto de emenda em formato tabular; das assembleias,
+nenhuma.
+
+### Dois defeitos meus na sonda, corrigidos antes de publicar
+
+A primeira versão deu **zero APIs** — num levantamento em que eu já tinha testado
+a da ALEGO funcionando. Ela mora em `/api/transparencia/{recurso}`, dois níveis
+abaixo do que eu sondava. E a lógica de subdomínio cortava `ale.am.gov.br` para
+`am.gov.br`, levando a sonda ao **Executivo** num levantamento sobre o
+Legislativo. Corrigidos, o resultado foi de 0 para 4 APIs e de achados
+contaminados para achados da casa certa.

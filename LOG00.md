@@ -803,3 +803,30 @@ E os dois descartes só apareceram abrindo o arquivo. Pernambuco publica
 dicionário descrevendo campos que nenhum arquivo tem; a Bahia tem o deputado mas
 não o lugar. Nenhuma das duas coisas se vê pela descrição do conjunto — que foi
 exatamente o erro que cometi ao escrever a linha do roadmap sobre PE.
+
+## 2026-08-23 — aba API, e o mapa que não existia
+
+Sondadas as 27 casas legislativas estaduais. Não há catálogo público disso, e a
+pergunta nasceu procurando emenda estadual.
+
+**19 de 27 respondem** algum portal; **4 têm API confirmada** abrindo à mão (GO,
+MG, PE, DF); 8 não devolveram nada nos caminhos testados.
+
+**A inferência principal é negativa e vale mais que a contagem: nenhuma
+assembleia publica emenda parlamentar.** Elas publicam a si mesmas — folha,
+diárias, verbas indenizatórias, licitações, contratos. A Casa como empregadora e
+compradora, nunca como poder que direciona orçamento. E isso é coerência
+institucional: a emenda é indicação sobre o orçamento do Executivo e executada
+pelas secretarias.
+
+Consequência prática, que economiza o dia que gastamos: **quem procurar emenda
+estadual não deve começar pela assembleia.**
+
+**Dois defeitos meus na sonda, os dois pegos por absurdo.** A primeira versão
+deu zero APIs num levantamento em que eu já tinha testado a da ALEGO
+respondendo — ela mora dois níveis abaixo do caminho que eu sondava. E a lógica
+de subdomínio cortava o domínio da casa para o do estado, levando a sonda ao
+Executivo num levantamento sobre o Legislativo.
+
+A aba diz a data no rodapé e aponta o script: portal muda de endereço, e é a
+data que dá validade ao número, não a nossa palavra.
