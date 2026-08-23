@@ -663,3 +663,32 @@ de Goiás e escolhia São Paulo caía na ficha de um deputado paulista. Agora a 
 entrar nele.
 
 Artefato em 15,7 MB de 16.
+
+## 2026-08-23 — piloto de Goiás: emendas de deputado estadual
+
+**Eu tinha descartado a fonte certa.** Disse que os dados abertos de Goiás só
+tinham fragmentos e que a execução completa exigiria engenharia reversa do painel
+Power BI. Errado: o conjunto "Emendas Parlamentares - SERINT" é a base da
+Assembleia Legislativa inteira, em CSV, 2019–2025. Julguei pelo nome do órgão
+sem ler a descrição do conjunto, que diz exatamente o que é.
+
+**O custo do piloto não estava onde eu esperava.** Achar o dado foi fácil. O
+trabalho é que o esquema muda todo ano: sete arquivos, sete formatos, separador
+que vira tabulação em 2025, e a coluna de autor com três nomes diferentes ao
+longo da série. Uma tabela de nomes fixos quebraria no próximo arquivo — as
+colunas passaram a ser achadas por busca.
+
+**Duas correções minhas no caminho, ambas do mesmo tipo.** Escrevi dois códigos
+IBGE de memória para o override e os dois estavam errados: 5208707 é Goiânia,
+não a cidade de Goiás. Fui buscar na malha. E concluí "município só a partir de
+2023" olhando cabeçalhos — os arquivos de 2024 e 2025 são despejos multi-ano e
+trazem município para exercícios antigos, o que dá 246 municípios em 2022.
+
+Resultado: 22.310 linhas, 186 autores, R$ 4,0 bi, 65,8% do valor com município.
+Casamento com deputado estadual eleito em 61% dos autores e 76% do dinheiro —
+subiu de 43% quando tirei o prefixo "DEP." do nome, que a base do estado usa e a
+do TSE não.
+
+Cinco nomes seguem sem par, R$ 1,5 mi, e quatro nem são município. "RIO DOCE"
+pode ser Aparecida do Rio Doce, mas *pode ser* não entra em override: par errado
+põe dinheiro no município errado, que é pior que dinheiro sem município.

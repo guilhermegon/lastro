@@ -201,8 +201,22 @@ Emendômetro: é outra fonte — orçamento estadual, 26 portais, sem agregador
 nacional. O piloto responde quanto custa um estado antes de prometer 26.
 
 - [x] Capital sinalizada nos mapas municipais (âncora de leitura)
-- [ ] Alcançar o dado do painel Power BI de Goiás
-      (`reportId=c6b3961c-6932-4e0a-b77e-99cd14acee45`)
-- [ ] Normalizar com `cod_ibge`, para cair no mesmo mapa do federal
-- [ ] Casar autor com deputado **estadual** eleito (já temos os eleitos de GO)
-- [ ] Decidir, com custo medido em mãos, se vale ir para os outros 25
+- [x] **Não precisou do Power BI.** O conjunto "Emendas Parlamentares - SERINT"
+      dos dados abertos de Goiás é a base da Assembleia, em CSV — eu tinha
+      descartado olhando o nome do órgão, sem ler a descrição
+- [x] Normalizado com `cod_ibge` (`34_emendas_go_estadual.py`): 22.310 linhas,
+      2019–2025, R$ 4,0 bi, 246 municípios em 2022
+- [x] Casamento com deputado estadual eleito: 61% dos autores, 76% do dinheiro
+- [ ] Aba do Emendômetro estadual, ou fusão com a federal
+- [ ] Decidir, com o custo medido, se vale ir para os outros 25
+
+### O custo real de um estado, medido
+
+O trabalho não está em achar o dado — está em que **o esquema muda todo ano**:
+sete arquivos, sete formatos, separador que vira tabulação em 2025, e a coluna
+de autor chamada "DEPUTADO AUTOR", "Autor da Emenda" ou "Autor (Deputado)"
+conforme o ano. Por isso as colunas são achadas por busca, não por nome fixo.
+
+E o pareamento de município volta, porque aqui o dado vem por **nome**, não por
+código IBGE como no federal. Cinco nomes seguem sem par (R$ 1,5 mi) e quatro
+deles não são município: "Estado de Goiás", "PMGO", "#N/D" e um nome de pessoa.
