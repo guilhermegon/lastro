@@ -214,11 +214,43 @@ nacional. O piloto responde quanto custa um estado antes de prometer 26.
 - [x] **Decidido: não vale ir para os 25 — vale ir para 2 ou 3**
       (`36_sonda_portais_estaduais.py`). Aplicado sob a pré-autorização, com a
       sondagem em mãos
-- [ ] Pernambuco: `dados.pe.gov.br`, quatro conjuntos da SEPLAG em CSV+JSON,
-      inclusive "Emendas Especiais - PIX" próprias do estado
-- [ ] Espírito Santo: `dados.es.gov.br`, "Emendas Parlamentares do Estado"
-      (SEFAZ) em CSV — e um conjunto separado para as federais
+- [x] **Pernambuco: descartado.** Abri os quinze exercícios: nenhum tem `autor`
+      nem `municipio`. São registros de empenho — número, unidade gestora,
+      credor, valores. O dicionário "versão 02" descreve um esquema rico com os
+      dois campos, e **nenhum arquivo publicado usa esse esquema**. O CSV de
+      2026 tem zero bytes e o JSON de 2025 traz o formato antigo
+- [x] **Espírito Santo: confirmado**, e melhor que Goiás
+- [ ] Ingestão do Espírito Santo, no formato de `35_emendas_estadual_web.py`
 - [ ] Bahia: só PNG e ZIP na SEFAZ; abrir o ZIP antes de prometer
+
+### Espírito Santo, medido
+
+| exercício | emendas | autores | municípios | % do valor com município | pago |
+|---|---|---|---|---|---|
+| 2021 | 921 | 30 | 76 | 96,8% | R$ 21,8 mi |
+| 2022 | 1.323 | 30 | 76 | 98,2% | R$ 28,3 mi |
+| 2023 | 964 | 30 | 75 | 98,2% | R$ 30,6 mi |
+| 2024 | 1.421 | 30 | 76 | 98,9% | R$ 48,2 mi |
+| 2025 | 1.346 | 30 | 78 | 81,5% | R$ 70,2 mi |
+| 2026 | 1.684 | 30 | 78 | 61,4% | R$ 92,9 mi |
+
+Esquema estável nos seis exercícios, com `CodigoMunicipio` além do nome — o
+pareamento por nome nem é necessário. **A cobertura municipal é de 98% contra
+65,8% em Goiás.** 2025 e 2026 aparecem mais baixos porque ainda estão
+executando, não porque publiquem pior.
+
+### Duas lições deste levantamento, e as duas são erro meu
+
+**Li o dicionário em vez do dado.** Escrevi a linha do roadmap sobre Pernambuco
+a partir da descrição do conjunto e do dicionário v2 — exatamente o que o
+`36_sonda_portais_estaduais.py`, escrito no commit anterior, avisa para não
+fazer. A regra estava certa e eu a violei uma hora depois.
+
+**O detector de formato de moeda tinha limite de duas casas decimais.** O ES
+publica `11250,0000`, com quatro. A vírgula virava separador de milhar e o valor
+inflava dez mil vezes: o primeiro cálculo deu R$ 217 bilhões para um estado cujo
+orçamento inteiro é fração disso. O número absurdo é que denunciou; um erro de
+10% teria passado.
 
 ### A sondagem que tornou a decisão possível
 
