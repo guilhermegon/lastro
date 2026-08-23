@@ -69,6 +69,12 @@ def main():
             r["capital"] = v["cidade"]
         resumo.append(r)
 
+    # o agregado nacional de emendas viaja junto: 35 KB, e e' o unico arquivo
+    # do Emendometro que a tela precisa antes de escolher um estado
+    br = ORIGEM / "emendas_br.json"
+    if br.exists():
+        shutil.copy2(br, DESTINO / "emendas_br.json")
+
     indice = {
         "anos": cfg.ANOS,
         "cargos": CARGOS,
@@ -88,6 +94,10 @@ def main():
     print(f"total publicado: {total/1024/1024:.1f} MB")
     print(f"maior arquivo: {maior[1]} com {maior[0]/1024:.0f} KB")
     print()
+    com_em = sum(1 for uf in ufs_dir if (DESTINO / uf / "emendas.json").exists())
+    print(f"emendas em {com_em} UFs"
+          + (", agregado nacional publicado" if (DESTINO / "emendas_br.json").exists()
+             else " — SEM agregado nacional (rode 31_)"))
     com_ver = sum(1 for r in resumo if "capital" in r)
     com_riv = sum(1 for uf in ufs_dir
                   if (DESTINO / uf / "rivais_estadual.json").exists()

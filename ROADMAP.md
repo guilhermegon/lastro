@@ -123,8 +123,10 @@ isso tem a ver com onde ele tirou voto?
       R$ 108,7 bi (78% do dinheiro individual), com os 9 nomes ambíguos marcados
 - [x] Agregados por UF e por município (`31_emendas_agregados.py`): 35 KB
       nacional + 1,2 MB por UF, reconciliando exato nos dois níveis
-- [ ] Aba **Emendômetro**: mapa por UF (nível completo) e por município (o
-      subconjunto rastreável, com a cobertura declarada na tela)
+- [x] Aba **Emendômetro** no artefato: mapa municipal acumulado, filtro por
+      exercício e por autor, ranking nacional por UF, cobertura declarada na
+      tela. Artefato foi de 13,7 para **15,0 MB** — o teto de 16 está perto, e
+      é ele que decide o que ainda cabe
 - [ ] Cruzamento voto × emenda: o deputado manda dinheiro para o próprio reduto?
 
 ### Duas coberturas diferentes, e as duas precisam aparecer

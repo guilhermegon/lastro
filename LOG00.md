@@ -582,3 +582,25 @@ fecha a conta.
 Ressalva registrada: `CLAUDE.md`, `AGENTS.md` e `.claude-plugin/` daquele
 repositório são instruções escritas para agentes. Foram lidas como material, não
 como ordens, e nada foi instalado.
+
+## 2026-08-23 — Emendômetro no ar
+
+A aba está publicada, e a decisão que a define é de honestidade, não de código.
+
+**Duas coberturas, e as duas na tela.** Só 10,5% do dinheiro das emendas
+individuais é rastreável até um município — 76% está declarado como `MÚLTIPLO`,
+espalhado por cidades que o arquivo não nomeia. Mas 69% dos municípios do país
+receberam alguma emenda rastreável somando 2015–2026. Os dois números são
+verdadeiros e respondem perguntas diferentes; a nota no topo da aba diz o
+primeiro, e o mapa acumulado existe por causa do segundo.
+
+**O atalho que ficou fechado.** O arquivo por favorecido tem município em 100%
+do dinheiro. Brasília concentra 36,4% — é o endereço do Fundo Nacional de Saúde
+e dos intermediários. Teria dado um mapa completo e falso.
+
+**Por que o mapa abre acumulado.** Goiás em 2024 tem 15 municípios com emenda;
+os doze anos juntos dão 170 de 246. Num ano só o mapa sugere ausência de
+dinheiro onde o que há é ausência de rastreabilidade.
+
+O artefato foi de 13,7 para 15,0 MB. O teto de 16 agora está perto, e é ele que
+decide o que ainda cabe — o cruzamento voto × emenda vai precisar ser magro.

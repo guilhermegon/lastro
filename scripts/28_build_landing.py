@@ -93,7 +93,8 @@ def montar_dados():
             return json.loads(f.read_text(encoding="utf-8")) if f.exists() else None
         estados[uf] = {"m": [x["n"] for x in base["municipios"]],
                        "g": base["geo"], "a": anos,
-                       "p": ler("padroes.json"), "c": ler("cruzamentos.json")}
+                       "p": ler("padroes.json"), "c": ler("cruzamentos.json"),
+                       "e": ler("emendas.json")}
     return {
         "anos": indice["anos"],
         "ufs": indice["ufs"],
@@ -102,6 +103,8 @@ def montar_dados():
         "malhaBR": [{"cod": f["cod"], "g": aneis(f["geom"])}
                     for f in indice["malhaUF"]],
         "estados": estados,
+        "emendasBR": json.loads((DADOS / "emendas_br.json").read_text(encoding="utf-8"))
+                     if (DADOS / "emendas_br.json").exists() else None,
     }
 
 
@@ -135,6 +138,7 @@ PAGINA = r"""<title>Cadê o Voto?</title>
     <button role="tab" data-v="estado" aria-selected="false">Estado</button>
     <button role="tab" data-v="padroes" aria-selected="false">Padrões</button>
     <button role="tab" data-v="cruzamentos" aria-selected="false">Cruzamentos</button>
+    <button role="tab" data-v="emendas" aria-selected="false">Emendômetro</button>
   </div>
 </div></div>
 
@@ -194,6 +198,20 @@ PAGINA = r"""<title>Cadê o Voto?</title>
        style="padding:20px 0 40px"></div></div>
   <div id="v-cruzamentos" class="oculto"><div class="conteudo" id="cruzamentos"
        style="padding:20px 0 40px"></div></div>
+
+  <div id="v-emendas" class="oculto">
+    <div class="painel">
+      <aside class="rail">
+        <div class="rail-bloco rail-primario">
+          <p class="rail-titulo" id="rotAutores">Autor(a)</p>
+          <div class="seg" role="group" aria-label="Exercício" id="emAnos"
+               style="margin-bottom:8px"></div>
+          <div class="lista" id="listaAutores"></div>
+        </div>
+      </aside>
+      <div class="conteudo" id="emendas"></div>
+    </div>
+  </div>
 </main>
 
 <footer class="wrap">
@@ -699,15 +717,202 @@ function pintarCruzamentos() {
       d.mp ? "sim" : "não", dec(d.af,4)]));
 }
 
+/* ---------- Emendômetro ----------
+   Duas coberturas diferentes, e as duas aparecem na tela porque respondem a
+   perguntas diferentes: 10,5% do DINHEIRO individual é rastreável até um
+   município, mas 69% dos MUNICÍPIOS receberam alguma emenda somando 2015–2026.
+   O mapa abre acumulado por causa do segundo número — num ano só, um estado
+   como Goiás mostra 17 municípios e o mapa sugere ausência de dinheiro onde o
+   que há é ausência de rastreabilidade. */
+let emAno = "todos", emAutor = -1;
+
+const reais = v => v >= 1e9 ? "R$ " + dec(v/1e9,2) + " bi"
+              : v >= 1e6 ? "R$ " + dec(v/1e6,1) + " mi"
+              : v >= 1e3 ? "R$ " + dec(v/1e3,0) + " mil"
+              : "R$ " + dec(v,0);
+
+function emBlocos() {
+  const e = D.estados[uf].e;
+  if (!e) return null;
+  return emAno === "todos" ? Object.values(e.anos)
+                           : (e.anos[emAno] ? [e.anos[emAno]] : []);
+}
+
+function emAgregado() {
+  /* Soma os anos escolhidos num único vetor municipal e numa lista de autores.
+     Somar aqui, e não no pipeline, é o que deixa o filtro de exercício ser
+     recorte e não outro arquivo. */
+  const e = D.estados[uf].e, n = D.estados[uf].m.length;
+  const bl = emBlocos();
+  if (!bl || !bl.length) return null;
+  const tot = new Array(n).fill(0);
+  const por = new Map();
+  let pago = 0, emendas = 0, cortados = 0;
+  for (const b of bl) {
+    b.totalMun.forEach((v,i) => tot[i] += v);
+    pago += b.pleito.pago; emendas += b.pleito.nEmendas;
+    cortados += b.pleito.cortados || 0;
+    for (const f of b.fichas) {
+      let a = por.get(f.n);
+      if (!a) { a = {n:f.n, t:0, ne:0, el:f.el, ufEl:f.ufEl, amb:f.amb,
+                     fn:f.fn, mun:new Map()}; por.set(f.n, a); }
+      a.t += f.t; a.ne += f.ne;
+      f.mi.forEach((idx,k) => a.mun.set(idx, (a.mun.get(idx)||0) + f.mv[k]));
+    }
+  }
+  const autores = [...por.values()].map(a => {
+    const v = [...a.mun.values()], soma = v.reduce((x,y)=>x+y,0);
+    const p = v.map(x => x/soma);
+    return {...a, nm: v.length,
+      ef: +(1/p.reduce((x,y)=>x+y*y,0)).toFixed(2),
+      t1: +(Math.max(...p)*100).toFixed(2)};
+  }).sort((a,b)=>b.t-a.t);
+  return {tot, autores, pago, emendas, cortados,
+          nMun: tot.filter(v=>v>0).length, cobertura: e.cobertura};
+}
+
+function pintarEmendas() {
+  const alvo = document.getElementById("emendas");
+  const est = D.estados[uf], nome = esc(nomeUF.get(uf)||uf);
+  const n = est.m.length;
+
+  const anosEm = est.e ? Object.keys(est.e.anos).sort() : [];
+  document.getElementById("emAnos").innerHTML = est.e
+    ? [`<button data-a="todos"${emAno==="todos"?' aria-pressed="true"':''}>Todos</button>`]
+        .concat(anosEm.map(a=>`<button data-a="${a}"${a===emAno?' aria-pressed="true"':''}>${a}</button>`)).join("")
+    : "";
+  document.getElementById("rotAutores").textContent = `Autor(a) · ${nomeUF.get(uf)||uf}`;
+
+  const ag = emAgregado();
+  if (!ag) {
+    document.getElementById("listaAutores").innerHTML = "";
+    alvo.innerHTML = `<p class="indice exp">Sem emenda com município identificado
+      ${emAno==="todos" ? `em ${nome}` : `em ${nome} no exercício de ${emAno}`}.</p>`;
+    return;
+  }
+
+  document.getElementById("listaAutores").innerHTML =
+    `<button data-i="-1"${emAutor<0?' aria-pressed="true"':''}>` +
+    `<span>Todos os autores</span><span class="lv">${reais(ag.pago)}</span></button>` +
+    ag.autores.map((a,i) => `<button data-i="${i}"${i===emAutor?' aria-pressed="true"':''}>` +
+      `<span>${esc(a.n)}${a.el?'':' <span class="lv">·</span>'}</span>` +
+      `<span class="lv">${reais(a.t)}</span></button>`).join("");
+
+  const a = emAutor >= 0 ? ag.autores[emAutor] : null;
+  const vals = a ? (() => { const v = new Array(n).fill(0);
+      for (const [i,x] of a.mun) v[i] = x; return v; })() : ag.tot;
+  const cortes = quantis(vals);
+  const P = projDe(uf);
+  const pctMun = ag.cobertura.pago > 0 ? ag.cobertura.pagoMun/ag.cobertura.pago*100 : 0;
+
+  const top = vals.map((v,i)=>({i,v})).filter(x=>x.v>0)
+    .sort((x,y)=>y.v-x.v).slice(0,20);
+  const somaVals = vals.reduce((x,y)=>x+y,0);
+
+  alvo.innerHTML = `
+  <div class="nota">
+    <strong>Esta aba mostra o que é rastreável até o município, e isso é uma
+    fatia.</strong> Em ${nome}, ${reais(ag.cobertura.pagoMun)} dos
+    ${reais(ag.cobertura.pago)} pagos em emendas individuais têm um município
+    declarado — <span class="num">${pct(pctMun,1)}</span>. O resto está em
+    <em>MÚLTIPLO</em> ou dirigido ao estado inteiro, e o arquivo do Portal da
+    Transparência não diz para onde foi. O valor é o que saiu do caixa
+    (pago + restos a pagar pagos), nunca o empenhado.
+  </div>
+
+  <div class="cartoes">
+    ${cartao("Rastreável ao município", reais(a ? a.t : ag.pago), a ? esc(a.n) : `de ${reais(ag.cobertura.pago)} no estado`)}
+    ${cartao("Emendas", num(a ? a.ne : ag.emendas), emAno==="todos" ? "2015–2026" : `exercício ${emAno}`)}
+    ${cartao("Municípios alcançados", num(a ? a.nm : ag.nMun), "de "+num(n))}
+    ${cartao("Autores", num(ag.autores.length), a ? "" : "com emenda no estado")}
+    ${a ? cartao("Municípios efetivos", dec(a.ef,1), "concentração da carteira") : ""}
+    ${a ? cartao("Casa com eleito", a.el ? "Sim" : "Não", a.el ? (a.ufEl||"").replace(/\|/g,", ") : "senador ou fora de 2014–2022", true) : ""}
+  </div>
+
+  <div class="cartaz">
+    <h2>Para onde foi o dinheiro${a ? " de "+esc(a.n) : ""}</h2>
+    <p class="cap">Valor pago por município${emAno==="todos" ? ", somando 2015 a 2026" : `, exercício de ${emAno}`}.
+      ${a ? "" : "Clique num autor à esquerda para ver só a carteira dele."}</p>
+    <div id="m-emendas">
+      <svg viewBox="0 0 ${P.L} ${P.H}" role="img" aria-label="Emendas por município">
+        ${P.d.map((d,i)=> d ? `<path d="${d}" class="mun" data-i="${i}" fill="${corDe(vals[i],cortes)}"></path>` : "").join("")}
+      </svg>
+    </div>
+    <div class="legenda" id="leg-emendas"></div>
+  </div>
+
+  <div class="duas">
+    <div class="cartaz"><h2>Municípios que mais receberam</h2>
+      <p class="cap">Os 20 maiores${a ? " na carteira deste autor" : ""}.</p>
+      <div class="rolagem"><table id="tmun"></table></div></div>
+    <div class="cartaz"><h2>Quem manda</h2>
+      <p class="cap">Autores com emenda rastreável em ${nome}. O ponto marca quem
+        casa com um deputado federal eleito entre 2014 e 2022 — senadores também
+        fazem emenda individual e não casam por aqui.</p>
+      <div class="rolagem"><table id="tautores"></table></div></div>
+  </div>
+
+  <div class="cartaz">
+    <h2>O país inteiro, por unidade da federação</h2>
+    <p class="cap">Aqui a cobertura é outra: <strong>97,1% do dinheiro</strong>
+      individual tem UF, inclusive o que está em <em>MÚLTIPLO</em>. É o nível em
+      que o Emendômetro está completo.</p>
+    <div class="rolagem"><table id="tbr"></table></div>
+  </div>`;
+
+  legenda(document.getElementById("leg-emendas"), cortes, false, "Sem emenda rastreável");
+  ligarMapa(document.querySelector("#m-emendas svg"), i =>
+    `<strong>${esc(est.m[i]||"")}</strong>` +
+    (vals[i]>0 ? `<span class="num">${reais(vals[i])}</span>` : "sem emenda rastreável"));
+
+  tabela(document.getElementById("tmun"),
+    ["Município","Valor pago","% do total"],
+    top.map(x => [esc(est.m[x.i]||"—"), reais(x.v), pct(x.v/somaVals*100)]));
+
+  tabela(document.getElementById("tautores"),
+    ["Autor(a)","Emendas","Valor pago","Munic.","Área principal"],
+    ag.autores.slice(0,20).map(x => [
+      esc(x.n) + (x.el ? ' <span style="color:var(--accent)">●</span>' : ""),
+      x.ne, reais(x.t), x.nm, esc(x.fn||"—")]));
+
+  if (D.emendasBR) {
+    const m = new Map();
+    for (const r of D.emendasBR.uf) {
+      if (emAno !== "todos" && String(r.ano) !== emAno) continue;
+      const q = m.get(r.uf) || {pago:0, n:0, pagoMun:0, aut:0};
+      q.pago += r.pago; q.n += r.n; q.pagoMun += r.pagoMun;
+      q.aut = Math.max(q.aut, r.aut); m.set(r.uf, q);
+    }
+    tabela(document.getElementById("tbr"),
+      ["UF","Pago (todas as emendas individuais)","Emendas","Autores","Rastreável ao município"],
+      [...m.entries()].sort((x,y)=>y[1].pago-x[1].pago).map(([s,q]) => [
+        `<button class="ligacao" data-uf="${s}">${esc(nomeUF.get(s)||s)}</button>`,
+        reais(q.pago), num(q.n), num(q.aut),
+        pct(q.pago>0 ? q.pagoMun/q.pago*100 : 0, 1)]));
+  }
+}
+
+document.getElementById("emAnos").addEventListener("click", e => {
+  const b = e.target.closest("button[data-a]");
+  if (!b) return;
+  emAno = b.dataset.a; emAutor = -1; pintarEmendas();
+});
+document.getElementById("listaAutores").addEventListener("click", e => {
+  const b = e.target.closest("button[data-i]");
+  if (!b) return;
+  emAutor = +b.dataset.i; pintarEmendas();
+});
+
 /* ---------- navegação ---------- */
 function irPara(v) { vista = v; render(); }
 
-const VISTAS = ["nacional","estado","padroes","cruzamentos"];
+const VISTAS = ["nacional","estado","padroes","cruzamentos","emendas"];
 const SUB = {
   nacional: "Distribuição espacial do voto para deputado estadual em cada unidade da federação, de 1998 a 2022, município a município.",
   estado: "Onde cada deputado estadual eleito tirou voto, município a município, de 1998 a 2022.",
   padroes: "O que muda na geografia do voto ao longo de sete pleitos, e que tipo de deputado o estado elege.",
   cruzamentos: "Como os cinco cargos se relacionam no mesmo território, e o que anda junto entre eles.",
+  emendas: "Para onde cada parlamentar mandou emenda individual, de 2015 a 2026 — e quanto disso dá para rastrear até o município.",
 };
 
 function render() {
@@ -727,8 +932,8 @@ function render() {
     b.setAttribute("aria-pressed", String(b.dataset.uf === uf));
 
   gravarHash();
-  ({nacional: pintarNacional, estado: pintarEstado,
-    padroes: pintarPadroes, cruzamentos: pintarCruzamentos}[vista])();
+  ({nacional: pintarNacional, estado: pintarEstado, padroes: pintarPadroes,
+    cruzamentos: pintarCruzamentos, emendas: pintarEmendas}[vista])();
   esconderDica();
 }
 
