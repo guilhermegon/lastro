@@ -121,10 +121,31 @@ isso tem a ver com onde ele tirou voto?
       por nome, que é o que custou 23 milhões de votos do outro lado
 - [x] Casamento autor ↔ deputado federal eleito: 1.098 de 1.492 autores (74%),
       R$ 108,7 bi (78% do dinheiro individual), com os 9 nomes ambíguos marcados
-- [ ] Agregados por UF e por município, no formato que o front já consome
+- [x] Agregados por UF e por município (`31_emendas_agregados.py`): 35 KB
+      nacional + 1,2 MB por UF, reconciliando exato nos dois níveis
 - [ ] Aba **Emendômetro**: mapa por UF (nível completo) e por município (o
       subconjunto rastreável, com a cobertura declarada na tela)
 - [ ] Cruzamento voto × emenda: o deputado manda dinheiro para o próprio reduto?
+
+### Duas coberturas diferentes, e as duas precisam aparecer
+
+Medidas ao agregar, e não são a mesma coisa:
+
+- **10,5% do dinheiro** individual é rastreável até um município.
+- **69% dos municípios** (3.844 de 5.571) receberam alguma emenda rastreável,
+  somando 2015–2026.
+
+Por isso o mapa municipal abre **acumulado**, não por ano: em Goiás, 2024 sozinho
+tem 17 municípios com emenda e o mapa fica quase vazio; os doze anos juntos dão
+uma mancha legível. O filtro por ano continua, como recorte, não como padrão.
+
+### Limitação conhecida do casamento
+
+`eleito` significa "casa com deputado federal eleito entre 2014 e 2022", e não
+"é parlamentar". Senadores fazem emenda individual e saem marcados como não
+casados — Jorge Kajuru e Damares Alves aparecem assim em Goiás. Casar senador
+exige a base de eleitos do Senado, que já temos por UF e ainda não foi ligada
+aqui.
 
 ### A ressalva que define esta aba, e não pode ser esquecida
 
