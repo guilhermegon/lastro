@@ -422,6 +422,70 @@ média.**
 
 ---
 
+## 16. O custo do Legislativo quase não é o parlamentar
+
+Fonte: `44_cldf_administrativo.py`, folha nominal da CLDF de 07/2026. A Câmara
+Legislativa do DF é a única das três casas levantadas que publica a folha **nome
+a nome**, com cargo, lotação e remuneração — 107 arquivos mensais, de setembro
+de 2017 a julho de 2026.
+
+Em 07/2026, **2.623 pessoas** custaram R$ 59,85 mi de folha bruta. Os
+**24 deputados distritais são 1,4%** desse total. O que
+custa não é o mandato: é a estrutura em volta dele — 882 pessoas
+lotadas em gabinete respondem por 16,2% da folha.
+
+E são 5.052 **linhas de pagamento** para 2.623 pessoas: uma pessoa
+aparece em várias folhas no mesmo mês. Contar linhas conta pagamento, não gente
+— foi assim que a primeira versão deste levantamento relatou 48 deputados
+distritais num Distrito Federal que tem 24.
+
+### 16a. Livre nomeação é maioria por cabeça, minoria por dinheiro
+
+Há **993 comissionados para 871 concursados** — o cargo de livre
+nomeação é a maior categoria da Casa em número de pessoas. Em dinheiro a ordem
+se inverte: os concursados custam R$ 31,00 mi contra R$ 10,79 mi, porque o
+concursado individual custa **3,3×** o comissionado individual
+(R$ 35.594 contra R$ 10.866 por mês).
+
+Um total agregado de "despesa de pessoal" não deixaria ver nem uma coisa nem a
+outra.
+
+### 16b. Quem já saiu pesa mais que todo o quadro de livre nomeação
+
+**448 inativos custam R$ 15,28 mi; 993 comissionados em atividade custam
+R$ 10,79 mi.** O inativo médio custa R$ 34.104 por mês, praticamente o
+mesmo que o concursado da ativa — são carreiras no topo, aposentadas com
+proventos integrais.
+
+### 16c. A folha cresce mais rápido que o quadro, e só um dos dois números é sólido
+
+Comparando julho com julho, de 2018 a 2026: o quadro foi de
+1.919 para 2.623 pessoas (**+37%**) e a folha
+de R$ 30,11 mi para R$ 59,85 mi (**+99%**).
+
+**Os dois números não têm o mesmo peso probatório.** O crescimento do quadro é
+contagem e não depende de inflação. O da folha está em reais correntes, sem
+deflacionar — boa parte dele é a moeda valendo menos. Não deflacionamos porque
+escolher um índice exigiria justificar a escolha, e o que interessa aqui — o
+descolamento entre as duas curvas — não vem da inflação, que atinge as duas.
+
+Julho é escolhido de propósito: dezembro carrega décimo terceiro.
+
+### 16d. Duas fontes independentes que poderiam divergir e não divergem
+
+A folha bruta de 07/2026 dá R$ 59,85 mi. A despesa total paga pela Casa naquele
+mês, publicada por caminho separado, dá R$ 77,82 mi. A folha é **77%** do que a
+CLDF pagou no mês, e o resto cabe em custeio, terceirizado e investimento. É a
+checagem de consistência que o levantamento do DF permite e o de Goiás não.
+
+### 16e. Uma ressalva que sobrevive: o bruto é piso
+
+Só a folha principal detalha os créditos. As secundárias trazem as colunas de
+crédito zeradas e apenas o líquido — **R$ 4,98 mi pagos em 07/2026 cujo valor
+bruto o arquivo não informa**. Somar as colunas de crédito não duplica (as
+secundárias somam zero), mas também não alcança tudo. Todo número de folha aqui
+é mínimo, não total.
+
 ## Seis ressalvas de método
 
 **O denominador do mapa de Influência.** O painel original informa, para cada município,

@@ -429,12 +429,17 @@ tentativa e parei de caçar.
   nominal, despesa, duodécimo, terceirizados
 - [x] **Correção de uma afirmação publicada** (`45_emenda_nas_assembleias.py`)
 - [x] Delta-encoding do vetor municipal: 15,9 → 13,9 MB, round-trip verificado
-- [ ] **Verba indenizatória da ALMG** (`43_almg_verbas.py`) — AGUARDANDO a
-  varredura, que é espera legítima: 1.463 requisições ao ritmo que a própria
-  ALMG publica (duas simultâneas, um segundo entre elas, sob pena de bloqueio
-  sem aviso). A seção do artefato já está escrita e commitada, derivando todo
-  número do JSON em tempo de renderização; sem o arquivo ela retorna vazio,
-  verificado no navegador. Quando a varredura gravar, é rodar 22_ e 28_.
+
+### AGUARDANDO — a varredura de Minas, que é espera legítima
+
+- [ ] **Verba indenizatória da ALMG** (`43_almg_verbas.py`): 5.408 requisições
+  ao ritmo que a própria ALMG publica — duas simultâneas, um segundo entre elas,
+  sob pena de bloqueio sem aviso. São 44 minutos e não há como encurtar sem
+  trocar o acesso de todo mundo por meia hora minha. A seção do artefato já está
+  escrita, commitada e verificada no navegador: deriva todo número do JSON em
+  tempo de renderização e retorna vazio sem ele. Quando gravar, é rodar `22_` e
+  `28_`. Esta segunda varredura existe porque a primeira leu a janela errado
+  (ver abaixo) e porque agora o bruto vai para parquet, para não haver terceira.
 
 ### A afirmação que estava errada no ar
 
@@ -492,6 +497,30 @@ mês. Duas fontes que poderiam divergir e não divergem.
 **Uma ressalva declarada na tela:** o bruto é **piso**, não total. Só a folha
 principal detalha os créditos; as secundárias trazem as colunas de crédito
 zeradas e apenas o líquido — R$ 4,98 mi em julho cujo bruto o arquivo não diz.
+
+### O erro da janela de Minas, e por que ele importa mais que parece
+
+Escrevi que a ALMG mantinha uma **janela móvel de ~18 meses** por política de
+publicação. Amostrei **um** deputado, vi 18 meses e generalizei para os 77.
+
+Medindo os 77: **mediana de 88 meses**, máximo 91, mínimo 18 — e o mínimo era
+justamente o deputado que amostrei. O arquivo começa em **2019-02**, início da
+legislatura 2019–2022, e a janela de cada um acompanha o tempo dele de mandato:
+48 têm série desde 2019, 22 desde fevereiro de 2023, o resto entrou por
+substituição.
+
+**Errei nas duas metades, e a consequência não foi cosmética.** Com base na
+limitação que inventei, eu tinha me *recusado a publicar a série temporal* —
+escrevi na tela que uma série ali "descreveria a política de retenção da ALMG
+achando que descreve gasto". A série existe, cobre duas legislaturas, e a
+recusa era o único obstáculo.
+
+A frase não chegou a nenhum leitor: a seção retornava vazio por falta do JSON
+quando o artefato foi publicado. Mas é o terceiro erro da mesma família nesta
+frente — presumir padrão a partir do que vi e não do que testei — depois de
+`\d{4}-\d{2}` ter apagado cinco anos do DF e de "nenhuma assembleia publica
+emenda" ter ido ao ar. A diferença entre os três é só quanto tempo levou até
+alguma coisa denunciar.
 
 ### Minas: o grão mais completo dos três
 
