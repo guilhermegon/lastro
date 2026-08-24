@@ -17,18 +17,31 @@ isso e' a unica onde da' para perguntar "qual fornecedor atende quantos
 deputados" — pergunta que o DF nao responde por nao ter autor, e que Goias nao
 responde por nao ter fornecedor.
 
-**A janela e' movel e isso NAO e' comportamento.** O endpoint `/datas` devolve
-cerca de 18 meses por deputado — fevereiro de 2025 em diante. Nao e' que a verba
-tenha comecado ali: e' politica de publicacao. Qualquer serie longa ou
-comparacao com os anos de Goias descreveria a politica de retencao da ALMG
-achando que descreve gasto. Por isso este script nao publica tendencia temporal,
-e as pontas da janela ficam declaradas na tela.
+**A janela e' POR MANDATO, e eu li errado da primeira vez.** Amostrei um
+deputado, vi 18 meses, e escrevi que a ALMG mantinha uma janela movel de 18
+meses por politica de publicacao. Estava errado nas duas metades. Medindo os 77:
+a mediana e' de **88 meses** por deputado, o maximo e' 91, e o minimo 18 — que
+era justamente o deputado que amostrei.
+
+O arquivo comeca em **2019-02**, inicio da legislatura 2019-2022, e a janela de
+cada um acompanha o tempo dele de mandato: 48 deputados tem serie desde 2019, 22
+desde fevereiro de 2023 (inicio da legislatura seguinte) e o resto entrou no
+meio, por substituicao. Nao ha' janela movel nenhuma — ha' um arquivo que
+comeca numa legislatura e vai ate' o ultimo mes fechado.
+
+**A consequencia e' que a serie temporal existe**, e a primeira versao deste
+script se recusava a publica-la com base numa limitacao que eu tinha inventado.
+O erro e' o de sempre com cara nova: generalizar de uma amostra de um.
+
+**O bruto fica em disco.** A varredura leva 44 minutos ao ritmo que a ALMG
+permite; guardar as 141 mil notas em parquet faz qualquer reanalise custar
+segundos em vez de outra varredura.
 
 **O limite de requisicao e' publicado e obedecido aqui.** A ALMG declara no
 proprio site: no maximo duas requisicoes simultaneas e um segundo entre o fim de
 uma e o inicio da proxima, sob pena de bloqueio sem aviso. Sao dois workers com
-pausa de um segundo por requisicao. A varredura leva cerca de 12 minutos, e
-apressar seria trocar o acesso de todo mundo por alguns minutos.
+pausa de um segundo por requisicao. Sao 5.408 requisicoes e a varredura leva
+44 minutos; apressar seria trocar o acesso de todo mundo por meia hora minha.
 
 **Falha de rede nao e' ausencia de dado.** Tres tentativas por requisicao — a
 primeira varredura da ALEGO devolveu 37 de 96 meses por ler timeout como
@@ -149,6 +162,18 @@ def main():
         d[c] = pd.to_numeric(d[c], errors="coerce").fillna(0.0)
     print(f"  {len(d):,} notas", flush=True)
 
+    # 44 minutos de varredura nao se joga fora: o bruto em disco faz qualquer
+    # reanalise custar segundos
+    cru = cfg.INTERIM / "almg_verbas_notas.parquet"
+    cru.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        d.to_parquet(cru, index=False)
+        print(f"  bruto em {cru.name} ({cru.stat().st_size/1e6:.1f} MB)", flush=True)
+    except Exception as e:
+        cru = cru.with_suffix(".csv.gz")
+        d.to_csv(cru, index=False, compression="gzip")
+        print(f"  bruto em {cru.name} (parquet indisponível: {e})", flush=True)
+
     # ---- glosa: pedido menos pago, a mesma medida que Goias permite ----
     ped = float(d["despesa"].sum())
     pago = float(d["reembolsado"].sum())
@@ -187,6 +212,14 @@ def main():
             "pctGlosa": round(glosa / ped * 100, 2) if ped else 0,
             "comGlosa": int((d["reembolsado"] < d["despesa"] - 0.005).sum()),
         },
+        # a serie que a primeira versao se recusou a publicar por uma limitacao
+        # que nao existia; anos incompletos ficam marcados, nao escondidos
+        "serie": [{"ano": int(a),
+                   "pago": round(float(g["reembolsado"].sum()), 2),
+                   "pedido": round(float(g["despesa"].sum()), 2),
+                   "deputados": int(g["idDeputado"].nunique()),
+                   "meses": int(g["mes"].nunique())}
+                  for a, g in d.groupby("ano")],
         "categorias": [{"n": str(i)[:70], "v": round(float(r.v), 2),
                         "q": int(r.q)} for i, r in cat.head(14).iterrows()],
         "fornecedores": {
@@ -216,6 +249,12 @@ def main():
         len(d), d["idDeputado"].nunique(), len(tarefas)))
     print("   pedido R$ %.2f mi | pago R$ %.2f mi | glosa R$ %.2f mi (%.2f%%)" % (
         ped/1e6, pago/1e6, glosa/1e6, obj["total"]["pctGlosa"]))
+    print("")
+    print("=== por ano (meses < 12 = ano incompleto) ===")
+    for x in obj["serie"]:
+        marca = "" if x["meses"] == 12 else "   <- %d meses" % x["meses"]
+        print("   %d  pago R$ %6.2f mi | %2d deputados%s" % (
+            x["ano"], x["pago"]/1e6, x["deputados"], marca))
     print("")
     print("=== no que o dinheiro vai ===")
     for c in obj["categorias"][:8]:

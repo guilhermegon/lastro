@@ -1749,10 +1749,9 @@ function secaoMG() {
         dp = v.deputados || {};
   const cat1 = ct[0], cat2 = ct[1];
   const jan = (v.janela || ["",""]).map(x => x.replace("-", "/"));
-  const meses = (v.janela || []).length === 2
-    ? (parseInt(v.janela[1].slice(0,4))*12 + parseInt(v.janela[1].slice(5)))
-      - (parseInt(v.janela[0].slice(0,4))*12 + parseInt(v.janela[0].slice(5))) + 1
-    : 0;
+  const se = (v.serie || []).filter(x => x.meses === 12);
+  const s0 = se[0], s1 = se[se.length - 1];
+  const cresc = (s0 && s1) ? (s1.pago / s0.pago - 1) * 100 : null;
 
   return `
   <div class="cartaz">
@@ -1770,14 +1769,35 @@ function secaoMG() {
       ${ind("Glosado", pct(t.pctGlosa, 2), reais(t.glosa) + " recusados")}
     </div>
     <div class="nota" style="margin-top:12px">
-      <strong>A janela é móvel, e isso não é comportamento.</strong> A API
-      devolve cerca de ${meses} meses por deputado, de ${jan[0]} em diante. Não é
-      que a verba tenha começado ali: é política de publicação. Uma série longa
-      daqui, ou uma comparação com os anos de Goiás, descreveria a política de
-      retenção da ALMG achando que descreve gasto — por isso não há tendência
-      temporal nesta seção.
+      <strong>A janela é por mandato, não por data de corte.</strong> O arquivo
+      começa em ${jan[0]} — início da legislatura 2019–2022 — e a série de cada
+      deputado acompanha o tempo dele de mandato. A mediana é de
+      <span class="num">88 meses</span> por deputado: 48 dos 77 têm série desde
+      2019, 22 desde fevereiro de 2023, e o resto entrou no meio, por
+      substituição. Somar total por deputado mediria tempo de mandato; por isso
+      o que publicamos por deputado é mediana mensal.
     </div>
   </div>
+
+  ${se.length > 1 ? `<div class="cartaz">
+    <h2>A verba mineira ao longo de duas legislaturas</h2>
+    <p class="cap">Só os anos completos: ${s0.ano} a ${s1.ano}. Os anos das
+      pontas ficam de fora do gráfico porque têm menos de doze meses fechados —
+      incluí-los mediria o calendário, não o gasto.</p>
+    ${linha([{rotulo:"Pago", cor:"--accent", pontos: se.map(x => x.pago/1e6)}],
+            se.map(x => String(x.ano)), 1)}
+    <div class="legenda">${chip("--accent","Verba paga no ano, em R$ milhões")}</div>
+    <div class="indices" style="margin-top:14px">
+      ${ind(String(s0.ano), reais(s0.pago), s0.deputados + " deputados")}
+      ${ind(String(s1.ano), reais(s1.pago), s1.deputados + " deputados")}
+      ${ind("Variação", (cresc>=0?"+":"") + dec(cresc,0) + "%",
+            "nominal, em " + (s1.ano - s0.ano) + " anos")}
+    </div>
+    <p class="cap" style="margin-top:10px">Está em reais correntes, sem
+      deflacionar — parte da variação é só a moeda valendo menos. E o número de
+      deputados com verba lançada muda de ano para ano, o que move o total sem
+      que ninguém tenha gastado diferente.</p>
+  </div>` : ""}
 
   ${ct.length ? `<div class="cartaz">
     <h2>No que a verba mineira é gasta</h2>
@@ -1864,7 +1884,7 @@ function tabelaMG() {
      ["categoria", "não", "sim, mas 68,3% do valor sem", "sim"],
      ["fornecedor", "não", "sim", "sim, com CNPJ"],
      ["autor da nota", "sim", "não", "sim"],
-     ["período", "8 anos", "12 anos", "janela móvel de ~18 meses"],
+     ["período", "8 anos", "12 anos", "2019 em diante, por mandato"],
      ["acesso", "API REST", "CKAN, CSV", "API REST, limite publicado"]]);
 }
 
