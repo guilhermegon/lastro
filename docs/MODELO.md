@@ -179,3 +179,199 @@ Documentadas aqui porque nenhuma delas é visível no dado e todas alteram resul
 12. **O card "Nº de municípios" do painel original é sempre 246**: conta o universo
    exibido no mapa, não os municípios em que o deputado teve voto (Álvaro Guimarães
    teve voto em 190 dos 246 em 2018).
+
+
+## Rivais territoriais (`web/{UF}/rivais_{cargo}.json`)
+
+Um arquivo por UF e por cargo, e só nos proporcionais. Nos majoritários cada
+partido lança um nome e a disputa não se dá dentro de uma lista: ali "rival"
+seria o próprio adversário da eleição, que a tela do cargo já mostra inteiro.
+
+| Campo | O que é |
+|---|---|
+| `pr` | **pressão** — % do voto do eleito que está em municípios onde o rival também é forte, ponderado pela força do rival ali. **Assimétrica**: um gigante pressiona um pequeno muito mais do que o contrário |
+| `af` | **afinidade** — cosseno entre os dois vetores municipais. Simétrica; mede formato do mapa, não tamanho |
+| `mun` | índices, em `base.json`, dos três municípios onde os dois mais se encostam |
+| `b` | banda ideológica, de `partidos_espectro.csv` |
+
+Corte de mil votos: abaixo disso o vetor municipal é ruído, não geografia.
+
+### A aferição, e por que ela está no arquivo
+
+O achado aparente é "o rival nº 1 costuma ser um aliado ideológico". Ele não
+sobrevive sozinho: se a maioria das candidaturas já está na mesma faixa, aliado
+venceria por acaso. Por isso cada pleito carrega três números:
+
+- `esperado` — fração média de candidaturas na mesma banda do eleito. É o acaso.
+- `observado` — fração de eleitos cujo rival nº 1 é de fato aliado.
+- `pareado` — **o único que sobrevive sozinho**: para o MESMO eleito, quanto o
+  aliado mais pressionante pressiona a mais que o adversário mais pressionante.
+  Controla a composição por completo.
+
+Medido nas 27 unidades, `observado` acompanha `esperado` de perto — o achado
+aparente é, em boa parte, composição do campo. O pareado é positivo em quase
+todos os pleitos, mas pequeno (ordem de +1 a +3 pp). A leitura honesta é
+**território e ideologia são pouco acoplados**, não "aliados se canibalizam".
+
+## Vereador nas capitais (`web/{UF}/vereador.json`)
+
+26 capitais, 2000 a 2024. Brasília não entra: elege distrital, não vereador.
+
+**Não há mapa, e não é omissão.** Uma capital é um município só — o coroplético
+que sustenta o resto do projeto aqui não existe. A única desagregação territorial
+que o arquivo do TSE oferece dentro da cidade é a zona eleitoral, e não há malha
+pública de zona: a geografia entra como distribuição, não como desenho.
+
+Duas armadilhas que a replicação amplia, tratadas no código e não só no texto:
+
+- **O número e o traçado das zonas mudam entre pleitos**, e de forma diferente
+  em cada cidade. Zonas efetivas nunca viram série temporal — só valem dentro de
+  um ano — e a similaridade com o pleito anterior só é calculada quando o número
+  de zonas bate. Devolver um número sobre zonas redesenhadas seria comparar dois
+  mapas diferentes fingindo que são o mesmo.
+- **A escala não se compara entre capitais.** Rio de Janeiro tem 49 zonas e São
+  Paulo 57; Macapá, Boa Vista e Vitória têm 2. **Palmas tem 1 nos sete pleitos** —
+  lá não há geografia interna nenhuma, e a tela diz isso em vez de desenhar uma
+  barra de 100%.
+
+## O pareamento TSE ↔ IBGE, e a armadilha de 23 milhões de votos
+
+Descoberto em 2026-08-22 por `26_audita_pareamento.py`, que existe justamente
+porque a falha é **silenciosa**: em `19_` e `23_`, a linha cujo município não
+pareia com a malha do IBGE é descartada, e o mapa fica com aparência de certo —
+o município some do total sem que nada avise.
+
+**O que eram os 153 órfãos.** A hipótese natural — município do IBGE que ficou
+sem par — está errada: eram 153 nomes órfãos do lado do TSE contra apenas 5
+municípios do IBGE sem voto nenhum. Quase todo alvo já recebia voto. O que
+acontece é que **o TSE mudou a grafia ao longo da série**: "MOJI GUAÇU" nos
+pleitos antigos, "MOGI GUAÇU" nos recentes. A grafia nova pareia, a velha não, e
+o município perde só os anos antigos.
+
+Por isso o estrago não estava no mapa de um ano — estava na **linha do tempo**,
+que é muito mais difícil de enxergar:
+
+| ano | perda nacional | pior UF |
+|---|---|---|
+| 1998 | 1,98% | PE 8,9% |
+| 2002 | 1,66% | PE 10,0% |
+| 2006 | 1,12% | RO 9,5% |
+| 2010 | 0,44% | RO 9,4% |
+| 2014 | 0,13% | RO 3,1% |
+| 2018 | 0,14% | RO 2,9% |
+| 2022 | 0,12% | RO 2,9% |
+
+Uma série de concentração lida assim mostraria Pernambuco "crescendo" de 1998 a
+2022 por puro artefato de pareamento.
+
+**Por que Goiás nunca pegou.** O teste-ouro (`06_verifica.py`) valida GO, onde o
+pareamento é 246/246 por construção — as 9 correções manuais de 2026-08-21 já
+cobriam tudo. O gate era real e continuou passando enquanto 26 unidades sangravam.
+
+### Como os pares foram estabelecidos
+
+Casar por semelhança de texto é perigoso: um par errado **não perde voto**, põe
+voto no município errado, o que é pior. Por isso cada proposta passou por um
+crivo baseado no dado, não no texto:
+
+| Método | O que resolve | n |
+|---|---|---|
+| `colapso` | idênticos sem espaços — "Sant'Ana" vs "SANTANA" | 5 |
+| `apostrofo` | "D'Oeste" vs "DO OESTE" | 10 |
+| `prefixo` | nome curto virando oficial — "CAMPOS" → Campos dos Goytacazes | 19 |
+| `parecido` | grafia divergente — "PIRACUNUNGA" → Pirassununga | 88 |
+| `complementar` | o nome novo aparece exatamente nos anos em que o velho some | 11 |
+| `disjunto` | candidatos que nunca dividem pleito, o mais próximo no texto | 11 |
+| `renomeacao` | hipótese de renomeação confirmada por cobertura exata da série | 6 |
+
+**O crivo que decide:** duas grafias do mesmo lugar nunca aparecem no mesmo
+arquivo — um município não vota duas vezes no mesmo pleito. Se aparecem juntas,
+são lugares diferentes. Isso reprovou três propostas plausíveis (AMAPARI →
+Amapá, SÃO MIGUEL DE TOUROS → São Miguel, ESPÍRITO SANTO DO OESTE → Espírito
+Santo) e depois **identificou o alvo certo** de uma delas: São Miguel do Gostoso.
+
+O mesmo teste derrubou dois palpites de renomeação que pareciam óbvios
+(ANSELMO DA FONSECA → Mulungu do Morro, ESPÍRITO SANTO DO OESTE → Jandaíra).
+
+**Resultado:** 23.063.701 → **47.535 votos** sem par (99,79% recuperado). Restam
+três nomes, todos da Bahia e do Rio Grande do Norte, todos só em 1998, listados
+por `26_audita_pareamento.py` a cada execução.
+
+**Mudança de esquema:** `municipios_tse_ibge.csv` ganhou a coluna `uf`. A chave
+passou a ser `(uf, nome)` porque "LUISIANIA" existe no Paraná e em São Paulo
+apontando para municípios diferentes, e uma chave só de nome não cabe os dois.
+
+
+## Auditoria de design: o que o `impeccable` achou, e o que ele erra
+
+Rodado o detector determinístico de `pbakaus/impeccable` (59 regras, sem LLM e
+sem chave de API) contra `dist/cade_o_voto.html`, em 2026-08-23.
+
+**Achados reais, corrigidos:**
+
+| O quê | Antes | Depois |
+|---|---|---|
+| `--ink-3` (texto secundário) | 3,68:1 no claro, 4,46:1 no escuro | 5,36:1 e 5,10:1 |
+| Tintas do mapa de calor | até 2,61:1 | as dez ≥ 4,50:1 |
+| `.lv`/`.sg` no item selecionado | 3,28:1 sobre `--accent-soft` | token próprio, `--ink-sel` |
+| Texto funcional < 11px | rótulos de cartão 10,24px, `th` 10,24px | 11,2px |
+| Barra de acento de 3px na `.nota` | o tique mais reconhecível de UI gerada por IA | borda inteira |
+| `■` colorido na legenda | texto colorido a 3,44:1 | bloco gráfico com borda |
+
+As cores não foram escolhidas a olho: cada token foi resolvido caminhando a
+luminosidade em HLS, preservando matiz e saturação, até bater 4,5:1 **contra o
+pior fundo em que ele aparece** — `--surface`, `--bg` e `--surface-2`, não só o
+cartão. Duas armadilhas apareceram nesse cálculo:
+
+1. **A tinta tem de ser por tema.** Calculei `--tinta-s5` contra o verde do tema
+   escuro (`#3E9A48`) e apliquei nos dois; no claro o verde é `#2C6E33`, bem mais
+   escuro, e texto escuro sobre ele deu 2,61:1. As dez tintas agora são
+   calculadas contra a rampa do seu próprio tema.
+2. **Não dá para escolher a direção pela luminosidade da faixa.** Num laranja
+   como `#E07B33`, nem branco nem a heurística de "faixa escura → texto claro"
+   funcionam: branco chega a 2,98:1 e escuro a 4,52:1. A rotina testa as duas
+   direções e fica com a melhor.
+
+**Falsos positivos, verificados no DOM e mantidos:**
+
+- `text #000000 on #161e21` (6 ocorrências) — nenhum elemento computa preto.
+  Varrendo os dois temas nas quatro abas, zero falhas de contraste.
+- `text #809093 on #ffffff` (4) — `#809093` é o `--ink-3` do tema **escuro**,
+  pareado com o branco do tema **claro**. O detector é estático e não sabe a qual
+  bloco de tema um token pertence. No claro o valor é `#606D70`, que dá 5,36:1.
+- `wide-tracking 0.34em` — é o `INTELIGÊNCIA POLÍTICA` da marca, rótulo curto em
+  caixa alta, que a própria regra isenta.
+- `cramped-padding` na `.topo` — o recuo vem do `.wrap` interno, não da `.topo`.
+
+A lição de método: o detector estático **acha** o que a inspeção do DOM confirma
+ou desmente, e nenhum dos dois basta sozinho. A varredura de contraste no DOM
+vivo, percorrendo tema e aba, é o que fecha a conta — e foi ela que provou que os
+dez restantes são ruído.
+
+
+## A ALEGO tem API, e ela não tem emendas
+
+Sondado em 2026-08-23, porque seria a fonte mais direta possível para o
+Emendômetro estadual de Goiás.
+
+**A API existe e é bem documentada**: `transparencia.al.go.leg.br/api/transparencia`,
+com URL parametrizada (`{formato}` json ou csv, `{ano}`, `{mês}`) e dezesseis
+assuntos — verbas indenizatórias, diárias, remunerações, execução orçamentária,
+orçamento, programa-ações, licitações, contratos, convênios, expedientes,
+diários. Os endpoints documentados respondem 200.
+
+**Nenhum deles é emenda parlamentar.** Testados `emendas`,
+`emendas-parlamentares`, `emenda`, `emendas_parlamentares` e `indicacoes`: os
+cinco dão 404. E `expedientes` (220 registros) não menciona emenda.
+
+Isso é coerente com a divisão institucional, não é omissão: a ALEGO publica o
+gasto **da própria Casa** — sua folha, seus contratos, suas diárias. A emenda
+parlamentar é indicação de deputado sobre o orçamento do **Executivo**, e é
+executada pelas secretarias. Por isso o dado vive na SERINT e no portal de dados
+abertos do estado, que é de onde `34_emendas_go_estadual.py` já o tira.
+
+Uma pista que não deu certo: `remuneracoes` inclui "Deputados, servidores ativos
+e estagiários", e uma lista oficial de nomes parlamentares poderia melhorar o
+casamento autor↔eleito, hoje em 61% em Goiás. Mas o endpoint devolveu zero
+registros em todos os pares ano/mês testados (2023, 2024, 2025). Fica registrado
+como pista, não como caminho.

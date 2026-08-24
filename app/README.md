@@ -1,4 +1,6 @@
-# Lastro — front end
+# Cadê o Voto? — front end
+
+Produto de **Lastro — Inteligência Política**.
 
 React 19 + TypeScript + Vite. Build estático: sai um `dist/` que roda em qualquer
 hospedagem de arquivo, sem servidor de aplicação.
@@ -19,13 +21,20 @@ desktop.
 
 Aqui os dados são **fatiados por UF** e buscados sob demanda:
 
+Os dados são fatiados **por UF e por cargo**, e o front baixa só o que a aba
+aberta precisa:
+
 | | Tamanho |
 |---|---|
-| App (JS + CSS) | 212 KB |
-| `dados/indice.json` | 93 KB |
-| **Abertura** | **305 KB** |
-| `+ dados/uf/GO.json` | 533 KB |
-| `+ dados/uf/MG.json` (a maior) | 2,3 MB |
+| App (JS + CSS) | 233 KB |
+| `dados/indice.json` | 95 KB |
+| **Abertura** | **328 KB** |
+| `+ GO/base.json + GO/estadual.json` | 847 KB |
+| `+ SP/estadual.json` (a maior) | 2,7 MB |
+| `+ qualquer padroes.json` | 3 KB |
+
+Um arquivo por UF seria pior: em São Paulo, os cinco cargos somam 7,9 MB, e
+trocar de aba não deveria custar isso.
 
 O usuário paga só pelo estado que abrir, e o cache em `lib/dados.ts` guarda a
 *promessa*, não o resultado — dois pedidos simultâneos do mesmo estado viram uma
@@ -34,13 +43,15 @@ requisição só, e uma falha não fica presa no cache.
 Os arquivos de `public/dados/` são **gerados**, não editados à mão:
 
 ```bash
-python ../scripts/16_payload_br.py   # monta o payload nacional
-python ../scripts/18_dados_web.py    # fatia em indice.json + uf/{SIGLA}.json
+python ../scripts/19_nacional_completo.py    # 5 cargos x 7 pleitos x 26 UFs
+python ../scripts/20_adjacencia.py           # vizinhança, da malha completa
+python ../scripts/21_padroes_cruzamentos.py  # padrões e cruzamentos por UF
+python ../scripts/22_publicar_web.py         # publica em public/dados
 ```
 
 ## Estado na URL
 
-`?uf=GO&ano=2022&c=0` — unidade da federação, pleito e índice do candidato.
+`?uf=GO&ano=2022&v=estadual&c=0` — unidade da federação, pleito, aba e índice do candidato.
 
 Não é preciosismo. Num produto de inteligência política a ação mais frequente é
 mandar a tela para outra pessoa; com o estado na URL, copiar o endereço compartilha
@@ -57,7 +68,9 @@ src/
     projecao.ts         lat/long -> caminho SVG
     escalas.ts          quantis, faixas, rampa de cor
     formato.ts          pt-BR num lugar só
-  componentes/          Mapa, Legenda, Cartoes, Indices, SeletorEstado, Dica, Logo
+  componentes/          Mapa, Legenda, Cartoes, Indices, SeletorEstado, Dica,
+                        Logo, Abas, Barras, Linha
+  vistas/               VistaCargo, VistaPadroes, VistaCruzamentos
   estilos/tokens.css    sistema de tokens, claro e escuro
   App.tsx               composição e estado
 ```

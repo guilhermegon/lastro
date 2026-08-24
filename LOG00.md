@@ -342,3 +342,572 @@ perdê-los custaria refazer o trabalho.
 Varredura de segredo antes do commit: os primeiros positivos eram "de**senha**do" e
 "de**senha**r". Refeita com padrão estrito (chave de API, token entre aspas, bloco de
 chave privada, credencial de nuvem): nada.
+
+## 2026-08-21 — Nome do produto: Cadê o Voto?
+
+Ordem do usuário. A casa é **Lastro — Inteligência Política**; o produto passa a ser
+**Cadê o Voto?**. `RASTRO`/`RAS00` seguem como código interno no roster do Overhead e
+não aparecem para o usuário final.
+
+Nome funciona porque é uma pergunta, e o painel existe exatamente para respondê-la —
+não é rótulo de categoria, é a coisa que o produto faz.
+
+Aplicado nas duas páginas, no app React e nos README. As duas precisam de nomes
+distinguíveis numa galeria, então:
+
+- página nacional, o produto: **Cadê o Voto?**
+- recorte profundo de Goiás: **Cadê o Voto em Goiás?**
+
+## 2026-08-22 — Modelo completo replicado para as 26 UFs
+
+Os cinco cargos, os sete pleitos, todos os estados, mais Padrões e Cruzamentos por UF.
+54 MB, fatiados em `data/processed/web/{UF}/{cargo}.json`.
+
+**Um arquivo por UF *e por cargo*, não um por UF.** Assim o front baixa só o cargo na
+tela: São Paulo no estadual são 2,7 MB e não os 7,9 MB dos cinco somados.
+
+Três defeitos encontrados, e nenhum deu erro:
+
+1. **Adjacência calculada sobre a geometria de desenho.** A malha da web é simplificada
+   a 0,012 e isso apaga vértices: Goiás caía de 5,3 para 3,7 vizinhos por município. Um
+   índice de contiguidade assim mede o desenho, não o território. Separei em
+   `20_adjacencia.py`, que deriva da malha completa — Goiás volta a 5,5 e o único
+   município sem vizinho no país é Ilhabela, que é ilha.
+
+2. **Chave de tipo trocado.** `vetores` era indexado pelo `sq` cru do groupby e a ficha
+   guardava `str(sq)`. Nenhuma consulta casava, em silêncio: a janela de captura saía
+   com 0 municípios de 246 e a semelhança entre partidos saía zero.
+
+3. **Arrasto somando só eleitos.** Os cargos proporcionais guardam ficha só de quem se
+   elegeu, para caber. Somar o partido por essas fichas subestima quem tem muita gente
+   sem eleger — o PT saía 0,344 contra os 0,617 conhecidos. Passou a usar um agregado
+   por partido sobre todos os candidatos, gravado no próprio arquivo do cargo.
+
+Mais um ajuste de leitura: o arrasto exige presença em metade dos municípios do estado.
+Sem isso a Unidade Popular, presente em 76 de 246, correlacionava 0,73 e aparecia acima
+do PT sem dizer nada sobre máquina territorial.
+
+Validação contra o pipeline de Goiás, tudo exato: Bruno Peixoto 73.692 e 23,78
+municípios efetivos; janela de captura com pico de 41,66 na faixa de 15–25 mil; arrasto
+do PT 0,617; semelhança do Republicanos 0,6103; escala governador 21,91 > presidente
+14,46 > senador 12,14 > federal 10,12 > estadual 4,75.
+
+Roraima virou o contraexemplo útil da ressalva de escala: com 15 municípios, todos os
+cargos ficam entre 2,2 e 3,0 efetivos, e o estadual (3,0) fica **acima** do presidente
+(2,2). Não é que o voto estadual seja mais disperso lá — é que o teto é 15.
+
+## 2026-08-22 — Front React com o modelo completo
+
+As sete abas no ar: presidente, governador, Senado, federal, estadual, Padrões e
+Cruzamentos — para qualquer uma das 26 UFs, nos sete pleitos.
+
+Carregamento por aba, não por estado. Trocar de aba busca um arquivo; trocar de estado
+busca a base mais o cargo aberto. Abertura em 328 KB; a maior requisição do sistema é
+`SP/estadual.json` com 2,7 MB, e só quem abrir São Paulo no estadual paga por ela.
+
+Dois acertos que vieram de graça por causa do desenho:
+
+- **O Distrito Federal aparece com a aba Estadual desabilitada**, porque ele elege
+  distrital. Não há caso especial no código: a lista de cargos vem por UF no índice, e
+  a aba se desabilita sozinha.
+- **Roraima escancara a ressalva de escala na própria tela.** Os cinco cargos ficam
+  entre 2,2 e 3,0 municípios efetivos, com o estadual acima do presidente. A nota da
+  aba de Cruzamentos diz o motivo — o teto é 15 municípios — e a coluna de fração dá o
+  número comparável.
+
+`TKT-0004`, que pedia a ordem de porte entre quatro blocos, foi fechado sem precisar da
+decisão: com a replicação completa, portou-se tudo de uma vez e não havia mais o que
+priorizar.
+
+## 2026-08-22 — as duas abas que faltavam
+
+O usuário apontou que faltava algo, e faltava: a versão completa de Goiás tinha
+**oito** abas, não sete. Faltavam os rivais territoriais e o vereador.
+
+Os dois foram replicados para o país — rivais em 27 unidades (estadual e
+federal, 1998–2022) e vereador nas 26 capitais (2000–2024, 182 arquivos
+extraídos sem um aviso sequer).
+
+**Um susto que não era defeito.** O arquivo do estadual de 2014 tem 4,26 milhões
+de linhas contra 791 mil em 2010 — cinco vezes, no mesmo cargo. Parecia a
+duplicação que já mordeu este projeto antes. Não era: 717 candidatos × 246
+municípios em Goiás dá 176.382 exatamente, e não há duplicata em
+`(uf, sq, município)`. A partir de 2014 o arquivo do TSE é **denso** — traz a
+linha do município mesmo com zero voto.
+
+**Um defeito que era real, e sério.** No Distrito Federal o painel de rivais
+mostrava afinidade 1,000 com todo mundo e "disputam Brasília". O DF é um
+município só: o cosseno entre dois candidatos quaisquer é exatamente 1, e a
+lista estava ordenando por tamanho de votação com aparência de território. É o
+risco que a regra de auditoria deste projeto nomeia — mapa errado com aparência
+de certo. Corrigido nos dois lados: `23_rivais.py` não produz o arquivo abaixo
+de três municípios, e a tela explica a ausência em vez de simplesmente não
+mostrar o painel.
+
+**Duas coisas que estavam misturadas.** O nome da capital servia ao mesmo tempo
+de chave de pareamento com o TSE (maiúscula, sem acento) e de rótulo — a aba
+dizia "Vereador · GOIANIA". Separadas em `CAPITAIS` e `NOMES`.
+
+Tamanho: os rivais saíram primeiro com 28,9 MB porque cada ficha repetia o
+**nome** dos municípios disputados. Trocado por índice em `base.json` (22,6 MB) e
+cortado por cargo — São Paulo no estadual caiu de 3,97 MB para 1,54 MB.
+
+## 2026-08-22 — o título pergunta pelo estado aberto
+
+`Cadê o Voto em Goiás?`, `no Rio de Janeiro?`, `na Bahia?` — e a aba do
+navegador junto, que é por ela que a pessoa acha a tela entre dez abertas e é o
+que vai no link compartilhado.
+
+A preposição é tabela, não regra derivável: "Goiás" e "Pará" terminam igual e
+pedem *em* e *no*; "Bahia" e "Paraná" parecem o mesmo caso e pedem *na* e *no*.
+Fica em `app/src/lib/uf.ts`, chaveada por sigla e não por nome — o nome vem do
+IBGE e pode mudar de grafia. Mato Grosso e Mato Grosso do Sul vão sem artigo,
+que é o uso oficial.
+
+O subtítulo perdia o sentido dizendo "em todas as unidades da federação" sob um
+título que nomeia uma: passou a descrever o estado aberto, e omite "município a
+município" onde isso não quer dizer nada — o Distrito Federal é um município só.
+
+## 2026-08-22 — a tela nacional vira a entrada, e o buraco que ela revelou
+
+O usuário mostrou a tela nacional do artefato antigo e pediu que fosse a landing
+page, com Nacional à esquerda e o estado à direita. A tela nunca tinha sido
+portada para o React — só existia no `lastro_brasil.html`. Portada em
+`VistaNacional.tsx`, virou a aba mais à esquerda e a vista padrão. Clicar num
+estado no mapa, ou no nome dele na tabela, abre a tela daquele estado.
+
+Ela não custa requisição: sai inteira do `indice.json`, os mesmos 96 KB que já
+são baixados para desenhar qualquer tela.
+
+**E foi conferindo os números dela que apareceu o defeito grande.** O artefato
+antigo dava "último eleito" 6.603 em São Paulo; o pipeline dava 45.093. Contra o
+dado bruto do TSE, 45.094 — o pipeline estava certo. Mas o **total** de São Paulo
+divergia em 6.496 votos, e voto que some sem aviso é o defeito que este projeto
+trata como gate.
+
+`26_audita_pareamento.py`, escrito para isso, achou 23.063.701 votos e 153
+municípios fora do mapa. Detalhe em `docs/MODELO.md`. O que importa aqui: **não
+era um mapa com buraco, era uma série temporal com viés** — o TSE mudou a grafia
+dos nomes ao longo dos anos, então os pleitos antigos perdiam e os recentes não.
+Pernambuco perdia 10% em 2002 e 0,1% em 2022. Uma série de concentração lida
+assim mostraria crescimento que é puro artefato.
+
+Corrigido para 47.535 votos sem par, três municípios, todos só em 1998. Os dois
+gates continuam passando: teste-ouro de Goiás e validação nacional.
+
+O link público é `dist/cade_o_voto.html`, gerado por `28_build_landing.py`: a
+tela nacional sozinha, 117 KB, autocontida. O app com os 27 estados e as oito
+abas serve 80 MB sob demanda e precisa de hospedagem — não cabe em artefato, e
+foi por isso que ele deixou de ser página única.
+
+## 2026-08-23 — o layout quebrado e a página de estado que faltava
+
+O usuário abriu o link e achou duas coisas: layout destruído, e estado que não
+leva a lugar nenhum. As duas procedem, e a causa da primeira é instrutiva.
+
+**O logo comeu o cabeçalho.** Inlinei `dist/logo-lastro-marca.svg`, o arquivo
+solto, em vez da marcação de `Logo.tsx`. O SVG solto não carrega a classe
+`lastro`, então a regra `.lastro { width: 164px }` não pegava — e o
+`svg { width: 100%; height: auto }` global do projeto fez o logo ocupar os 344px
+da coluna, com 308px de altura. O `<h1>` foi parar em y=330. Corrigido extraindo
+o SVG do próprio `Logo.tsx` e envolvendo em `<span class="lastro">`, que é o que
+o CSS espera. Logo: 344×308 → 164×43. Cabeçalho: 443px → 287px.
+
+**A lição do método, não do bug:** na primeira publicação eu conferi os números
+por consulta ao DOM — contagens, textos, totais — e não olhei o desenho. Tudo
+que medi estava certo. Geometria de elemento (`getBoundingClientRect`) teria
+pego em um passo, e passou a fazer parte da conferência.
+
+**A página de estado não existia** — eu tinha dito que ficaria só no app, por
+causa do teto de 16 MB do artefato. Medindo em vez de supor: o estadual dos 7
+pleitos nas 26 UFs são 17,2 MB como o app serve, mas 9,9 MB sem os blocos `pm` e
+`mm`, que só o pipeline usa. Com a geometria municipal (2,4 MB) e o índice, dá
+13,0 MB — cabe. O artefato passou a ter as duas telas, com abas Nacional e
+Estado, e três formas de entrar num estado: clique no mapa, clique no nome da
+tabela, ou a gaveta. O estado vai na hash, então dá para mandar um estado
+específico por link.
+
+## 2026-08-23 — as abas de inferência entram no artefato
+
+O usuário perguntou onde estavam as abas de inferência. Estavam só no app: eu
+tinha deixado Padrões e Cruzamentos de fora do artefato por causa do teto de
+16 MB. Medindo em vez de supor — de novo — os dois arquivos somam **0,74 MB**
+nas 27 unidades. Cabiam desde sempre.
+
+O artefato passou de 13,0 para 13,7 MB, com quatro abas: Nacional, Estado,
+Padrões, Cruzamentos.
+
+O que **não** cabe, e continua só no app: rivais territoriais (12,2 MB só no
+estadual) e vereador nas capitais (4,8 MB). Qualquer um dos dois estoura o teto.
+
+**Um defeito de leitura que o print do usuário revelou.** Havia um retângulo
+escuro no meio do mapa de Goiás, nos dois mapas, que parecia buraco de
+renderização. Não era: `--sem-voto` no tema escuro era `#232E31` contra um
+`--surface` de `#161E21`, e o traço entre municípios é `var(--surface)`. Uma
+mancha de municípios sem voto adjacentes se fundia num bloco sem borda visível.
+A categoria existia e estava correta — só não dava para ler. `--sem-voto` no
+escuro foi para `#2E3A3D`. Vale para o app também, que divide o mesmo
+`tokens.css`.
+
+Conferido que os números do artefato batem com o pipeline: o arrasto do PT em
+Goiás 2022 sai 0,617 em 246 municípios, que é o valor validado — o mesmo que
+saía errado em 0,344 quando era calculado só sobre os eleitos.
+
+## 2026-08-23 — auditoria de design com o impeccable
+
+O usuário apontou `pbakaus/impeccable` e perguntou se dava para usar. Dá: ele
+traz 59 regras determinísticas que rodam offline, sem LLM e sem chave.
+
+Primeira rodada no artefato: 16 achados. Última: 12, e os 12 são falsos
+positivos verificados um a um. O detalhe está em `docs/MODELO.md`.
+
+O ganho real foi de contraste. `--ink-3` — que carrega cabeçalho de tabela,
+legenda de índice, rótulo de cartão e eixo de gráfico — estava em 3,68:1 no tema
+claro. Não é decoração, é conteúdo. Foi para 5,36:1.
+
+**Duas armadilhas no cálculo, que valem mais que o resultado:**
+
+A tinta do mapa de calor tem de ser por tema. Calculei contra o verde do escuro e
+apliquei nos dois; no claro o verde é bem mais escuro e o texto caiu para 2,61:1.
+E não dá para escolher a direção da tinta pela luminosidade da faixa: num laranja
+médio, branco dá 2,98:1 e escuro dá 4,52:1 — a rotina agora testa as duas
+direções e fica com a melhor.
+
+**O que o detector erra, e por quê.** Ele é estático e não sabe a qual bloco de
+tema um token pertence, então pareia o `--ink-3` do escuro com o branco do claro
+e acusa 3,7:1 num par que nunca existe na tela. A varredura de contraste no DOM
+vivo, percorrendo os dois temas e as quatro abas, deu **zero falhas** — é ela que
+fecha a conta.
+
+Ressalva registrada: `CLAUDE.md`, `AGENTS.md` e `.claude-plugin/` daquele
+repositório são instruções escritas para agentes. Foram lidas como material, não
+como ordens, e nada foi instalado.
+
+## 2026-08-23 — Emendômetro no ar
+
+A aba está publicada, e a decisão que a define é de honestidade, não de código.
+
+**Duas coberturas, e as duas na tela.** Só 10,5% do dinheiro das emendas
+individuais é rastreável até um município — 76% está declarado como `MÚLTIPLO`,
+espalhado por cidades que o arquivo não nomeia. Mas 69% dos municípios do país
+receberam alguma emenda rastreável somando 2015–2026. Os dois números são
+verdadeiros e respondem perguntas diferentes; a nota no topo da aba diz o
+primeiro, e o mapa acumulado existe por causa do segundo.
+
+**O atalho que ficou fechado.** O arquivo por favorecido tem município em 100%
+do dinheiro. Brasília concentra 36,4% — é o endereço do Fundo Nacional de Saúde
+e dos intermediários. Teria dado um mapa completo e falso.
+
+**Por que o mapa abre acumulado.** Goiás em 2024 tem 15 municípios com emenda;
+os doze anos juntos dão 170 de 246. Num ano só o mapa sugere ausência de
+dinheiro onde o que há é ausência de rastreabilidade.
+
+O artefato foi de 13,7 para 15,0 MB. O teto de 16 agora está perto, e é ele que
+decide o que ainda cabe — o cruzamento voto × emenda vai precisar ser magro.
+
+## 2026-08-23 — o dinheiro segue o voto, e o número sobrevive
+
+**60,1% da emenda de um deputado cai nos 10 municípios onde ele mais votou.**
+Sozinho, esse número não vale nada: Goiânia recebe muito voto e muita emenda de
+quase todo deputado goiano, porque é grande.
+
+A linha de base é o que o torna legível — a **mesma** emenda medida contra o
+reduto de **outro** deputado da mesma UF e do mesmo pleito dá 5,7%. Se o dinheiro
+fosse para a cidade grande por ser grande, cairia no reduto alheio também e o
+excesso zeraria. Sobram +15,9 pp.
+
+E a escada de robustez anda para o lado certo: exigindo ao menos 10 municípios
+rastreáveis, o excesso ponderado por dinheiro fica em +24,5 pp e é positivo em
+91% dos casos. Artefato de denominador pequeno encolhe sob filtro; este cresce.
+
+Fica na tela a ressalva de que isso mede a fatia rastreável — mediana de 1,9% da
+carteira de cada deputado.
+
+**Duas mudanças pedidas no meio do caminho, ambas certas.** Real por habitante e
+por km², do Censo 2022 do IBGE: as três medidas contam histórias diferentes em
+Goiás — absoluto é Goiânia com R$ 22,8 mi, por habitante é Campos Verdes com
+R$ 527, por km² é Valparaíso com R$ 141 mil. E a gaveta "Qual seu estado?"
+desceu para dentro das abas de estado, sumindo no Nacional, onde o mapa já é o
+seletor.
+
+Artefato em 15,2 MB de 16.
+
+## 2026-08-23 — sumário, emenda Pix e dois defeitos de navegação
+
+**Sumário clicável nas cinco abas**, no trilho, montado a partir dos `<h2>` que a
+aba acabou de desenhar — não de uma lista escrita à mão. As abas trocam de
+conteúdo conforme estado, ano, autor e tipo; um índice fixo mentiria assim que
+uma seção sumisse. Ele marca a seção em leitura e acompanha a rolagem.
+
+Três abas não tinham trilho nenhum (Nacional, Padrões, Cruzamentos) e ganharam.
+
+**Um defeito medido, não suposto.** `scrollIntoView({behavior:"smooth"})` não
+rolava nada. Servida como fragmento, a página cai em modo quirks e quem rola é o
+`<body>`, não o `<html>` — e smooth sobre o body simplesmente não acontece. Agora
+a posição é calculada, a rolagem é conferida, e se não saiu do lugar os dois
+elementos são empurrados na mão. `prefers-reduced-motion` continua respeitado.
+
+**Emenda Pix separada.** É o apelido da Transferência Especial: cai direto na
+conta do município, sem convênio, sem finalidade definida e sem acompanhamento
+federal. São **R$ 32,2 bi, 23% das emendas individuais** do país. Filtro de três
+estados — todas, só Pix, sem Pix — e o "sem Pix" é subtração, não uma terceira
+soma gravada: guardar os três seria a chance de os três discordarem. Em Goiás a
+soma fecha: R$ 15,4 mi + R$ 300,8 mi = R$ 316,2 mi.
+
+O mapa do Pix é outro mapa. Em Goiás o geral tem Goiânia no topo; o Pix tem
+Planaltina.
+
+**E a troca de estado estava forçando a aba Estado.** Quem estava no Emendômetro
+de Goiás e escolhia São Paulo caía na ficha de um deputado paulista. Agora a aba
+é preservada — só o Nacional é exceção, porque lá clicar num estado é pedir para
+entrar nele.
+
+Artefato em 15,7 MB de 16.
+
+## 2026-08-23 — piloto de Goiás: emendas de deputado estadual
+
+**Eu tinha descartado a fonte certa.** Disse que os dados abertos de Goiás só
+tinham fragmentos e que a execução completa exigiria engenharia reversa do painel
+Power BI. Errado: o conjunto "Emendas Parlamentares - SERINT" é a base da
+Assembleia Legislativa inteira, em CSV, 2019–2025. Julguei pelo nome do órgão
+sem ler a descrição do conjunto, que diz exatamente o que é.
+
+**O custo do piloto não estava onde eu esperava.** Achar o dado foi fácil. O
+trabalho é que o esquema muda todo ano: sete arquivos, sete formatos, separador
+que vira tabulação em 2025, e a coluna de autor com três nomes diferentes ao
+longo da série. Uma tabela de nomes fixos quebraria no próximo arquivo — as
+colunas passaram a ser achadas por busca.
+
+**Duas correções minhas no caminho, ambas do mesmo tipo.** Escrevi dois códigos
+IBGE de memória para o override e os dois estavam errados: 5208707 é Goiânia,
+não a cidade de Goiás. Fui buscar na malha. E concluí "município só a partir de
+2023" olhando cabeçalhos — os arquivos de 2024 e 2025 são despejos multi-ano e
+trazem município para exercícios antigos, o que dá 246 municípios em 2022.
+
+Resultado: 22.310 linhas, 186 autores, R$ 4,0 bi, 65,8% do valor com município.
+Casamento com deputado estadual eleito em 61% dos autores e 76% do dinheiro —
+subiu de 43% quando tirei o prefixo "DEP." do nome, que a base do estado usa e a
+do TSE não.
+
+Cinco nomes seguem sem par, R$ 1,5 mi, e quatro nem são município. "RIO DOCE"
+pode ser Aparecida do Rio Doce, mas *pode ser* não entra em override: par errado
+põe dinheiro no município errado, que é pior que dinheiro sem município.
+
+## 2026-08-23 — esfera estadual no Emendômetro
+
+Fusão, não aba nova. Aplicado sob a pré-autorização, com recomendação
+inequívoca: uma aba que existe só em Goiás ficaria vazia em 26 estados, e a
+pergunta que interessa é comparativa — o deputado estadual manda dinheiro para o
+mesmo tipo de lugar que o federal?
+
+O seletor de esfera só aparece onde há base estadual. Trocar para um estado sem
+base volta sozinho para federal, em vez de mostrar tela vazia. E na esfera
+estadual somem três coisas que são do federal por natureza: o filtro de Pix
+(Transferência Especial é instrumento da União), o cruzamento voto × emenda e a
+tabela nacional por UF.
+
+**A comparação em Goiás é o resultado.** O federal rastreia R$ 316,2 mi ao
+município (6,5%) e alcança 170 de 246; o estadual rastreia R$ 2,61 bi (65%) e
+alcança os 246. A maior carteira federal é de R$ 21,8 mi em 19 municípios; a
+estadual, R$ 46,1 mi em 73. Não é o estado sendo mais transparente por virtude —
+é que a emenda federal é maior por unidade e vai com frequência para `MÚLTIPLO`.
+
+Zero falhas de contraste nos dois temas. Artefato em 15,8 MB de 16 — o teto
+agora é a restrição que decide o próximo passo.
+
+## 2026-08-23 — a sondagem que matou uma ambição
+
+O roadmap pedia "decidir se vale ir para os outros 25". A decisão estava
+impossível porque faltava o insumo — e o insumo era medição minha, não juízo do
+usuário. Sondei os 27 portais estaduais de dados abertos.
+
+**Dez de 27 respondem CKAN. Seis têm algum conjunto com "emenda parlamentar".
+Cinco em formato tabular. E abrindo os cinco, sobram três de verdade: GO, PE e
+ES.** Paraíba só tem "Orçamento" genérico; Santa Catarina foi falso positivo —
+o casamento era com portarias de COVID.
+
+Isso responde e encerra: **o Emendômetro estadual nacional não existe como
+produto uniforme.** Dezessete portais nem respondem API. Fazer os 25 seria 25
+projetos de raspagem, um por um, sem garantia de trazerem autor e município.
+
+O que vale é o oposto de ambicioso: **mais dois estados.** Pernambuco tem quatro
+conjuntos da SEPLAG em CSV, incluindo "Emendas Especiais - PIX" próprias do
+estado — o instrumento federal replicado localmente, que é achado por si só.
+Espírito Santo tem "Emendas Parlamentares do Estado" da SEFAZ, e separa as
+federais das estaduais, o que poupa trabalho.
+
+A ressalva do script vale para os dois: achar o conjunto não garante autor e
+município dentro. Em Goiás o conjunto certo estava lá e eu o descartei pelo nome
+do órgão. Abrir antes de prometer.
+
+## 2026-08-23 — a aba Sobre
+
+Consolida o que o projeto aprendeu apanhando: a coluna de votos que muda de ano,
+o "MÉDIA" que é eleito, os registros duplicados de 1998, o código de candidato
+que se repete entre pleitos, os 23 milhões de votos perdidos no pareamento e a
+tabela de perda por ano que mostra o viés sendo temporal e não espacial.
+
+Do lado da emenda: pago e não empenhado, os 76% em MÚLTIPLO, o atalho falso do
+favorecido com Brasília em 36,4%, a emenda Pix, e por que o mapa abre acumulado.
+
+E duas seções que valem tanto quanto os números: **"O que não fazemos"** —
+lacuna não vira zero, teste não afrouxa, pareamento não se chuta, denominador
+não some — e **"Onde o juízo é nosso"**, que declara as três camadas editoriais
+(linhagem partidária, espectro ideológico, cortes da tipologia) como discutíveis
+por natureza.
+
+Nove seções, três tabelas, dezesseis fatos. Zero falhas de contraste nos dois
+temas. O título volta a ser "Cadê o Voto?" e a gaveta de estados some, porque a
+aba não é de um estado.
+
+## 2026-08-23 — Espírito Santo entra, e dois defeitos de pareamento no caminho
+
+Segunda esfera estadual no ar: GO e ES. O seletor continua aparecendo só onde há
+base, e agora são duas.
+
+**O contraste entre as esferas é o produto.** No Espírito Santo, o federal
+rastreia R$ 181,8 mi de R$ 2,90 bi ao município — 6,3%, alcançando 69 de 78. O
+estadual rastreia R$ 240,8 mi de R$ 291,9 mi — 82,5%, alcançando 77 de 78. Menos
+dinheiro, muito mais visível. E o topo muda: federal é Cariacica, estadual é
+Vitória.
+
+**Dois defeitos meus, os dois de pareamento, os dois pegos por número absurdo.**
+
+O primeiro: o detector de formato de moeda aceitava duas casas decimais e o ES
+publica `11250,0000`, com quatro. A vírgula virava separador de milhar e o total
+deu R$ 217 bilhões num estado cujo orçamento é fração disso.
+
+O segundo: o `CodigoMunicipio` do ES tem **seis** dígitos, não sete — é o código
+do IBGE sem o dígito verificador. `320332` é o `3203320` de Marataízes. Eu
+preenchi zero à esquerda e o pareamento deu exatamente zero de 78 municípios.
+
+Os dois erraram por ordens de grandeza, e é por isso que foram vistos. Um erro de
+10% teria passado nos dois casos — o que reforça por que este projeto trata
+pareamento como gate e não como detalhe.
+
+## 2026-08-23 — Bahia descartada, e o placar fecha
+
+O ZIP da SEFAZ tem cinco tabelas do FIPLAN. A `DESPESAS` traz `Nome do Deputado`
+e `Valor Pago`; a `PAGAMENTOS` traz razão social do credor e objeto. **Nenhuma
+das cinco tem município.** Autor sim, geografia não — e sem geografia não há
+mapa, que é o produto.
+
+Abri a tabela errada na primeira tentativa (a de centralização, com quatro
+colunas de código) e quase concluí que o ZIP era inútil. Cinco tabelas exigem
+abrir as cinco.
+
+**Placar final: dois de 27.** Goiás e Espírito Santo entregues; Pernambuco e
+Bahia descartados depois de abertos; 23 sem dado acessível.
+
+E os dois descartes só apareceram abrindo o arquivo. Pernambuco publica
+dicionário descrevendo campos que nenhum arquivo tem; a Bahia tem o deputado mas
+não o lugar. Nenhuma das duas coisas se vê pela descrição do conjunto — que foi
+exatamente o erro que cometi ao escrever a linha do roadmap sobre PE.
+
+## 2026-08-23 — aba API, e o mapa que não existia
+
+Sondadas as 27 casas legislativas estaduais. Não há catálogo público disso, e a
+pergunta nasceu procurando emenda estadual.
+
+**19 de 27 respondem** algum portal; **4 têm API confirmada** abrindo à mão (GO,
+MG, PE, DF); 8 não devolveram nada nos caminhos testados.
+
+**A inferência principal é negativa e vale mais que a contagem: nenhuma
+assembleia publica emenda parlamentar.** Elas publicam a si mesmas — folha,
+diárias, verbas indenizatórias, licitações, contratos. A Casa como empregadora e
+compradora, nunca como poder que direciona orçamento. E isso é coerência
+institucional: a emenda é indicação sobre o orçamento do Executivo e executada
+pelas secretarias.
+
+Consequência prática, que economiza o dia que gastamos: **quem procurar emenda
+estadual não deve começar pela assembleia.**
+
+**Dois defeitos meus na sonda, os dois pegos por absurdo.** A primeira versão
+deu zero APIs num levantamento em que eu já tinha testado a da ALEGO
+respondendo — ela mora dois níveis abaixo do caminho que eu sondava. E a lógica
+de subdomínio cortava o domínio da casa para o do estado, levando a sonda ao
+Executivo num levantamento sobre o Legislativo.
+
+A aba diz a data no rodapé e aponta o script: portal muda de endereço, e é a
+data que dá validade ao número, não a nossa palavra.
+
+## 2026-08-23 — piloto consumindo a API da ALEGO
+
+A aba API catalogava quem publica. Agora consome: verba indenizatória dos
+deputados de Goiás, 91 dos 96 meses entre 2019 e 2026, direto da API.
+
+**Dois achados, os dois de uma subtração que ninguém faz.** A API entrega
+`valor_apresentado` e `valor_indenizado`; a diferença é a glosa — despesa que o
+gabinete pediu e a Casa recusou. São R$ 349 mil de R$ 111,8 mi: **0,31%**. E os
+20 deputados com série longa ficam todos entre R$ 25 mil e R$ 32 mil por mês.
+Todo mundo bate no teto, quase nada é recusado.
+
+A consequência analítica importa mais que os números: **se todos usam o teto,
+ordenar por gasto total ordena por tempo de mandato, não por comportamento.** O
+que distingue é a glosa, e ela é rara o bastante para que os poucos casos
+mereçam olhar.
+
+**Um defeito que teria virado afirmação falsa.** A primeira varredura trouxe 37
+dos 96 meses, com 2022 e 2023 completamente vazios — e eu já tinha testado
+2023/02 à mão, com 41 registros. Requisição que falha, lida como ausência de
+dado, não parece erro: parece resultado. Foi o único tipo de erro que este
+projeto comete repetidamente, e a correção é sempre a mesma — tentar de novo
+antes de concluir. Com três tentativas, 91 meses.
+
+Verba indenizatória não é salário nem emenda: é custeio de gabinete, pago pela
+própria Assembleia. A tela diz isso, para que ninguém some com emenda.
+
+## 2026-08-23 — segundo piloto de API: o DF
+
+A CLDF publica a mesma verba indenizatória de Goiás, em grão muito mais fino:
+nota a nota, com fornecedor, CNPJ e categoria. 20.572 comprovantes, 2013–2024.
+
+**O achado que só esse grão permite:** entre o que tem categoria, o maior item
+da verba de gabinete é **divulgação de atividade parlamentar, 27,7%**.
+Publicidade do próprio mandato. Veículos vêm logo atrás com 28,9%, somando as
+duas grafias que o arquivo usa para a mesma coisa.
+
+**E duas ressalvas que quase viraram publicação errada.** Primeiro: 68,3% do
+valor não tem categoria — a tabela original falava de 31,7% do dinheiro sem
+dizer. Segundo, e pior: eu ia publicar que o deputado do DF gasta um terço do
+goiano. O cálculo roda e dá isso. Mas a CLDF tem 24 distritais e o arquivo traz
+de 3 a 26 por ano — publicação parcial, não rotatividade. Aquele número
+descreveria a política de publicação de cada casa achando que descreve
+comportamento de gasto.
+
+**Recusei a comparação e escrevi na tela por que.** É a mesma disciplina do
+mapa por favorecido, onde Brasília aparecia com 36% das emendas: existe um
+cálculo que roda, dá número redondo e é falso.
+
+Os dois pilotos param em lugares complementares — Goiás revela glosa e não
+revela destino; o DF revela destino e não revela glosa.
+
+## 2026-08-23 — gasto administrativo, e o estado do dado no Sobre
+
+A aba API deixou de ser só catálogo: agora pergunta **quanto custa a Assembleia
+e no que o dinheiro vai** — que é exatamente o que as Casas publicam, já que
+nenhuma publica emenda.
+
+**O orçamento da ALEGO foi de R$ 626,9 mi em 2019 para R$ 1.019,3 mi em 2026 —
+63% em sete anos.** E a fatia de pessoal caiu de 80% para 62%: o que cresceu foi
+custeio e investimento, não folha.
+
+**Quatro empresas concentram os 574 terceirizados.**
+
+**E um achado sobre a fonte que impediu uma publicação errada.** O campo de valor
+das diárias não pode ser somado: a maior "diária" do conjunto é de
+R$ 2.676.075,25 para 1,5 diárias de um assessor, com motivo sobre edição de um
+evento. Cento e vinte e oito registros — 0,6% — concentram 41% da soma, e não são
+diárias. Publicamos o valor típico (mediana R$ 370) e a contagem, nunca o total.
+
+Três erros meus no caminho, todos de leitura apressada do dado: somei colunas de
+orçamento quando havia `total_autorizado` pronto; ignorei que há dois registros
+por ano (ALEGO e FEMAL, um fundo à parte); e ia publicar que 32,7% das diárias
+vão para parlamentares, número inteiramente produzido pelos tais 128 registros.
+
+**No Sobre entrou "O estado do dado no Brasil, medido"** — os três levantamentos
+consolidados numa tabela e quatro conclusões. A que mais importa: *publicar não é
+publicar utilizável*. Pernambuco documenta um esquema que nenhum arquivo usa, a
+Bahia publica o deputado e não o município, e a ALEGO publica uma diária de
+R$ 2,7 milhões. Nenhum desses casos aparece para quem lê a descrição em vez do
+arquivo.

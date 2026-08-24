@@ -1,6 +1,9 @@
-# RASTRO
+# Cadê o Voto?
 
-Distribuição espacial do voto para deputado estadual em **Goiás, 1998–2022**.
+Produto de **Lastro — Inteligência Política**.
+
+Geografia do voto sobre os dados abertos do TSE: onde cada candidato tirou voto,
+município a município, de 1998 a 2024.
 
 Reconstrói o painel Power BI público do TSE/GO — *Distribuição Espacial do Desempenho
 Eleitoral dos Deputados Estaduais (1998 a 2018)* — a partir dos dados abertos do TSE,

@@ -1,10 +1,164 @@
-nome_norm_tse,cod_ibge,nome_ibge
-AGUAS LINDAS,5200258,AGUAS LINDAS DE GOIAS
-ALTO PARAISO,5200605,ALTO PARAISO DE GOIAS
-BOM JESUS,5203500,BOM JESUS DE GOIAS
-CESARINA,5205455,CEZARINA
-MUNDO NOVO DE GOIAS,5214051,MUNDO NOVO
-SAO LUIS DOS MONTES BELOS,5220108,SAO LUIS DE MONTES BELOS
-TEREZINHA DE GOIAS,5221080,TERESINA DE GOIAS
-VALPARAISO,5221858,VALPARAISO DE GOIAS
-VALPARAIZO,5221858,VALPARAISO DE GOIAS
+uf,nome_norm_tse,cod_ibge,nome_ibge,origem
+AC,MANUEL URBANO,1200344,Manoel Urbano,parecido
+AC,SANTA ROSA,1200435,Santa Rosa do Purus,prefixo
+AL,SENADOR TEOTONIO VILELA,2709152,Teotônio Vilela,complementar
+AM,BOA VISTA DE RAMOS,1300680,Boa Vista do Ramos,parecido
+AM,NOVO AYRAO,1303205,Novo Airão,parecido
+AP,AGUA BRANCA DO AMAPARI,1600154,Pedra Branca do Amapari,parecido
+AP,AMAPARI,1600154,Pedra Branca do Amapari,disjunto
+BA,CAMACA,2905602,Camacan,complementar
+BA,GOVERNADOR LOMANTO JUNIOR,2903300,Barro Preto,complementar
+BA,OURO BRANCO,2900504,Érico Cardoso,renomeacao
+BA,PALMAS DO MONTE ALTO,2923407,Palmas de Monte Alto,parecido
+BA,QUINJINGUE,2925907,Quijingue,parecido
+BA,SANTA CRUZ DE CABRALIA,2927705,Santa Cruz Cabrália,parecido
+BA,SANTA TERESINHA,2928505,Santa Terezinha,parecido
+BA,VEREDAS,2933257,Vereda,parecido
+CE,DEP IRAPUAN PINHEIRO,2304269,Deputado Irapuan Pinheiro,parecido
+CE,EUZEBIO,2304285,Eusébio,parecido
+CE,GRANGEIRO,2304806,Granjeiro,parecido
+CE,ITAPAGE,2306306,Itapajé,parecido
+CE,SENADOR CATUNDA,2303659,Catunda,disjunto
+CE,TEJUSSUOCA,2313351,Tejuçuoca,parecido
+ES,SANTA MARIA DO JETIBA,3204559,Santa Maria de Jetibá,parecido
+ES,SAO DOMINGOS,3204658,São Domingos do Norte,prefixo
+GO,AGUAS LINDAS,5200258,AGUAS LINDAS DE GOIAS,manual-2026-08-21
+GO,ALTO PARAISO,5200605,ALTO PARAISO DE GOIAS,manual-2026-08-21
+GO,BOM JESUS,5203500,BOM JESUS DE GOIAS,manual-2026-08-21
+GO,CAMPOS VERDES DE GOIAS,5204953,Campos Verdes,emendas-go-2026-08-23
+GO,CESARINA,5205455,CEZARINA,manual-2026-08-21
+GO,CIDADE DE GOIAS,5208905,Goiás,emendas-go-2026-08-23
+GO,CORUMBAIBA DE GOIAS,5205901,Corumbaíba,emendas-go-2026-08-23
+GO,MUNDO NOVO DE GOIAS,5214051,MUNDO NOVO,manual-2026-08-21
+GO,PLANALTINA DE GOIAS,5217609,Planaltina,emendas-go-2026-08-23
+GO,SAO LUIS DOS MONTES BELOS,5220108,SAO LUIS DE MONTES BELOS,manual-2026-08-21
+GO,TEREZINHA DE GOIAS,5221080,TERESINA DE GOIAS,manual-2026-08-21
+GO,VALPARAISO,5221858,VALPARAISO DE GOIAS,manual-2026-08-21
+GO,VALPARAIZO,5221858,VALPARAISO DE GOIAS,manual-2026-08-21
+MA,AGUA DOCE,2100154,Água Doce do Maranhão,prefixo
+MA,BELA VISTA,2101772,Bela Vista do Maranhão,prefixo
+MA,GOVERNADOR EDSON LOBAO,2104552,Governador Edison Lobão,parecido
+MA,LUIS DOMINGUES DO MARANHAO,2106201,Luís Domingues,prefixo
+MA,SAO RAIMUNDO DA DOCA BEZERRA,2111631,São Raimundo do Doca Bezerra,parecido
+MA,SENADOR LA ROQUE,2111763,Senador La Rocque,parecido
+MG,BARAO DE MONTE ALTO,3105509,Barão do Monte Alto,parecido
+MG,BRASOPOLIS,3108909,Brazópolis,parecido
+MG,CONCEICAO DA PEDRA,3117207,Conceição das Pedras,disjunto
+MG,DONA EUSEBIA,3122900,Dona Euzébia,parecido
+MG,GOUVEA,3127602,Gouveia,parecido
+MG,ITABIRINHA DE MANTENA,3131802,Itabirinha,prefixo
+MG,OLHOS DAGUA,3145455,Olhos-d'Água,colapso
+MG,PINGO DAGUA,3150539,Pingo-d'Água,colapso
+MG,PIUM I,3151503,Piumhi,parecido
+MG,SANTA RITA DO IBITIPOCA,3159407,Santa Rita de Ibitipoca,parecido
+MG,SAO JOSE DO LAPA,3162955,São José da Lapa,parecido
+MG,SAO THOME DAS LETRAS,3165206,São Tomé das Letras,parecido
+MS,APARECIDA DO TABUADO,5001003,Aparecida do Taboado,parecido
+MS,BATAGUACU,5001904,Bataguassu,parecido
+MS,BATAIPORA,5002001,Batayporã,parecido
+MS,JUTY,5005152,Juti,disjunto
+MT,ALTO DA BOA VISTA,5100359,Alto Boa Vista,parecido
+MT,FIGUEIROPOLES D OESTE,5103809,Figueirópolis D'Oeste,parecido
+MT,NOVA BANDEIRANTE,5106158,Nova Bandeirantes,parecido
+MT,PORTO ESPEREDIAO,5106828,Porto Esperidião,parecido
+MT,POXOREO,5107008,Poxoréu,parecido
+MT,QUATRO MARCOS,5107107,São José dos Quatro Marcos,disjunto
+MT,SANTO ANTONIO DO LEVERGER,5107800,Santo Antônio de Leverger,renomeacao
+MT,TAPURA,5108006,Tapurah,parecido
+MT,VILA BELA STSSMA TRINDADE,5105507,Vila Bela da Santíssima Trindade,parecido
+PA,ALMERIM,1500503,Almeirim,parecido
+PA,ELDORADO DOS CARAJAS,1502954,Eldorado do Carajás,parecido
+PA,SANTA ISABEL DO PARA,1506500,Santa Izabel do Pará,parecido
+PA,VIZEU,1508308,Viseu,disjunto
+PB,BARAUNAS,2501534,Baraúna,parecido
+PB,CAMPO DE SANTANA,2516409,Tacima,renomeacao
+PB,SANTA CECILIA DE UMBUZEIRO,2513158,Santa Cecília,prefixo
+PB,SANTAREM,2513653,Joca Claudino,renomeacao
+PB,SAO DOMINGOS DE POMBAL,2513968,São Domingos,prefixo
+PB,SAO JOSE DO BREJO CRUZ,2514651,São José do Brejo do Cruz,parecido
+PB,SAO SEB DE LAGOA DE ROCA,2515104,São Sebastião de Lagoa de Roça,parecido
+PE,BELEM DE SAO FRANCISCO,2601607,Belém do São Francisco,parecido
+PE,CABO,2602902,Cabo de Santo Agostinho,prefixo
+PE,IGUARACI,2606903,Iguaracy,parecido
+PE,ITAMARACA,2607604,Ilha de Itamaracá,complementar
+PE,JABOATAO,2607901,Jaboatão dos Guararapes,prefixo
+PE,SAO CAETANO,2613107,São Caitano,parecido
+PI,ALAGOINHA,2200251,Alagoinha do Piauí,prefixo
+PI,OLHO DAGUA DO PIAUI,2207108,Olho D'Água do Piauí,colapso
+PI,PAU DARCO DO PIAUI,2207793,Pau D'Arco do Piauí,colapso
+PR,CONSELHEIRO MAYRINCK,4106100,Conselheiro Mairinck,parecido
+PR,DIAMANTE DO OESTE,4107157,Diamante D'Oeste,apostrofo
+PR,ITAGUAGE,4110904,Itaguajé,parecido
+PR,ITAPEJARA DO OESTE,4111209,Itapejara d'Oeste,apostrofo
+PR,LUISIANIA,4113734,Luiziana,parecido
+PR,MOREIRA SALLES,4116109,Moreira Sales,parecido
+PR,MUNHOZ DE MELLO,4116307,Munhoz de Melo,parecido
+PR,SANTA ANA DO ITARARE,4124004,Santana do Itararé,parecido
+PR,SANTA CRUZ DO MONTE CASTELO,4123303,Santa Cruz de Monte Castelo,parecido
+PR,SANTA IZABEL DO IVAI,4123709,Santa Isabel do Ivaí,parecido
+PR,VILA ALTA,4128625,Alto Paraíso,renomeacao
+RJ,ARMACAO DE BUZIOS,3300233,Armação dos Búzios,parecido
+RJ,CAMPOS,3301009,Campos dos Goytacazes,prefixo
+RJ,PARATI,3303807,Paraty,parecido
+RJ,PATI DO ALFERES,3303856,Paty do Alferes,parecido
+RJ,TRAJANO DE MORAIS,3305901,Trajano de Moraes,parecido
+RJ,VARRE E SAI,3306156,Varre-Sai,parecido
+RN,ACU,2400208,Assú,complementar
+RN,ARES,2401206,Arez,complementar
+RN,BOA SAUDE,2405306,Januário Cicco,complementar
+RN,FERNANDO PEDROSA,2403756,Fernando Pedroza,parecido
+RN,PRESIDENTE JUSCELINO,2410306,Serra Caiada,renomeacao
+RN,SAO JOSE DE CAMPESTRE,2412302,São José do Campestre,parecido
+RN,SAO MIGUEL DE TOUROS,2412559,São Miguel do Gostoso,complementar
+RO,ALTA FLORESTA DO OESTE,1100015,Alta Floresta D'Oeste,apostrofo
+RO,ALVORADA DO OESTE,1100346,Alvorada D'Oeste,apostrofo
+RO,ESPIGAO DO OESTE,1100098,Espigão D'Oeste,apostrofo
+RO,MACHADINHO DO OESTE,1100130,Machadinho D'Oeste,apostrofo
+RO,NOVA BRASILANDIA,1100148,Nova Brasilândia D'Oeste,prefixo
+RO,NOVA BRASILANDIA DO OESTE,1100148,Nova Brasilândia D'Oeste,apostrofo
+RO,SANTA LUZIA DO OESTE,1100296,Santa Luzia D'Oeste,apostrofo
+RO,SAO FELIPE DO OESTE,1101484,São Felipe D'Oeste,apostrofo
+RR,SAO JOAO DO BALIZA,1400506,São João da Baliza,parecido
+RR,SAO LUIZ,1400605,São Luiz do Anauá,prefixo
+RS,CHIAPETA,4305405,Chiapetta,parecido
+RS,ERVAL,4307104,Herval,parecido
+RS,SANTANA DO LIVRAMENTO,4317103,Sant'Ana do Livramento,colapso
+RS,SAO LUIS GONZAGA,4318903,São Luiz Gonzaga,parecido
+RS,TRINDADE,4321956,Trindade do Sul,prefixo
+SC,BALNEARIO DE BARRA DO SUL,4202057,Balneário Barra do Sul,parecido
+SC,BALNEARIO DE CAMBORIU,4202008,Balneário Camboriú,parecido
+SC,HERVAL DO OESTE,4206702,Herval d'Oeste,apostrofo
+SC,LAGEADO GRANDE,4209458,Lajeado Grande,parecido
+SC,LUIS ALVES,4210001,Luiz Alves,parecido
+SC,PICARRAS,4212809,Balneário Piçarras,disjunto
+SC,PRESIDENTE CASTELO BRANCO,4213906,Presidente Castello Branco,parecido
+SE,AMPARO DE SAO FRANCISCO,2800100,Amparo do São Francisco,parecido
+SE,CANINDE DO SAO FRANCISCO,2801207,Canindé de São Francisco,complementar
+SP,BADY BASSIT,3504602,Bady Bassitt,parecido
+SP,BERNADINO DE CAMPOS,3506300,Bernardino de Campos,parecido
+SP,BRODOSQUI,3507803,Brodowski,disjunto
+SP,EMBU,3515004,Embu das Artes,complementar
+SP,FLORINIA,3516101,Florínea,parecido
+SP,IPAUCU,3520905,Ipaussu,disjunto
+SP,LUISIANIA,3527702,Luiziânia,parecido
+SP,MOJI DAS CRUZES,3530607,Mogi das Cruzes,parecido
+SP,MOJI GUACU,3530706,Mogi Guaçu,parecido
+SP,MOJI MIRIM,3530805,Mogi Mirim,parecido
+SP,PIRACUNUNGA,3539301,Pirassununga,parecido
+SP,SALMORAO,3545100,Salmourão,parecido
+SP,SANTO ANTONIO DA POSSE,3548005,Santo Antônio de Posse,parecido
+SP,SAO LUIS DO PARAITINGA,3550001,São Luiz do Paraitinga,parecido
+SP,SUD MENUCCI,3552304,Sud Mennucci,parecido
+SP,SUZANOPOLIS,3552551,Suzanápolis,parecido
+SP,VALPARAIZO,3556305,Valparaíso,parecido
+TO,BANDEIRANTE,1703057,Bandeirantes do Tocantins,disjunto
+TO,BANDEIRANTE DO TOCANTINS,1703057,Bandeirantes do Tocantins,parecido
+TO,CHAPADA DA AREIA,1704600,Chapada de Areia,parecido
+TO,COUTO DE MAGALHAES,1706001,Couto Magalhães,parecido
+TO,DIVINOPOLIS,1707108,Divinópolis do Tocantins,prefixo
+TO,FORTALEZA DO TABOCAO,1708254,Tabocão,complementar
+TO,LAGEADO,1712009,Lajeado,parecido
+TO,MONTE SANTO,1713700,Monte Santo do Tocantins,prefixo
+TO,PINDORAMA DE GOIAS,1717008,Pindorama do Tocantins,disjunto
+TO,SAO VALERIO DA NATIVIDADE,1720499,São Valério,prefixo
+TO,SAO VALERIO DO TOCANTINS,1720499,São Valério,prefixo

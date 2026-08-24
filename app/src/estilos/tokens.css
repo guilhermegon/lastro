@@ -3,13 +3,13 @@
    para não reintroduzir bugs de contraste já resolvidos. */
 :root {
   --bg: #EFF3F3; --surface: #FFFFFF; --surface-2: #E7EDED;
-  --ink: #11181A; --ink-2: #47565A; --ink-3: #79888C;
+  --ink: #11181A; --ink-2: #47565A; --ink-3: #606D70;
   --line: #D3DDDD; --line-strong: #B6C4C4;
   --accent: #0E6F72; --accent-soft: #D9EBEB; --on-accent: #FFFFFF;
-  --sem-voto: #DFE6E6;
+  --sem-voto: #DFE6E6; --ink-sel: #5E6A6E;
   --s1: #C43D34; --s2: #E07B33; --s3: #DFBB3C; --s4: #6FAA38; --s5: #2C6E33;
-  --tinta-s1: #FFF2F0; --tinta-s2: #2B1403; --tinta-s3: #241D02;
-  --tinta-s4: #12240A; --tinta-s5: #EFFAF0;
+  --tinta-s1: #F5EEED; --tinta-s2: #3B2B20; --tinta-s3: #564D2E;
+  --tinta-s4: #29361D; --tinta-s5: #C9E2CC;
   --shadow: 0 1px 2px rgba(17,24,26,.06), 0 4px 14px rgba(17,24,26,.05);
   --radius: 8px; --step--1: .78rem; --step-0: .9rem; --step-1: 1.05rem;
   --step-2: 1.4rem; --step-3: 2rem;
@@ -17,25 +17,25 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0E1416; --surface: #161E21; --surface-2: #1E282B;
-    --ink: #E7EDED; --ink-2: #A5B4B7; --ink-3: #75868A;
+    --ink: #E7EDED; --ink-2: #A5B4B7; --ink-3: #809093;
     --line: #2A3639; --line-strong: #3B4A4E;
     --accent: #3FB9BE; --accent-soft: #17393B; --on-accent: #06191A;
-    --sem-voto: #232E31;
+    --sem-voto: #2E3A3D; --ink-sel: #919EA1;
     --s1: #C4453D; --s2: #D0812F; --s3: #C9AE3B; --s4: #6FAC3D; --s5: #3E9A48;
-    --tinta-s1: #FFF2F0; --tinta-s2: #1F0F02; --tinta-s3: #1B1502;
-    --tinta-s4: #0D1A07; --tinta-s5: #F0FBF1;
+    --tinta-s1: #F9F5F4; --tinta-s2: #362A1D; --tinta-s3: #4A4328;
+    --tinta-s4: #2A381E; --tinta-s5: #142516;
     --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
   }
 }
 :root[data-theme="dark"] {
   --bg: #0E1416; --surface: #161E21; --surface-2: #1E282B;
-  --ink: #E7EDED; --ink-2: #A5B4B7; --ink-3: #75868A;
+  --ink: #E7EDED; --ink-2: #A5B4B7; --ink-3: #809093;
   --line: #2A3639; --line-strong: #3B4A4E;
   --accent: #3FB9BE; --accent-soft: #17393B; --on-accent: #06191A;
-  --sem-voto: #232E31;
+  --sem-voto: #2E3A3D; --ink-sel: #919EA1;
   --s1: #C4453D; --s2: #D0812F; --s3: #C9AE3B; --s4: #6FAC3D; --s5: #3E9A48;
-  --tinta-s1: #FFF2F0; --tinta-s2: #1F0F02; --tinta-s3: #1B1502;
-  --tinta-s4: #0D1A07; --tinta-s5: #F0FBF1;
+  --tinta-s1: #F9F5F4; --tinta-s2: #362A1D; --tinta-s3: #4A4328;
+  --tinta-s4: #2A381E; --tinta-s5: #142516;
   --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
 }
 * { box-sizing: border-box; }
@@ -51,7 +51,7 @@ h1, h2, h3 { font-family: Archivo, sans-serif; margin: 0; letter-spacing: -.015e
 .topo { border-bottom: 1px solid var(--line); background: var(--surface); }
 .topo-in { display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: flex-end;
   justify-content: space-between; padding: 20px 0 16px; }
-.lastro { display: block; width: 164px; margin: 0 0 14px; }
+.lastro { display: block; width: 246px; margin: 0 0 16px; }
 .lastro svg { width: 100%; height: auto; display: block; }
 .lastro-mark { fill: var(--accent); }
 .lastro-nome { fill: var(--ink); font-family: Archivo, sans-serif; font-size: 30px;
@@ -105,7 +105,7 @@ h1, h2, h3 { font-family: Archivo, sans-serif; margin: 0; letter-spacing: -.015e
 .rail { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .rail-bloco { background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--radius); padding: 12px; box-shadow: var(--shadow); }
-.rail-titulo { font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
+.rail-titulo { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
   color: var(--ink-3); font-weight: 600; margin: 0 0 8px; }
 .busca { width: 100%; padding: 7px 9px; border: 1px solid var(--line-strong);
   border-radius: 6px; background: var(--bg); color: var(--ink);
@@ -118,13 +118,15 @@ h1, h2, h3 { font-family: Archivo, sans-serif; margin: 0; letter-spacing: -.015e
   display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
 .lista button:hover { background: var(--surface-2); color: var(--ink); }
 .lista button[aria-pressed="true"] { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+.lista button[aria-pressed="true"] .lv,
+.estados button[aria-pressed="true"] .sg { color: var(--ink-sel); }
 .lista .lv { font-family: "IBM Plex Mono", monospace; font-size: .7rem; color: var(--ink-3); }
 
 .conteudo { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .cartoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
 .cartao { background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--radius); padding: 11px 13px; box-shadow: var(--shadow); }
-.cartao .rot { font-size: .64rem; letter-spacing: .09em; text-transform: uppercase;
+.cartao .rot { font-size: .7rem; letter-spacing: .09em; text-transform: uppercase;
   color: var(--ink-3); font-weight: 600; }
 .cartao .val { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums;
   font-size: var(--step-2); font-weight: 500; line-height: 1.2; margin-top: 3px; }
@@ -149,25 +151,25 @@ table { width: 100%; border-collapse: collapse; font-size: var(--step--1); }
 .rolagem { overflow-x: auto; }
 th, td { padding: 6px 9px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
 th:first-child, td:first-child { text-align: left; }
-thead th { font-size: .64rem; letter-spacing: .07em; text-transform: uppercase;
+thead th { font-size: .7rem; letter-spacing: .07em; text-transform: uppercase;
   color: var(--ink-3); font-weight: 600; border-bottom: 1px solid var(--line-strong); }
 tbody tr:hover { background: var(--surface-2); }
 td.n { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; }
 tfoot td { font-weight: 600; border-bottom: 0; border-top: 1px solid var(--line-strong); }
 
 .indices { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 10px 14px; }
-.indice .rot { font-size: .64rem; letter-spacing: .08em; text-transform: uppercase;
+.indice .rot { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase;
   color: var(--ink-3); font-weight: 600; }
 .indice .val { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums;
   font-size: var(--step-1); font-weight: 500; }
-.indice .exp { font-size: .68rem; color: var(--ink-3); line-height: 1.35; }
+.indice .exp { font-size: .72rem; color: var(--ink-3); line-height: 1.35; }
 
-.nota { border-left: 3px solid var(--accent); background: var(--accent-soft);
-  padding: 10px 14px; border-radius: 0 6px 6px 0; font-size: var(--step--1); color: var(--ink-2); }
+.nota { border: 1px solid var(--accent); background: var(--accent-soft);
+  padding: 12px 15px; border-radius: 6px; font-size: var(--step--1); color: var(--ink-2); }
 .nota strong { color: var(--ink); }
 .dica { position: fixed; pointer-events: none; z-index: 50; opacity: 0;
   background: var(--surface); border: 1px solid var(--line-strong); border-radius: 6px;
-  padding: 7px 10px; box-shadow: var(--shadow); font-size: .74rem; line-height: 1.45;
+  padding: 8px 11px; box-shadow: var(--shadow); font-size: .8rem; line-height: 1.45;
   max-width: 250px; transition: opacity .1s; }
 .dica strong { font-family: Archivo, sans-serif; display: block; font-size: .82rem; }
 footer { border-top: 1px solid var(--line); padding: 18px 0 40px; color: var(--ink-3); font-size: .72rem; }
@@ -187,17 +189,72 @@ footer p { margin: 3px 0; max-width: 80ch; }
   .painel { display: flex; flex-direction: column; gap: 14px; padding: 14px 0 32px; }
   .rail { display: contents; }
   .rail-primario { order: 1; }
-  .conteudo { order: 2; }
-  .rail-bloco { order: 3; }
+  .sumario { order: 2; }
+  .conteudo { order: 3; }
+  .rail-bloco { order: 4; }
 
   .lista { max-height: 246px; }
   .topo-in { padding: 14px 0 12px; }
-  .lastro { width: 136px; margin-bottom: 10px; }
+  .lastro { width: 204px; margin-bottom: 12px; }
   .marca h1 { font-size: 1.55rem; }
-  .marca > p { font-size: .74rem; }
+  .marca > p { font-size: .8rem; }
   .cartaz { padding: 12px 13px 14px; }
   th, td { padding: 6px 7px; }
   .estados { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); padding: 4px 12px 14px; }
   .dica { max-width: calc(100vw - 24px); }
   .ajuda { width: 18px; height: 18px; font-size: 10px; }
 }
+
+/* --- rivais territoriais --- */
+.rivais { list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 11px; }
+.rivais > li { display: flex; flex-direction: column; gap: 3px; }
+.rival-topo { display: flex; justify-content: space-between;
+  align-items: baseline; gap: 10px; }
+.rival-nome { font-weight: 600; }
+.rival-el { color: var(--accent); }
+.rival-barra { height: 5px; border-radius: 3px;
+  background: var(--surface-2); overflow: hidden; }
+.rival-barra > span { display: block; height: 100%; border-radius: 3px; }
+
+/* --- vereador: sem mapa, a geografia é a distribuição por zona --- */
+.zonas { list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 7px; }
+.zonas > li { display: grid; grid-template-columns: 3.6rem 1fr 4.4rem;
+  align-items: center; gap: 10px; }
+.zona-barra { height: 9px; border-radius: 3px;
+  background: var(--surface-2); overflow: hidden; }
+.zona-barra > span { display: block; height: 100%; border-radius: 3px; }
+
+/* nome de estado que leva para a tela dele */
+.ligacao { background: none; border: 0; padding: 0; font: inherit;
+  color: var(--accent); cursor: pointer; text-align: left; }
+.ligacao:hover { text-decoration: underline; }
+
+/* --- sumário clicável no trilho --- */
+.sumario { position: sticky; top: 12px; }
+.sumario ol { list-style: none; margin: 0; padding: 0; counter-reset: s;
+  display: flex; flex-direction: column; gap: 1px; }
+.sumario li { counter-increment: s; }
+.sumario button { width: 100%; text-align: left; border: 0; background: none;
+  cursor: pointer; padding: 6px 8px 6px 26px; border-radius: 5px;
+  position: relative; color: var(--ink-2);
+  font: 400 var(--step--1)/1.3 "IBM Plex Sans", sans-serif; }
+.sumario button::before { content: counter(s); position: absolute; left: 8px;
+  color: var(--ink-3); font-family: "IBM Plex Mono", monospace; font-size: .68rem; }
+.sumario button:hover { background: var(--surface-2); color: var(--ink); }
+.sumario button[aria-current="true"] { background: var(--accent-soft);
+  color: var(--ink); font-weight: 600; }
+@media (max-width: 760px) { .sumario { position: static; } }
+/* no celular o sumário fecha em si mesmo: aberto, empurraria o
+   conteúdo para baixo da dobra em toda troca de aba */
+@media (max-width: 760px) { .sumario ol { max-height: 132px; overflow-y: auto; } }
+
+/* --- lista de fatos da aba Sobre --- */
+.lista-fatos { margin: 0; padding: 0; list-style: none;
+  display: flex; flex-direction: column; gap: 10px; }
+.lista-fatos > li { color: var(--ink-2); font-size: var(--step--1);
+  line-height: 1.5; padding-left: 15px; position: relative; max-width: 78ch; }
+.lista-fatos > li::before { content: ""; position: absolute; left: 0; top: .55em;
+  width: 6px; height: 6px; border-radius: 2px; background: var(--accent); }
+.lista-fatos strong { color: var(--ink); }

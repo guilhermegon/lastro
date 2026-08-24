@@ -70,18 +70,32 @@ não são renumerados (`preserve_historical_numbers: true`).
 |---|---|
 | `type` | `TRACKING_NO_APPROVAL` |
 | `criticality` | baixa |
-| `work_continues` | não se aplica — não há trabalho em curso |
-| `status` | **ABERTO** — aguardando pedido do usuário |
+| `work_continues` | sim |
+| `status` | **FECHADO** — entregue, 2026-08-23 |
 
-**summary.** O pipeline é parametrizado por `UF` e `UF_IBGE` em `scripts/00_config.py`
-e os zips do TSE já são nacionais, então rodar para outro estado não exige reescrever
-nada. Precisariam de revisão apenas: (a) as correções de nome de município em
-`data/overrides/municipios_tse_ibge.csv`, que são específicas de Goiás; (b) o número de
-cadeiras (`N_CADEIRAS`), que varia por UF; (c) o teste-ouro, que só existe para Goiás
-porque o painel de referência é goiano — em outra UF não haveria contra o que conferir.
+**Fechado por entrega, não por decisão.** RT não alcançou este ticket: ele nunca teve
+`leader_recommendation`, e a política não força decisão onde não há recomendação. O que
+o fechou foi o fato de o pedido já estar cumprido — as 26 unidades estão no ar, nos
+cinco cargos, com Padrões, Cruzamentos, rivais territoriais e vereador nas capitais.
 
-**decision_needed.** Nenhuma agora. Ticket de rastreio: só executar se o usuário pedir
-uma UF específica.
+**As três ressalvas do summary original envelheceram, e vale registrar como:**
+
+- *"as correções de nome de município são específicas de Goiás"* — eram nove, de Goiás.
+  Hoje são **159**, cobrindo 27 unidades, e a chave virou `(uf, nome)`. A investigação
+  que as produziu está em [`docs/MODELO.md`](docs/MODELO.md); ela recuperou 23 milhões
+  de votos que sumiam em silêncio.
+- *"o número de cadeiras varia por UF"* — resolvido: `N_CADEIRAS_CARGO` sai do próprio
+  dado, contando os eleitos de cada pleito.
+- *"o teste-ouro só existe para Goiás, em outra UF não haveria contra o que conferir"* —
+  **esta era a ressalva séria, e estava certa.** A resposta foi criar um segundo gate
+  que não depende de painel externo: `15_valida_nacional.py` exige que o recorte de
+  Goiás dentro dos arquivos do Brasil seja idêntico ao pipeline de Goiás, em 34
+  combinações cargo/ano. Não valida as outras 26 diretamente — valida a máquina que as
+  produz. E `26_audita_pareamento.py` cobre o flanco que nenhum dos dois via.
+
+**summary (no momento da abertura).** O pipeline é parametrizado por `UF` e `UF_IBGE` em
+`scripts/00_config.py` e os zips do TSE já são nacionais, então rodar para outro estado
+não exigiria reescrever nada.
 
 ---
 
@@ -109,12 +123,18 @@ porque ele confere os pleitos antigos.
 |---|---|
 | `type` | `BLOCKING_DECISION` |
 | `criticality` | média |
-| `work_continues` | não — o próximo passo depende da resposta |
-| `status` | **ABERTO** |
+| `work_continues` | sim |
+| `status` | **FECHADO** — resolvido sem precisar da decisão, 2026-08-22 |
 
-**summary.** A base do front em React está entregue e verificada: deputado estadual das
-26 UFs, mapa, índices, gaveta de estados, estado na URL, toque. Restam quatro blocos do
-painel antigo para portar, e eles competem entre si por ordem.
+**Fechado porque a pergunta deixou de existir.** O ticket pedia a ordem de porte entre
+quatro blocos que competiam por prioridade. Com o modelo completo replicado para as 26
+UFs, os cinco cargos, Padrões e Cruzamentos foram portados de uma vez — não havia mais
+o que priorizar entre eles. Restam apenas o comparativo nacional, os rivais por UF e o
+vereador com mapa por seção, que estão no `ROADMAP.md` sem competir entre si.
+
+**summary (no momento da abertura).** A base do front em React estava entregue:
+deputado estadual das 26 UFs, mapa, índices, gaveta de estados, estado na URL, toque.
+Restavam quatro blocos do painel antigo para portar, competindo por ordem.
 
 **decision_needed.** Qual bloco vem primeiro?
 
@@ -138,3 +158,79 @@ nacional existir.
 
 **Ação do líder ao receber a resposta.** Portar o bloco escolhido e reabrir os demais
 como itens de roadmap na ordem definida.
+
+---
+
+### RAS 00 TKT 0005 — Cobertura do mapa municipal do Emendômetro
+
+| Campo | Valor |
+|---|---|
+| `type` | `BLOCKING_DECISION` |
+| `criticality` | alta — decide o que a aba afirma |
+| `work_continues` | sim — a base e o casamento já estão prontos |
+| `status` | **DECIDIDO** — pré-autorizado pelo líder, 2026-08-23 |
+
+**summary.** O mapa municipal de emendas cobre R$ 14,6 bi de R$ 140 bi
+individuais (10,5%), porque 76% do dinheiro está em `MÚLTIPLO` — emenda
+espalhada por municípios que o arquivo não nomeia. Existe um campo alternativo,
+o município do favorecido, com 100% de cobertura e semântica errada: Brasília
+sozinha concentra 36,4%, por ser o endereço do Fundo Nacional de Saúde.
+
+**decision_needed.** Publicar o mapa municipal com 10,5% de cobertura declarada,
+ou trocar pelo campo de favorecido, ou não publicar mapa municipal.
+
+**leader_recommendation.** **Publicar com a cobertura declarada, e nunca usar o
+favorecido.** O campo de favorecido não é uma cobertura melhor da mesma
+pergunta — é outra pergunta, respondida com aparência de mapa. É exatamente o
+"mapa errado com aparência de certo" que a regra de auditoria deste projeto
+nomeia, e a mesma razão pela qual não afrouxamos a tolerância do teste-ouro. A
+aba abre por UF, onde a cobertura é 97,1%, e o mapa municipal entra rotulado
+como o recorte rastreável.
+
+**Aplicado sob a pré-autorização de progresso** (DaRulez, ordem permanente de
+2026-08-01): recomendação inequívoca, aplicada na hora, registrada aqui para
+revisão posterior.
+
+---
+
+### RAS 00 TKT 0006 — Emendas de deputado estadual
+
+| Campo | Valor |
+|---|---|
+| `type` | `BLOCKING_DECISION` |
+| `criticality` | média — define escopo, não corrige defeito |
+| `work_continues` | sim — o Emendômetro federal está no ar |
+| `status` | **DECIDIDO** — usuário aprovou o piloto de Goiás, 2026-08-23 |
+
+**Resposta do usuário: fazer o piloto de Goiás.** É a recomendação do líder,
+aplicada. O piloto responde "quanto custa cada estado?" antes de qualquer
+promessa sobre os outros 25.
+
+**summary.** Emenda de deputado estadual vai para o orçamento **do estado**, não
+da União. Não está no Portal da Transparência federal, que é a fonte de todo o
+Emendômetro atual. Não existe agregador nacional: são 26 portais estaduais, cada
+um com seu formato, e nada garante que o município de destino esteja publicado.
+
+**O que apurei em Goiás**, que é o estado-piloto e um dos portais melhores:
+
+- Existe página dedicada, `transparencia.go.gov.br/emendas-parlamentares-de-goias/`
+- A execução completa desde 2021 só sai por **painel Power BI embutido**
+  (`reportId=c6b3961c-6932-4e0a-b77e-99cd14acee45`) — sem CSV
+- As indicações de 2025/2026 estão noutro sistema, o `sislog.go.gov.br`
+- O portal de dados abertos tem três conjuntos com "emenda", e nenhum é o
+  conjunto completo: um é de uma secretaria (SERINT), um é de uma universidade
+  (UEG), e o terceiro é de **emendas constitucionais**, que são outra coisa —
+  alteração de texto de lei, não dinheiro
+
+**decision_needed.** Fazer um piloto só de Goiás por engenharia reversa do painel
+Power BI, tentar as 26 unidades, ou não fazer.
+
+**leader_recommendation.** **Piloto de Goiás, e só depois decidir o resto.** O
+projeto já fez exatamente isso uma vez — nasceu de engenharia reversa de um
+painel Power BI do TSE/GO — então o caminho é conhecido e o custo, estimável.
+Prometer as 26 unidades sem ter feito uma é o erro que este projeto evita: cada
+portal é um formato, e nem todos publicam município de destino. Um piloto
+transforma a pergunta "dá para fazer?" em "quanto custa cada estado?".
+
+Não aplico a pré-autorização aqui: não é destravar progresso de algo em curso, é
+abrir uma frente nova de escopo aberto, e isso é decisão de dono.

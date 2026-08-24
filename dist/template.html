@@ -1,4 +1,4 @@
-<title>Redutos de Goiás</title>
+<title>Cadê o Voto em Goiás?</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -437,7 +437,7 @@ h2 .ajuda { width: 17px; height: 17px; font-size: 10px; margin-left: 7px; }
           </svg>
         </span>
         <p class="eyebrow">Goiás · Assembleia Legislativa · 1998 a 2022</p>
-        <h1>Redutos de Goiás<button class="ajuda" type="button" data-aj="metodo" aria-label="Explicação">?</button></h1>
+        <h1>Cadê o Voto em Goiás?<button class="ajuda" type="button" data-aj="metodo" aria-label="Explicação">?</button></h1>
         <p>Distribuição espacial do desempenho eleitoral dos deputados estaduais, município a município.
            Reconstrói o painel do TSE/GO e estende a série ao pleito de 2022.</p>
       </div>
@@ -446,11 +446,11 @@ h2 .ajuda { width: 17px; height: 17px; font-size: 10px; margin-left: 7px; }
     <div class="abas" role="tablist">
       <button role="tab" id="tabPresidente" aria-selected="false" aria-controls="viewDep">Presidente</button>
       <button role="tab" id="tabGovernador" aria-selected="false" aria-controls="viewDep">Governador</button>
-      <button role="tab" id="tabEstadual" aria-selected="true" aria-controls="viewDep">Estadual</button>
-      <button role="tab" id="tabFederal" aria-selected="false" aria-controls="viewDep">Federal</button>
       <button role="tab" id="tabSenador" aria-selected="false" aria-controls="viewDep">Senado</button>
-      <button role="tab" id="tabPad" aria-selected="false" aria-controls="viewPad">Padrões</button>
+      <button role="tab" id="tabFederal" aria-selected="false" aria-controls="viewDep">Federal</button>
+      <button role="tab" id="tabEstadual" aria-selected="true" aria-controls="viewDep">Estadual</button>
       <button role="tab" id="tabVer" aria-selected="false" aria-controls="viewVer">Vereador · Goiânia</button>
+      <button role="tab" id="tabPad" aria-selected="false" aria-controls="viewPad">Padrões</button>
       <button role="tab" id="tabCruz" aria-selected="false" aria-controls="viewCruz">Cruzamentos</button>
     </div>
   </div>
@@ -1757,14 +1757,18 @@ document.getElementById("busca").addEventListener("input", e => {
 
 // As tres primeiras abas mostram a MESMA view, trocando o cargo: o layout e'
 // identico e duplicar o DOM so criaria tres copias para manter em sincronia.
+// Ordem decrescente de escopo do cargo: presidente (nacional, executivo) ate
+// vereador (municipal), e depois as duas abas de analise, que nao sao cargo.
+// A ordem tambem espelha o achado da escada de territorialidade: quanto mais
+// alto o cargo, mais uniforme o voto pelo territorio.
 const ABAS = [
   {id: "tabPresidente", view: "viewDep", cargo: "presidente"},
   {id: "tabGovernador", view: "viewDep", cargo: "governador"},
-  {id: "tabEstadual", view: "viewDep", cargo: "estadual"},
-  {id: "tabFederal", view: "viewDep", cargo: "federal"},
   {id: "tabSenador", view: "viewDep", cargo: "senador"},
-  {id: "tabPad", view: "viewPad"},
+  {id: "tabFederal", view: "viewDep", cargo: "federal"},
+  {id: "tabEstadual", view: "viewDep", cargo: "estadual"},
   {id: "tabVer", view: "viewVer"},
+  {id: "tabPad", view: "viewPad"},
   {id: "tabCruz", view: "viewCruz"},
 ];
 const VIEWS = ["viewDep", "viewPad", "viewVer", "viewCruz"];

@@ -422,6 +422,152 @@ média.**
 
 ---
 
+## 16. O custo do Legislativo quase não é o parlamentar
+
+Fonte: `44_cldf_administrativo.py`, folha nominal da CLDF de 07/2026. A Câmara
+Legislativa do DF é a única das três casas levantadas que publica a folha **nome
+a nome**, com cargo, lotação e remuneração — 107 arquivos mensais, de setembro
+de 2017 a julho de 2026.
+
+Em 07/2026, **2.623 pessoas** custaram R$ 59,85 mi de folha bruta. Os
+**24 deputados distritais são 1,4%** desse total. O que
+custa não é o mandato: é a estrutura em volta dele — 882 pessoas
+lotadas em gabinete respondem por 16,2% da folha.
+
+E são 5.052 **linhas de pagamento** para 2.623 pessoas: uma pessoa
+aparece em várias folhas no mesmo mês. Contar linhas conta pagamento, não gente
+— foi assim que a primeira versão deste levantamento relatou 48 deputados
+distritais num Distrito Federal que tem 24.
+
+### 16a. Livre nomeação é maioria por cabeça, minoria por dinheiro
+
+Há **993 comissionados para 871 concursados** — o cargo de livre
+nomeação é a maior categoria da Casa em número de pessoas. Em dinheiro a ordem
+se inverte: os concursados custam R$ 31,00 mi contra R$ 10,79 mi, porque o
+concursado individual custa **3,3×** o comissionado individual
+(R$ 35.594 contra R$ 10.866 por mês).
+
+Um total agregado de "despesa de pessoal" não deixaria ver nem uma coisa nem a
+outra.
+
+### 16b. Quem já saiu pesa mais que todo o quadro de livre nomeação
+
+**448 inativos custam R$ 15,28 mi; 993 comissionados em atividade custam
+R$ 10,79 mi.** O inativo médio custa R$ 34.104 por mês, praticamente o
+mesmo que o concursado da ativa — são carreiras no topo, aposentadas com
+proventos integrais.
+
+### 16c. A folha cresce mais rápido que o quadro, e só um dos dois números é sólido
+
+Comparando julho com julho, de 2018 a 2026: o quadro foi de
+1.919 para 2.623 pessoas (**+37%**) e a folha
+de R$ 30,11 mi para R$ 59,85 mi (**+99%**).
+
+**Os dois números não têm o mesmo peso probatório.** O crescimento do quadro é
+contagem e não depende de inflação. O da folha está em reais correntes, sem
+deflacionar — boa parte dele é a moeda valendo menos. Não deflacionamos porque
+escolher um índice exigiria justificar a escolha, e o que interessa aqui — o
+descolamento entre as duas curvas — não vem da inflação, que atinge as duas.
+
+Julho é escolhido de propósito: dezembro carrega décimo terceiro.
+
+### 16d. Duas fontes independentes que poderiam divergir e não divergem
+
+A folha bruta de 07/2026 dá R$ 59,85 mi. A despesa total paga pela Casa naquele
+mês, publicada por caminho separado, dá R$ 77,82 mi. A folha é **77%** do que a
+CLDF pagou no mês, e o resto cabe em custeio, terceirizado e investimento. É a
+checagem de consistência que o levantamento do DF permite e o de Goiás não.
+
+### 16e. Uma ressalva que sobrevive: o bruto é piso
+
+Só a folha principal detalha os créditos. As secundárias trazem as colunas de
+crédito zeradas e apenas o líquido — **R$ 4,98 mi pagos em 07/2026 cujo valor
+bruto o arquivo não informa**. Somar as colunas de crédito não duplica (as
+secundárias somam zero), mas também não alcança tudo. Todo número de folha aqui
+é mínimo, não total.
+
+## 17. Minas: a mesma verba, no único grão que junta tudo
+
+Fonte: `43_almg_verbas.py`, API de Dados Abertos da ALMG. 141.781 notas
+de 77 deputados, 2019-02 a 2026-08,
+5.325 meses-deputado. Pedido R$ 138,02 mi, pago
+R$ 136,56 mi, glosa de 1,05%.
+
+A ALMG é a única das três casas levantadas que amarra **as três dimensões ao
+mesmo tempo**: quanto foi pedido e quanto foi pago (a glosa, que só Goiás dava),
+em que categoria (que só o DF dava) e para qual fornecedor, com CNPJ — tudo
+ligado ao deputado, o que o DF não liga.
+
+### 17a. Metade da verba mineira é veículo
+
+**Locação e fretamento de veículos é 34,4% do pago** — o maior item isolado, com
+8.920 notas. Somado a combustível e lubrificante (17,1%), transporte
+responde por **51,5% de tudo**.
+
+Depois vêm serviços de consultoria, assessoria e pesquisa (17,6%) e divulgação da atividade parlamentar
+(17,5%). Em Goiás a categoria não existe no arquivo; no DF
+existe mas 68,3% do valor não tem categoria preenchida. Só em Minas a
+composição é completa.
+
+### 17b. A pergunta que só Minas permite: quem vende para quantos gabinetes
+
+São **9.048 CNPJ distintos**, e **3.864 deles
+(42,7%) atendem mais de um deputado**.
+
+No topo estão postos de combustível e uma companhia aérea — o que se espera de
+um mercado de transporte. O caso destoante é a
+**Facebook Serviços Online do Brasil Ltda., com 50 dos 77 deputados e R$ 2,27 mi**: é
+divulgação de mandato comprada em plataforma, e a plataforma aparece amarrada a
+dois terços da Casa.
+
+**Atender vários gabinetes não é irregularidade.** O número mede concentração do
+mercado que vive da verba, e não diz mais que isso. O DF não responde essa
+pergunta por não ter autor na nota; Goiás não responde por não ter fornecedor.
+
+### 17c. O número que sairia redondo e seria falso
+
+O total pago por ano vai de R$ 9,74 mi em 2020 a R$ 27,45 mi em
+2025 — **+182%**. Esse número é falso, e o motivo é do levantamento,
+não da fonte: a varredura consulta os deputados **em exercício**, os
+77 de hoje. Só 48 deles já eram deputados em
+2020. Quando a legislatura virou, a cobertura pulou de 48
+para 74 — e o total pulou junto, sem que ninguém tivesse gasto diferente.
+
+**Por deputado, o crescimento é de +78%** — R$ 203 mil
+para R$ 361 mil ao ano. Os **104 pontos de diferença
+são artefato puro**, e é por isso que a série publicada é por deputado, com o
+número falso mostrado ao lado para que se veja de onde ele vem.
+
+**Ressalva que sobrevive:** mesmo por deputado, 2020–2022 cobre apenas os
+48 que **continuam** em exercício hoje, não os cerca de 77 de
+então. Quem sobrevive a três mandatos tende a ter estrutura maior, o que
+provavelmente empurra a base para cima e faz de +78% um piso. Corrigir
+exigiria varrer `que_exerceram_mandato` de cada legislatura. E está em reais
+correntes, sem deflacionar.
+
+### 17d. Por deputado é mediana, nunca total
+
+A mediana mensal por deputado é **R$ 26.113,13**, numa faixa de
+R$ 7.005,09 a R$ 36.979,73. Não publicamos total por
+deputado porque a janela de cada um acompanha o tempo de mandato: somar
+produziria um ranking de antiguidade com aparência de ranking de gasto.
+
+### 17e. As três casas, e por que não se somam
+
+| | Goiás (ALEGO) | DF (CLDF) | Minas (ALMG) |
+|---|---|---|---|
+| grão | mês, por deputado | comprovante | deputado × mês × categoria |
+| glosa | sim | não: só o pago | sim |
+| categoria | não | sim, 68,3% do valor sem | sim |
+| fornecedor | não | sim | sim, com CNPJ |
+| autor da nota | sim | não | sim |
+| período | 8 anos | 12 anos | 2019 em diante, por mandato |
+
+Os períodos não coincidem, o grão não coincide, e Goiás publica o pedido
+enquanto o DF publica só o pago. **Um total "das três casas" sairia redondo e
+não significaria nada** — pela mesma razão que o total por ano de Minas não
+significa.
+
 ## Seis ressalvas de método
 
 **O denominador do mapa de Influência.** O painel original informa, para cada município,
@@ -468,3 +614,56 @@ nome completo sem acento, porque o TSE grava o mesmo nome ora com acento ora sem
 `SQ_CANDIDATO` muda a cada eleição. Isso funde eventuais homônimos — um risco pequeno
 num universo de 4.128 candidaturas, mas real. Os números de reincidência e de
 semelhança entre pleitos carregam essa margem.
+
+## Território e ideologia são pouco acoplados
+
+*Reproduz por `scripts/23_rivais.py`, que imprime a tabela abaixo ao final.*
+
+Calculado o rival territorial mais pressionante de cada eleito em todas as
+unidades, no estadual e no federal, 1998–2022, a leitura tentadora é: **o rival
+nº 1 costuma ser um aliado ideológico**. Em Goiás 2022 ele é aliado para 69,8%
+dos eleitos; em Minas 1998, para 81,1%.
+
+O número não sobrevive sozinho. Se a maior parte das candidaturas já está na
+mesma faixa ideológica do eleito, "aliado" vence por acaso — e é o que acontece:
+
+| UF | ano | acaso | observado | pareado |
+|---|---|---|---|---|
+| GO | 2022 | 71,0% | 69,8% | +1,21 pp |
+| SP | 2010 | 54,4% | 48,2% | −0,11 pp |
+| MG | 1998 | 74,3% | 81,1% | +2,27 pp |
+| RR | 2022 | 75,0% | 51,7% | +0,25 pp |
+
+`observado` acompanha `esperado` de perto, e às vezes fica **abaixo** dele. O
+achado aparente é, em boa medida, composição do campo — não comportamento.
+
+O que resta é o teste pareado, que compara aliado e adversário **dentro do mesmo
+eleito** e por isso controla a composição por completo. Ele é positivo em quase
+todos os pleitos das 27 unidades, mas pequeno: ordem de +1 a +3 pontos
+percentuais de pressão a mais. A conclusão defensável é a mais fraca e a mais
+interessante: **a geografia do voto proporcional é quase independente da posição
+ideológica**. Quem disputa o mesmo chão disputa por estar ali, não por pensar
+parecido.
+
+Uma unidade fica de fora por construção: o Distrito Federal é um município só, e
+lá o cosseno entre dois candidatos quaisquer dá exatamente 1,000. A medida não é
+calculada, e a tela diz por quê em vez de mostrar um ranking de tamanho de
+votação disfarçado de território.
+
+## Câmaras municipais: a mesma cadeira custa coisas muito diferentes
+
+*Reproduz por `scripts/25_vereador_web.py`.*
+
+Nas 26 capitais, 2000–2024, o vereador mais votado da cidade tira múltiplos
+muito diferentes do último eleito. Em São Paulo 2024, Lucas Pavanato fez 161.386
+votos contra 22.306 do último a entrar — **7,2 vezes**. E a base dele não é um
+reduto: 54,83 zonas efetivas de 57, Gini 0,112 entre zonas. É votação grande e
+espalhada, o oposto do padrão de reduto que domina o interior nos estaduais.
+
+São Paulo teve 979 candidatos para 55 cadeiras — 17,8 por cadeira — e 67,3% dos
+eleitos já haviam concorrido antes.
+
+A comparação entre capitais para na escala: Rio de Janeiro tem 49 zonas e São
+Paulo 57, mas Macapá, Boa Vista e Vitória têm 2, e **Palmas tem 1 nos sete
+pleitos**. Onde há uma zona só não existe geografia interna, e a tela diz isso em
+vez de desenhar uma barra de 100% que fingiria distribuição.

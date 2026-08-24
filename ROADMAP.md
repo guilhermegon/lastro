@@ -75,19 +75,23 @@ monitorado pelo BEDEL desde essa data. Identidade local em [`CLAUDE.md`](CLAUDE.
 - [x] Toque tratado desde o começo, não como remendo
 - [x] `app/README.md` com a arquitetura e as escolhas
 
-### Porte dos demais blocos — aguardando ordem de prioridade
+## Marco 7 — modelo completo em todas as UFs  ✅ concluído 2026-08-22
 
-Quatro blocos do painel antigo restam portar e competem por ordem. Como o alvo de
-entrega mudou (produto em React, não página única), a prioridade é decisão do usuário
-e está registrada como `RAS 00 TKT 0004` na [`FILA00.md`](FILA00.md), com recomendação
-do líder pelo comparativo nacional.
+- [x] Cinco cargos × 7 pleitos × 26 UFs (`19_nacional_completo.py`)
+- [x] Adjacência da malha completa, separada da geometria de desenho (`20_adjacencia.py`)
+- [x] Padrões e Cruzamentos por UF (`21_padroes_cruzamentos.py`)
+- [x] Validado contra o pipeline de Goiás: votos, captura, arrasto, semelhança e escala
+- [x] Front React com as sete abas: cinco cargos, Padrões e Cruzamentos
+
+- [x] Rivais territoriais em todas as UFs, estadual e federal (`23_rivais.py`)
+- [x] Vereador nas 26 capitais, 2000–2024 (`24_`, `25_`)
+
+### O que ainda não está no React
 
 | Bloco | Situação |
 |---|---|
-| Comparativo nacional | recomendado como primeiro — fecha o produto |
-| Demais cargos (federal, Senado, governador, presidente) | exige refazer o payload por UF para os outros cargos |
-| Rivais e cruzamentos | só existe para Goiás; replicar nacionalmente é o mais pesado |
-| Vereador de Goiânia com mapa por seção | dado de seção já pronto, cidade única |
+| Comparativo nacional | mapa por UF e rankings; os dados já estão em `indice.json` |
+| Vereador com mapa por seção | o mapa por seção existe só para Goiânia (`13_secoes.py`), e depende do arquivo de locais de votação com coordenadas — não replicado |
 - [x] Sigla atribuída e entrada no roster monitorado (TKT-001, 2026-08-21)
 
 ## AGUARDANDO — sem próximo item seguro
@@ -105,3 +109,390 @@ trabalho pendente.
 
 - Montar o `.pbix`: os CSVs do modelo estrela estão prontos, mas o arquivo do Power BI
   é trabalho manual no Desktop e o usuário optou pelo painel HTML como entrega visual.
+
+## Marco 8 — Emendômetro  ⏳ base pronta 2026-08-23
+
+Mesma pergunta do voto, virada para o dinheiro: onde o deputado manda emenda, e
+isso tem a ver com onde ele tirou voto?
+
+- [x] Fonte identificada e baixada: Portal da Transparência, arquivo único
+      (`30_emendas_ingest.py`). 78.454 emendas, 2015–2026, R$ 259,5 bi pagos
+- [x] Normalização com `cod_ibge`, a **mesma chave** do voto — sem pareamento
+      por nome, que é o que custou 23 milhões de votos do outro lado
+- [x] Casamento autor ↔ deputado federal eleito: 1.098 de 1.492 autores (74%),
+      R$ 108,7 bi (78% do dinheiro individual), com os 9 nomes ambíguos marcados
+- [x] Agregados por UF e por município (`31_emendas_agregados.py`): 35 KB
+      nacional + 1,2 MB por UF, reconciliando exato nos dois níveis
+- [x] Aba **Emendômetro** no artefato: mapa municipal acumulado, filtro por
+      exercício e por autor, ranking nacional por UF, cobertura declarada na
+      tela. Artefato em **15,2 MB** — o teto de 16 está perto, e é ele que
+      decide o que ainda cabe
+- [x] Cruzamento voto × emenda (`32_cruzamento_voto_emenda.py`): sim, e o
+      efeito sobrevive a toda checagem — cresce quando se exige mais dado
+- [x] Real por habitante e por km² (`33_demografia.py`, Censo 2022 do IBGE)
+- [x] "Qual seu estado?" virou subaba: some no Nacional, onde o mapa é o seletor
+
+### O achado do cruzamento
+
+Mediana do país: **60,1% da emenda de um deputado cai nos 10 municípios onde ele
+mais votou**, contra **5,7%** que cairia no reduto de outro deputado do mesmo
+estado e pleito. Excesso de **+15,9 pp**.
+
+A linha de base é o que dá sentido ao número. Goiânia recebe muito voto *e*
+muita emenda de quase todo deputado goiano, porque é grande — sem descontar
+isso, qualquer medida de sobreposição sai alta e diz "cidade grande é grande nas
+duas contas".
+
+**E o efeito não encolhe quando se exige mais dado — ele cresce:**
+
+| mín. municípios | n | excesso | ponderado por R$ | positivo em |
+|---|---|---|---|---|
+| 1 | 1.082 | +15,9 pp | +28,9 pp | 66% |
+| 3 | 703 | +20,0 pp | +27,2 pp | 77% |
+| 5 | 428 | +17,9 pp | +24,9 pp | 83% |
+| 10 | 197 | +17,2 pp | **+24,5 pp** | **91%** |
+
+Se fosse artefato de denominador pequeno, sumiria sob filtro. A ressalva que fica
+na tela: isso mede o dinheiro rastreável, mediana de 1,9% da carteira de cada
+deputado. O sentido é sólido, a magnitude fala do recorte.
+
+### Duas coberturas diferentes, e as duas precisam aparecer
+
+Medidas ao agregar, e não são a mesma coisa:
+
+- **10,5% do dinheiro** individual é rastreável até um município.
+- **69% dos municípios** (3.844 de 5.571) receberam alguma emenda rastreável,
+  somando 2015–2026.
+
+Por isso o mapa municipal abre **acumulado**, não por ano: em Goiás, 2024 sozinho
+tem 17 municípios com emenda e o mapa fica quase vazio; os doze anos juntos dão
+uma mancha legível. O filtro por ano continua, como recorte, não como padrão.
+
+### Limitação conhecida do casamento
+
+`eleito` significa "casa com deputado federal eleito entre 2014 e 2022", e não
+"é parlamentar". Senadores fazem emenda individual e saem marcados como não
+casados — Jorge Kajuru e Damares Alves aparecem assim em Goiás. Casar senador
+exige a base de eleitos do Senado, que já temos por UF e ainda não foi ligada
+aqui.
+
+### A ressalva que define esta aba, e não pode ser esquecida
+
+**O mapa municipal cobre 10,5% do dinheiro individual.** Não por descuido: 76%
+do valor está declarado como `MÚLTIPLO`, uma emenda espalhada por vários
+municípios que o arquivo não nomeia. O voto é completo por construção — todo
+voto tem município. A emenda não é.
+
+**E existe um atalho falso que precisa ficar fechado.** O arquivo por favorecido
+tem município em 100% do dinheiro, e é inútil como mapa: Brasília concentra
+36,4% das emendas individuais, porque é o endereço do Fundo Nacional de Saúde e
+dos intermediários. Usar esse campo produziria um mapa bonito dizendo que
+Brasília recebe um terço das emendas do país — verdade sobre a transferência
+bancária, falso sobre onde o dinheiro chegou. **O município vem sempre da
+localidade de aplicação.**
+
+Por UF a cobertura é 97,1% do dinheiro, inclusive nas linhas `MÚLTIPLO`. É nesse
+nível que o Emendômetro é completo, e é por isso que ele começa por UF.
+
+## Marco 9 — emendas de deputado estadual, piloto em Goiás
+
+Aprovado pelo usuário em 2026-08-23 (`RAS 00 TKT 0006`). Não é extensão do
+Emendômetro: é outra fonte — orçamento estadual, 26 portais, sem agregador
+nacional. O piloto responde quanto custa um estado antes de prometer 26.
+
+- [x] Capital sinalizada nos mapas municipais (âncora de leitura)
+- [x] **Não precisou do Power BI.** O conjunto "Emendas Parlamentares - SERINT"
+      dos dados abertos de Goiás é a base da Assembleia, em CSV — eu tinha
+      descartado olhando o nome do órgão, sem ler a descrição
+- [x] Normalizado com `cod_ibge` (`34_emendas_go_estadual.py`): 22.310 linhas,
+      2019–2025, R$ 4,0 bi, 246 municípios em 2022
+- [x] Casamento com deputado estadual eleito: 61% dos autores, 76% do dinheiro
+- [x] **Fusão, não aba nova** (`35_emendas_estadual_web.py`): seletor de esfera
+      dentro do Emendômetro, que só aparece onde há base estadual. Aplicado sob
+      a pré-autorização — uma aba vazia em 26 estados é pior que a ausência do
+      botão, e a pergunta que interessa é comparativa
+- [x] **Decidido: não vale ir para os 25 — vale ir para 2 ou 3**
+      (`36_sonda_portais_estaduais.py`). Aplicado sob a pré-autorização, com a
+      sondagem em mãos
+- [x] **Pernambuco: descartado.** Abri os quinze exercícios: nenhum tem `autor`
+      nem `municipio`. São registros de empenho — número, unidade gestora,
+      credor, valores. O dicionário "versão 02" descreve um esquema rico com os
+      dois campos, e **nenhum arquivo publicado usa esse esquema**. O CSV de
+      2026 tem zero bytes e o JSON de 2025 traz o formato antigo
+- [x] **Espírito Santo: confirmado**, e melhor que Goiás
+- [x] Ingestão do Espírito Santo (`38_emendas_es_estadual.py`): 2021–2026,
+      4.620 linhas com pagamento, 51 autores, R$ 291,9 mi, 77 de 78 municípios
+- [x] **Bahia: descartada para o mapa.** O ZIP da SEFAZ tem cinco tabelas do
+      FIPLAN. `DESPESAS` traz `Nome do Deputado` e `Valor Pago`, mas **nenhuma
+      das cinco tem município** — nem `PAGAMENTOS`, que só tem razão social do
+      credor e objeto. Renderia ranking por deputado sem geografia, que não é o
+      produto
+
+### Placar final do estadual, com todos os candidatos abertos
+
+| estado | autor | município | situação |
+|---|---|---|---|
+| Goiás | sim | sim, 65,8% do valor | **no ar** |
+| Espírito Santo | sim | sim, 82,5% do valor | **no ar** |
+| Pernambuco | não | não | descartado — só empenho |
+| Bahia | sim | **não** | descartado — sem geografia |
+| outros 23 | — | — | sem dado acessível |
+
+**Dois de 27.** E os dois descartes só apareceram abrindo o arquivo: Pernambuco
+publica um dicionário que descreve campos que nenhum arquivo tem, e a Bahia tem
+o deputado mas não o lugar. Nenhuma das duas coisas se vê pela descrição do
+conjunto.
+
+### Espírito Santo, medido
+
+| exercício | emendas | autores | municípios | % do valor com município | pago |
+|---|---|---|---|---|---|
+| 2021 | 921 | 30 | 76 | 96,8% | R$ 21,8 mi |
+| 2022 | 1.323 | 30 | 76 | 98,2% | R$ 28,3 mi |
+| 2023 | 964 | 30 | 75 | 98,2% | R$ 30,6 mi |
+| 2024 | 1.421 | 30 | 76 | 98,9% | R$ 48,2 mi |
+| 2025 | 1.346 | 30 | 78 | 81,5% | R$ 70,2 mi |
+| 2026 | 1.684 | 30 | 78 | 61,4% | R$ 92,9 mi |
+
+Esquema estável nos seis exercícios, com `CodigoMunicipio` além do nome — o
+pareamento por nome nem é necessário. **A cobertura municipal é de 98% contra
+65,8% em Goiás.** 2025 e 2026 aparecem mais baixos porque ainda estão
+executando, não porque publiquem pior.
+
+### Duas lições deste levantamento, e as duas são erro meu
+
+**Li o dicionário em vez do dado.** Escrevi a linha do roadmap sobre Pernambuco
+a partir da descrição do conjunto e do dicionário v2 — exatamente o que o
+`36_sonda_portais_estaduais.py`, escrito no commit anterior, avisa para não
+fazer. A regra estava certa e eu a violei uma hora depois.
+
+**O detector de formato de moeda tinha limite de duas casas decimais.** O ES
+publica `11250,0000`, com quatro. A vírgula virava separador de milhar e o valor
+inflava dez mil vezes: o primeiro cálculo deu R$ 217 bilhões para um estado cujo
+orçamento inteiro é fração disso. O número absurdo é que denunciou; um erro de
+10% teria passado.
+
+### A sondagem que tornou a decisão possível
+
+Sondados os 27 portais estaduais de dados abertos:
+
+| | |
+|---|---|
+| respondem CKAN | **10 de 27** |
+| têm conjunto com "emenda parlamentar" | 6 |
+| em formato tabular | 5 — BA, ES, GO, PB, PE |
+
+E abrindo os cinco, o número real cai de novo: PB só tem "Orçamento" genérico e
+SC foi falso positivo (o casamento era com portarias de COVID). **Sobram três
+com dado de emenda estadual de verdade: GO, PE e ES.**
+
+Isto responde a pergunta e mata a ambição: **o Emendômetro estadual nacional não
+existe como produto uniforme.** Dezessete portais nem respondem API. Os outros
+exigiriam raspagem ou engenharia reversa de painel, um por um, sem garantia de
+que tragam autor e município.
+
+A ressalva do próprio script continua valendo: achar o conjunto não garante o
+conteúdo. Em Goiás o conjunto certo estava lá e foi descartado pelo nome do
+órgão. PE e ES precisam ser abertos antes de virarem promessa.
+
+### O que a comparação já mostra em Goiás
+
+| | federal | estadual |
+|---|---|---|
+| rastreável ao município | R$ 316,2 mi (6,5%) | **R$ 2,61 bi (65%)** |
+| municípios alcançados | 170 de 246 | **246 de 246** |
+| maior carteira | Major Vitor Hugo, R$ 21,8 mi em 19 municípios | Amilton Filho, R$ 46,1 mi em **73** |
+
+A emenda estadual é mais dinheiro rastreável, mais espalhada e nomeia município
+quase sempre. Não por virtude do estado: a emenda federal é maior por unidade e
+frequentemente vai para `MÚLTIPLO` ou para o estado inteiro. Área principal nos
+dois: saúde.
+
+### O custo real de um estado, medido
+
+O trabalho não está em achar o dado — está em que **o esquema muda todo ano**:
+sete arquivos, sete formatos, separador que vira tabulação em 2025, e a coluna
+de autor chamada "DEPUTADO AUTOR", "Autor da Emenda" ou "Autor (Deputado)"
+conforme o ano. Por isso as colunas são achadas por busca, não por nome fixo.
+
+E o pareamento de município volta, porque aqui o dado vem por **nome**, não por
+código IBGE como no federal. Cinco nomes seguem sem par (R$ 1,5 mi) e quatro
+deles não são município: "Estado de Goiás", "PMGO", "#N/D" e um nome de pessoa.
+
+## Marco 10 — a aba Sobre
+
+- [x] Aba **Sobre** com a procedência de cada número, as regras de contagem e as
+      armadilhas do dado público. Nove seções, três tabelas, dezesseis fatos.
+
+Ela existe por dois motivos, e o segundo é comercial. O primeiro: dado eleitoral
+é dado de interesse público sob o olhar de terceiros, e quem publica número tem
+de mostrar como contou. O segundo: **o produto não é o mapa, é a confiança no
+número** — e confiança que não se demonstra não se vende. A aba transforma o
+rigor, que é invisível numa demonstração, em coisa que se lê.
+
+Escrita dentro do gerador, e não num arquivo à parte, de propósito: se o
+pipeline mudar e o texto ficar, o texto vira mentira antiga.
+
+## Marco 11 — aba API: o que as assembleias publicam
+
+- [x] Sondagem das 27 casas legislativas (`39_sonda_assembleias.py`)
+- [x] Aba **API** com o levantamento e as inferências
+- [x] Piloto consumindo a API de fato (`40_alego_verbas.py`): verba
+      indenizatória dos deputados de Goiás, 91 dos 96 meses de 2019 a 2026
+
+### O piloto, e os dois achados que saem de uma subtração
+
+R$ 111,8 mi apresentados, R$ 111,4 mi indenizados, **R$ 349 mil glosados —
+0,31%**. Nenhum dos dois números abaixo é publicado como indicador em lugar
+nenhum; os dois saem de comparar duas colunas que a API já entrega.
+
+**Quase nada é recusado.** A diferença entre apresentado e indenizado mede
+decisão administrativa, e a decisão é praticamente sempre aprovar.
+
+**Todo mundo usa o teto.** Entre os 20 deputados com cinco anos ou mais de
+série, a média mensal fica entre R$ 25 mil e R$ 32 mil, mediana de R$ 30 mil.
+Não há quem gaste pouco — a verba é usada como piso, não como limite. Isso muda
+o que "quem gasta mais" significa: ordenar por total ordena por tempo de
+mandato, não por comportamento.
+
+### E um defeito que teria virado afirmação falsa
+
+A primeira varredura trouxe **37 dos 96 meses**, e 2022 e 2023 apareciam
+completamente vazios — quando eu mesmo já tinha testado 2023/02 à mão, com 41
+registros. Requisição que falha, lida como ausência de dado, não parece erro:
+parece resultado. Com três tentativas por mês, foram 91 meses, 2,4× mais dado.
+
+**19 de 27 respondem** algum portal de dado aberto; **4 têm API confirmada** por
+abertura manual (GO, MG, PE, DF); 8 não devolveram nada nos caminhos testados —
+o que não é prova de ausência.
+
+### A inferência que importa
+
+**Nenhuma assembleia publica emenda parlamentar.** O que elas publicam é a si
+mesmas: folha, diárias, verbas indenizatórias, licitações, contratos, e a
+execução do próprio orçamento da Casa. A assembleia como empregadora e
+compradora, não como poder que direciona orçamento.
+
+E isso é coerência institucional, não omissão: a emenda é indicação de deputado
+sobre o orçamento do **Executivo**, executada pelas secretarias. Por isso o
+Emendômetro estadual sai dos portais do governo do estado.
+
+**O legislativo é mais opaco que o executivo neste recorte:** dos portais do
+Executivo, cinco tinham conjunto de emenda em formato tabular; das assembleias,
+nenhuma.
+
+### Dois defeitos meus na sonda, corrigidos antes de publicar
+
+A primeira versão deu **zero APIs** — num levantamento em que eu já tinha testado
+a da ALEGO funcionando. Ela mora em `/api/transparencia/{recurso}`, dois níveis
+abaixo do que eu sondava. E a lógica de subdomínio cortava `ale.am.gov.br` para
+`am.gov.br`, levando a sonda ao **Executivo** num levantamento sobre o
+Legislativo. Corrigidos, o resultado foi de 0 para 4 APIs e de achados
+contaminados para achados da casa certa.
+
+### Segundo piloto: Distrito Federal (`41_cldf_verbas.py`)
+
+A CLDF publica a **mesma** verba indenizatória em outro grão: nota a nota, com
+fornecedor, CNPJ e categoria. 20.572 comprovantes, 2013–2024, R$ 25,5 mi.
+
+**O que só o DF responde:** no que a verba é gasta. Entre o que tem categoria,
+**divulgação de atividade parlamentar é 27,7%** — o maior item da verba de
+gabinete é publicidade do próprio mandato. Veículos, somando as duas grafias que
+o arquivo usa, dão 28,9%.
+
+**Duas ressalvas medidas, e a segunda recusa uma comparação:**
+
+- **68,3% do valor não tem categoria.** A tabela fala de R$ 8,1 mi dos R$ 25,5 mi.
+- **A CLDF tem 24 distritais e o arquivo traz de 3 a 26 por ano.** Não é
+  rotatividade, é publicação parcial. **Não comparamos gasto por deputado com
+  Goiás**: o cálculo roda e dá "um terço", e esse número descreveria a política
+  de publicação de cada casa achando que descreve comportamento.
+
+### Onde os dois pilotos param
+
+| | Goiás (ALEGO) | DF (CLDF) |
+|---|---|---|
+| grão | mês, por deputado | comprovante |
+| revela | **glosa** (apresentado − indenizado) | **no que gasta** (categoria, fornecedor) |
+| não revela | destino do gasto | valor pedido, logo nem glosa |
+
+Cada casa responde o que a outra não responde. Pernambuco tem API REST
+(`/api/v1/`) com `parlamentares` e `remuneracao`, que é outro conceito — não
+verba de gabinete. Minas tem Swagger, mas não achei a especificação por
+tentativa e parei de caçar.
+
+## Marco 12 — gasto administrativo das Casas, e uma correção
+
+- [x] **Gasto administrativo da ALEGO** (`42_alego_administrativo.py`):
+  orçamento da Casa, diárias, terceirizados, contratos
+- [x] **Gasto administrativo da CLDF** (`44_cldf_administrativo.py`): folha
+  nominal, despesa, duodécimo, terceirizados
+- [x] **Correção de uma afirmação publicada** (`45_emenda_nas_assembleias.py`)
+- [x] Delta-encoding do vetor municipal: 15,9 → 13,9 MB, round-trip verificado
+
+- [x] **Verba indenizatória da ALMG** (`43_almg_verbas.py`): 141.781 notas,
+  77 deputados, 2019–2026. Bruto em parquet; `--cache` reanalisa em segundos.
+
+### O total de Minas era o número redondo e falso da vez
+
+A série por ano dava **+182%** de 2020 a 2025. É artefato: a varredura consulta
+`deputados/em_exercicio` — os 77 de hoje — e só 48 deles já eram deputados em
+2020. Quando a legislatura virou, a cobertura pulou de 49 para 74 e o total pulou
+junto. **Por deputado o crescimento é +78%**, e os 104 pontos de diferença são
+cobertura, não gasto.
+
+A série publicada é por deputado, com o +182% na tela ao lado, rotulado como o
+número falso — mesmo tratamento dado ao mapa de favorecido e à comparação
+DF × Goiás.
+
+**A ressalva que sobrevive:** 2020–2022 cobre só os 48 que continuam em
+exercício hoje, não os ~77 de então. Sobreviventes de três mandatos tendem a ter
+estrutura maior, o que faz de +78% um piso. Corrigir exigiria varrer
+`que_exerceram_mandato` por legislatura — não feito, e declarado na tela.
+
+### O erro da janela de Minas, e por que ele importa mais que parece
+
+Escrevi que a ALMG mantinha uma **janela móvel de ~18 meses** por política de
+publicação. Amostrei **um** deputado, vi 18 meses e generalizei para os 77.
+
+Medindo os 77: **mediana de 88 meses**, máximo 91, mínimo 18 — e o mínimo era
+justamente o deputado que amostrei. O arquivo começa em **2019-02**, início da
+legislatura 2019–2022, e a janela de cada um acompanha o tempo dele de mandato:
+48 têm série desde 2019, 22 desde fevereiro de 2023, o resto entrou por
+substituição.
+
+**Errei nas duas metades, e a consequência não foi cosmética.** Com base na
+limitação que inventei, eu tinha me *recusado a publicar a série temporal* —
+escrevi na tela que uma série ali "descreveria a política de retenção da ALMG
+achando que descreve gasto". A série existe, cobre duas legislaturas, e a
+recusa era o único obstáculo.
+
+A frase não chegou a nenhum leitor: a seção retornava vazio por falta do JSON
+quando o artefato foi publicado. Mas é o terceiro erro da mesma família nesta
+frente — presumir padrão a partir do que vi e não do que testei — depois de
+`\d{4}-\d{2}` ter apagado cinco anos do DF e de "nenhuma assembleia publica
+emenda" ter ido ao ar. A diferença entre os três é só quanto tempo levou até
+alguma coisa denunciar.
+
+### Minas: o grão mais completo dos três
+
+A ALMG tem API v2 documentada (a especificação está em
+`/api/ajuda/swagger/endpoints/lastest`, que só se acha olhando o que a página
+carrega — as tentativas por endereço plausível davam 500). São 108 endpoints.
+
+O de verba indenizatória devolve **deputado × mês × categoria**, com detalhe
+nota a nota dentro: `valorDespesa` e `valorReembolsado` (a glosa, que só Goiás
+dava), `descTipoDespesa` (a categoria, que só o DF dava) e `nomeEmitente` +
+`cpfCnpj` (o fornecedor). **É a união dos três**, e a única das casas onde dá
+para perguntar qual fornecedor atende quantos deputados.
+
+**A janela é móvel e isso não é comportamento:** cerca de 18 meses por
+deputado, de fevereiro de 2025 em diante. É política de publicação, não início
+da verba — série longa ali descreveria a retenção da ALMG achando que descreve
+gasto.
+
+**O limite de requisição é publicado e obedecido:** a ALMG declara no site duas
+requisições simultâneas e um segundo entre elas, sob pena de bloqueio sem
+aviso. São dois workers com pausa de um segundo. A varredura leva o tempo que
+levar.
+
