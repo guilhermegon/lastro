@@ -1751,7 +1751,9 @@ function secaoMG() {
   const jan = (v.janela || ["",""]).map(x => x.replace("-", "/"));
   const se = (v.serie || []).filter(x => x.meses === 12);
   const s0 = se[0], s1 = se[se.length - 1];
-  const cresc = (s0 && s1) ? (s1.pago / s0.pago - 1) * 100 : null;
+  // duas leituras da mesma série: a que engana e a que não
+  const cTotal = (s0 && s1) ? (s1.pago / s0.pago - 1) * 100 : null;
+  const cDep = (s0 && s1) ? (s1.porDeputado / s0.porDeputado - 1) * 100 : null;
 
   return `
   <div class="cartaz">
@@ -1780,23 +1782,39 @@ function secaoMG() {
   </div>
 
   ${se.length > 1 ? `<div class="cartaz">
-    <h2>A verba mineira ao longo de duas legislaturas</h2>
-    <p class="cap">Só os anos completos: ${s0.ano} a ${s1.ano}. Os anos das
-      pontas ficam de fora do gráfico porque têm menos de doze meses fechados —
-      incluí-los mediria o calendário, não o gasto.</p>
-    ${linha([{rotulo:"Pago", cor:"--accent", pontos: se.map(x => x.pago/1e6)}],
-            se.map(x => String(x.ano)), 1)}
-    <div class="legenda">${chip("--accent","Verba paga no ano, em R$ milhões")}</div>
-    <div class="indices" style="margin-top:14px">
-      ${ind(String(s0.ano), reais(s0.pago), s0.deputados + " deputados")}
-      ${ind(String(s1.ano), reais(s1.pago), s1.deputados + " deputados")}
-      ${ind("Variação", (cresc>=0?"+":"") + dec(cresc,0) + "%",
-            "nominal, em " + (s1.ano - s0.ano) + " anos")}
+    <h2>A série que engana, e a mesma série sem enganar</h2>
+    <p class="cap">Só os anos completos, ${s0.ano} a ${s1.ano} — as pontas têm
+      menos de doze meses fechados e incluí-las mediria o calendário. Mas há uma
+      armadilha bem maior do que essa neste gráfico, e ela vale mais que o
+      gráfico.</p>
+    <div class="nota">
+      <strong>O total por ano não mede gasto: mede quantos dos deputados de hoje
+      já estavam lá.</strong> Consultamos os ${(v.total||{}).deputados} deputados
+      <em>em exercício</em>, e só ${s0.deputados} deles já eram deputados em
+      ${s0.ano}. Quando a legislatura virou, a cobertura saltou de
+      ${s0.deputados} para ${(se.find(x=>x.ano===2023)||{}).deputados || "74"} —
+      e o total saltou junto, sem que ninguém tivesse gasto diferente.
     </div>
-    <p class="cap" style="margin-top:10px">Está em reais correntes, sem
-      deflacionar — parte da variação é só a moeda valendo menos. E o número de
-      deputados com verba lançada muda de ano para ano, o que move o total sem
-      que ninguém tenha gastado diferente.</p>
+    <div class="indices" style="margin-top:14px">
+      ${ind("Se olhássemos o total", (cTotal>=0?"+":"") + dec(cTotal,0) + "%",
+            "número falso: é cobertura")}
+      ${ind("Por deputado", (cDep>=0?"+":"") + dec(cDep,0) + "%",
+            "de " + s0.ano + " a " + s1.ano + ", nominal")}
+      ${ind("A diferença", dec(cTotal-cDep,0) + " pontos", "puro artefato")}
+    </div>
+    ${linha([{rotulo:"Por deputado", cor:"--accent",
+              pontos: se.map(x => x.porDeputado/1e3)}],
+            se.map(x => String(x.ano)), 0)}
+    <div class="legenda">${chip("--accent","Verba paga por deputado no ano, em R$ mil")}</div>
+    <div class="rolagem" style="margin-top:12px"><table id="t-mg-serie"></table></div>
+    <p class="cap" style="margin-top:10px">Mesmo o valor por deputado tem uma
+      ressalva em ${s0.ano}–2022: aqueles ${s0.deputados} são os que
+      <strong>continuam</strong> em exercício hoje, não os cerca de 77 que havia
+      então. Quem sobrevive a três mandatos costuma ter estrutura maior, o que
+      provavelmente empurra a base para cima e faz de
+      ${(cDep>=0?"+":"") + dec(cDep,0)}% um piso, não um teto. Corrigir exigiria
+      varrer também quem deixou o mandato em cada legislatura. E está em reais
+      correntes, sem deflacionar.</p>
   </div>` : ""}
 
   ${ct.length ? `<div class="cartaz">
@@ -1862,6 +1880,12 @@ function tabelaMG() {
   const v = (D.estados.MG || {}).av;
   if (!v || !v.total) return;
   const t = v.total;
+  const es = document.getElementById("t-mg-serie");
+  if (es) tabela(es, ["Ano","Deputados com verba","Total","Por deputado"],
+    (v.serie || []).map(x => [String(x.ano) + (x.meses < 12 ? " *" : ""),
+      num(x.deputados), reais(x.pago), reais(x.porDeputado)]),
+    ["* ano incompleto: fora do gráfico e das comparações", "", "", ""]);
+
   const ec = document.getElementById("t-mg-cat");
   if (ec) tabela(ec, ["Categoria","Pago","% do pago","Notas"],
     (v.categorias || []).map(c => [esc(c.n), reais(c.v),
@@ -2026,15 +2050,13 @@ function tabelaAdminDF() {
   const f = a.folha || {};
   const el = document.getElementById("t-df-tipo");
   if (el && f.porTipo) {
+    // "(sem tipo)" entra como linha visível, com a contagem à vista: some do
+    // rodapé porque um rodapé de texto some da leitura, e são 126 pessoas
     const tipo = f.porTipo.filter(x => x.n && x.n !== "NAN");
-    const semTipo = f.porTipo.filter(x => !x.n || x.n === "NAN")
-                             .reduce((s,x) => s + x.q, 0);
     tabela(el, ["Vínculo","Pessoas","Folha do mês","% da folha","Por pessoa"],
       tipo.map(x => [esc(x.n), num(x.q), reais(x.v),
                      pct(f.bruto ? x.v/f.bruto*100 : 0, 1),
-                     reais(x.q ? x.v/x.q : 0)]),
-      semTipo ? `Mais ${num(semTipo)} pessoas sem vínculo informado no arquivo.`
-              : null);
+                     reais(x.q ? x.v/x.q : 0)]));
   }
   const et = document.getElementById("t-df-terc");
   if (et && a.terceirizados) {

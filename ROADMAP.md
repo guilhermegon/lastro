@@ -430,73 +430,25 @@ tentativa e parei de caçar.
 - [x] **Correção de uma afirmação publicada** (`45_emenda_nas_assembleias.py`)
 - [x] Delta-encoding do vetor municipal: 15,9 → 13,9 MB, round-trip verificado
 
-### AGUARDANDO — a varredura de Minas, que é espera legítima
+- [x] **Verba indenizatória da ALMG** (`43_almg_verbas.py`): 141.781 notas,
+  77 deputados, 2019–2026. Bruto em parquet; `--cache` reanalisa em segundos.
 
-- [ ] **Verba indenizatória da ALMG** (`43_almg_verbas.py`): 5.408 requisições
-  ao ritmo que a própria ALMG publica — duas simultâneas, um segundo entre elas,
-  sob pena de bloqueio sem aviso. São 44 minutos e não há como encurtar sem
-  trocar o acesso de todo mundo por meia hora minha. A seção do artefato já está
-  escrita, commitada e verificada no navegador: deriva todo número do JSON em
-  tempo de renderização e retorna vazio sem ele. Quando gravar, é rodar `22_` e
-  `28_`. Esta segunda varredura existe porque a primeira leu a janela errado
-  (ver abaixo) e porque agora o bruto vai para parquet, para não haver terceira.
+### O total de Minas era o número redondo e falso da vez
 
-### A afirmação que estava errada no ar
+A série por ano dava **+182%** de 2020 a 2025. É artefato: a varredura consulta
+`deputados/em_exercicio` — os 77 de hoje — e só 48 deles já eram deputados em
+2020. Quando a legislatura virou, a cobertura pulou de 49 para 74 e o total pulou
+junto. **Por deputado o crescimento é +78%**, e os 104 pontos de diferença são
+cobertura, não gasto.
 
-Publicamos, na aba API e na Sobre, que **"das 27 assembleias, nenhuma publica
-emenda parlamentar"**. A CLDF publica: um conjunto chamado, literalmente,
-`emendas-parlamentares`, cinco CSV de 2021 a 2025.
+A série publicada é por deputado, com o +182% na tela ao lado, rotulado como o
+número falso — mesmo tratamento dado ao mapa de favorecido e à comparação
+DF × Goiás.
 
-O ponto de fundo sobrevive — são dezoito colunas de execução orçamentária
-(`VL_EMENDA`, `VL_EMPENHADO`, `NOME_UO`, `PT`), **sem coluna de autor e sem
-coluna de município**, então não respondem "quem mandou dinheiro para onde". E o
-DF é caso especial de qualquer forma: é estado e município ao mesmo tempo.
-
-**Mas a frase absoluta era falsa, e o modo como nasceu é o problema.** Foi
-escrita a partir do padrão que eu via, com a mesma confiança dos números que eu
-tinha testado. `45_` separa as duas perguntas que ela confundia numa só:
-
-1. A Casa publica **algum** conjunto chamado emenda? → o DF publica
-2. Esse conjunto é **utilizável** (autor E município)? → nenhum é
-
-### A folha nominal do DF, e três defeitos meus antes da tela
-
-A CLDF publica o que nenhuma outra casa publica: 107 folhas mensais, pessoa a
-pessoa, com cargo, lotação e remuneração, de setembro de 2017 a julho de 2026.
-
-**O que ela mostra em julho de 2026:** 2.623 pessoas, R$ 59,85 mi de folha
-bruta. **993 comissionados para 871 concursados** — livre nomeação é maioria por
-cabeça, mas não por dinheiro (o concursado individual custa 3,3× o
-comissionado). **448 inativos custam R$ 15,3 mi, mais que os 993 comissionados
-em atividade (R$ 10,8 mi).** Os 24 deputados são 1,4% da folha: o custo do
-Legislativo quase não é o parlamentar, é a estrutura em volta.
-
-Em oito anos o quadro cresceu 37% (1.919 → 2.623) e a folha 99% em reais
-correntes. Os dois números não são igualmente sólidos e a tela diz por quê: a
-contagem não depende de inflação, o valor em reais não foi deflacionado.
-
-**Os três defeitos, todos meus, todos pegos antes de publicar:**
-
-- **5.052 linhas de pagamento não são 5.052 pessoas.** Uma pessoa aparece em
-  várias folhas no mesmo mês. A primeira versão relatou **48 deputados
-  distritais num DF que tem 24** — e foi esse absurdo que denunciou o resto.
-- **Um `\d{4}-\d{2}` estrito apagou cinco anos.** Os arquivos se chamam
-  `2022-01`, mas também `2025-7` (sem zero), `2024-08 ` (com espaço) e
-  `2017-09 - Quadro Desmonstrativo de Pessoal`. O regex descartou quatro meses
-  de 2025 em silêncio e começou a série em 2022. É o mesmo erro de sempre com
-  cara nova: presumir padrão onde não há, e ler "não bate com o meu padrão"
-  como "não existe".
-- **O esquema muda em nove anos:** 20, 21 e 23 colunas, com o acento se movendo
-  dentro do próprio cabeçalho (`Subsídio` → `Subsidio`). Casar por nome literal
-  apagava a coluna sem avisar. Agora casa por nome normalizado.
-
-**E uma checagem que passou:** a folha bruta (R$ 59,85 mi) contra a despesa
-paga da Casa (R$ 77,82 mi), que vem de arquivo independente. A folha é 77% do
-mês. Duas fontes que poderiam divergir e não divergem.
-
-**Uma ressalva declarada na tela:** o bruto é **piso**, não total. Só a folha
-principal detalha os créditos; as secundárias trazem as colunas de crédito
-zeradas e apenas o líquido — R$ 4,98 mi em julho cujo bruto o arquivo não diz.
+**A ressalva que sobrevive:** 2020–2022 cobre só os 48 que continuam em
+exercício hoje, não os ~77 de então. Sobreviventes de três mandatos tendem a ter
+estrutura maior, o que faz de +78% um piso. Corrigir exigiria varrer
+`que_exerceram_mandato` por legislatura — não feito, e declarado na tela.
 
 ### O erro da janela de Minas, e por que ele importa mais que parece
 

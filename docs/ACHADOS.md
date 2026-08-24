@@ -486,6 +486,88 @@ bruto o arquivo não informa**. Somar as colunas de crédito não duplica (as
 secundárias somam zero), mas também não alcança tudo. Todo número de folha aqui
 é mínimo, não total.
 
+## 17. Minas: a mesma verba, no único grão que junta tudo
+
+Fonte: `43_almg_verbas.py`, API de Dados Abertos da ALMG. 141.781 notas
+de 77 deputados, 2019-02 a 2026-08,
+5.325 meses-deputado. Pedido R$ 138,02 mi, pago
+R$ 136,56 mi, glosa de 1,05%.
+
+A ALMG é a única das três casas levantadas que amarra **as três dimensões ao
+mesmo tempo**: quanto foi pedido e quanto foi pago (a glosa, que só Goiás dava),
+em que categoria (que só o DF dava) e para qual fornecedor, com CNPJ — tudo
+ligado ao deputado, o que o DF não liga.
+
+### 17a. Metade da verba mineira é veículo
+
+**Locação e fretamento de veículos é 34,4% do pago** — o maior item isolado, com
+8.920 notas. Somado a combustível e lubrificante (17,1%), transporte
+responde por **51,5% de tudo**.
+
+Depois vêm serviços de consultoria, assessoria e pesquisa (17,6%) e divulgação da atividade parlamentar
+(17,5%). Em Goiás a categoria não existe no arquivo; no DF
+existe mas 68,3% do valor não tem categoria preenchida. Só em Minas a
+composição é completa.
+
+### 17b. A pergunta que só Minas permite: quem vende para quantos gabinetes
+
+São **9.048 CNPJ distintos**, e **3.864 deles
+(42,7%) atendem mais de um deputado**.
+
+No topo estão postos de combustível e uma companhia aérea — o que se espera de
+um mercado de transporte. O caso destoante é a
+**Facebook Serviços Online do Brasil Ltda., com 50 dos 77 deputados e R$ 2,27 mi**: é
+divulgação de mandato comprada em plataforma, e a plataforma aparece amarrada a
+dois terços da Casa.
+
+**Atender vários gabinetes não é irregularidade.** O número mede concentração do
+mercado que vive da verba, e não diz mais que isso. O DF não responde essa
+pergunta por não ter autor na nota; Goiás não responde por não ter fornecedor.
+
+### 17c. O número que sairia redondo e seria falso
+
+O total pago por ano vai de R$ 9,74 mi em 2020 a R$ 27,45 mi em
+2025 — **+182%**. Esse número é falso, e o motivo é do levantamento,
+não da fonte: a varredura consulta os deputados **em exercício**, os
+77 de hoje. Só 48 deles já eram deputados em
+2020. Quando a legislatura virou, a cobertura pulou de 48
+para 74 — e o total pulou junto, sem que ninguém tivesse gasto diferente.
+
+**Por deputado, o crescimento é de +78%** — R$ 203 mil
+para R$ 361 mil ao ano. Os **104 pontos de diferença
+são artefato puro**, e é por isso que a série publicada é por deputado, com o
+número falso mostrado ao lado para que se veja de onde ele vem.
+
+**Ressalva que sobrevive:** mesmo por deputado, 2020–2022 cobre apenas os
+48 que **continuam** em exercício hoje, não os cerca de 77 de
+então. Quem sobrevive a três mandatos tende a ter estrutura maior, o que
+provavelmente empurra a base para cima e faz de +78% um piso. Corrigir
+exigiria varrer `que_exerceram_mandato` de cada legislatura. E está em reais
+correntes, sem deflacionar.
+
+### 17d. Por deputado é mediana, nunca total
+
+A mediana mensal por deputado é **R$ 26.113,13**, numa faixa de
+R$ 7.005,09 a R$ 36.979,73. Não publicamos total por
+deputado porque a janela de cada um acompanha o tempo de mandato: somar
+produziria um ranking de antiguidade com aparência de ranking de gasto.
+
+### 17e. As três casas, e por que não se somam
+
+| | Goiás (ALEGO) | DF (CLDF) | Minas (ALMG) |
+|---|---|---|---|
+| grão | mês, por deputado | comprovante | deputado × mês × categoria |
+| glosa | sim | não: só o pago | sim |
+| categoria | não | sim, 68,3% do valor sem | sim |
+| fornecedor | não | sim | sim, com CNPJ |
+| autor da nota | sim | não | sim |
+| período | 8 anos | 12 anos | 2019 em diante, por mandato |
+
+Os períodos não coincidem, o grão não coincide, e Goiás publica o pedido
+enquanto o DF publica só o pago. **Um total "das três casas" sairia redondo e
+não significaria nada** — pela mesma razão que o total por ano de Minas não
+significa.
+
 ## Seis ressalvas de método
 
 **O denominador do mapa de Influência.** O painel original informa, para cada município,

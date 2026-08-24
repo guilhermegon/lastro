@@ -33,6 +33,24 @@ comeca numa legislatura e vai ate' o ultimo mes fechado.
 script se recusava a publica-la com base numa limitacao que eu tinha inventado.
 O erro e' o de sempre com cara nova: generalizar de uma amostra de um.
 
+**Mas a serie do TOTAL nao pode ser publicada, e o motivo tambem sou eu.** Este
+script varre `deputados/em_exercicio` — os 77 de hoje. Dos 77, so 48 ja eram
+deputados em 2019. Entao o total por ano nao mede gasto: mede quantos dos
+deputados atuais ja estavam la'. O salto de R$ 12,75 mi (2022) para R$ 21,88 mi
+(2023) parece crescimento de 72% e e' so' a cobertura indo de 49 para 74.
+
+Medido: de 2020 a 2025 o total cresce **+182%** e o valor **por deputado**
+cresce **+78%**. Os 104 pontos de diferenca sao artefato puro. Por isso a serie
+publicada e' por deputado, e a de total fica na tela apenas como exemplo do
+numero que sairia redondo e seria falso.
+
+**E mesmo a serie por deputado tem vies de sobrevivencia em 2020-2022**, porque
+os 48 daquele periodo sao os que continuam em exercicio em 2026 — nao os ~77 que
+havia entao. Quem sobrevive a tres mandatos tende a ter estrutura maior, o que
+provavelmente empurra a base para cima e faz do +78% um piso. Corrigir exigiria
+varrer tambem `que_exerceram_mandato` de cada legislatura, o que dobra o custo;
+enquanto nao for feito, a limitacao fica declarada na tela.
+
 **O bruto fica em disco.** A varredura leva 44 minutos ao ritmo que a ALMG
 permite; guardar as 141 mil notas em parquet faz qualquer reanalise custar
 segundos em vez de outra varredura.
@@ -128,7 +146,32 @@ def mes(idd, ano, m):
     return linhas
 
 
+def do_cache():
+    """Reanalise a partir do bruto ja' varrido — segundos em vez de 44 minutos."""
+    cru = cfg.INTERIM / "almg_verbas_notas.parquet"
+    if not cru.exists():
+        return None
+    try:
+        return pd.read_parquet(cru)
+    except Exception:
+        return None
+
+
 def main():
+    if "--cache" in sys.argv:
+        d = do_cache()
+        if d is None:
+            print("sem cache em data/interim; rode sem --cache")
+            return
+        print(f"reanalisando {len(d):,} notas do cache", flush=True)
+        deps = deputados()
+        nomes = {int(x["id"]): x.get("nome", "") for x in deps}
+        partidos = {int(x["id"]): x.get("partido", "") for x in deps}
+        todos = sorted({(int(a), int(m)) for a, m in
+                        zip(d["ano"], d["mes"])})
+        tarefas = list(d.groupby(["idDeputado", "ano", "mes"]).groups)
+        resume(d, nomes, partidos, todos, tarefas)
+        return
     print("deputados em exercício...", flush=True)
     deps = deputados()
     if not deps:
@@ -174,6 +217,11 @@ def main():
         d.to_csv(cru, index=False, compression="gzip")
         print(f"  bruto em {cru.name} (parquet indisponível: {e})", flush=True)
 
+    resume(d, nomes, partidos, todos, tarefas)
+
+
+def resume(d, nomes, partidos, todos, tarefas):
+    """A analise, separada da varredura para poder rodar a partir do cache."""
     # ---- glosa: pedido menos pago, a mesma medida que Goias permite ----
     ped = float(d["despesa"].sum())
     pago = float(d["reembolsado"].sum())
@@ -212,12 +260,14 @@ def main():
             "pctGlosa": round(glosa / ped * 100, 2) if ped else 0,
             "comGlosa": int((d["reembolsado"] < d["despesa"] - 0.005).sum()),
         },
-        # a serie que a primeira versao se recusou a publicar por uma limitacao
-        # que nao existia; anos incompletos ficam marcados, nao escondidos
+        # A serie e' POR DEPUTADO. O total por ano mede quantos dos 77 atuais ja
+        # estavam em exercicio, nao gasto — ver docstring. `pago` fica no objeto
+        # so' para a tela poder mostrar o numero falso ao lado do certo.
         "serie": [{"ano": int(a),
                    "pago": round(float(g["reembolsado"].sum()), 2),
-                   "pedido": round(float(g["despesa"].sum()), 2),
                    "deputados": int(g["idDeputado"].nunique()),
+                   "porDeputado": round(float(g["reembolsado"].sum())
+                                        / g["idDeputado"].nunique(), 2),
                    "meses": int(g["mes"].nunique())}
                   for a, g in d.groupby("ano")],
         "categorias": [{"n": str(i)[:70], "v": round(float(r.v), 2),
@@ -243,18 +293,28 @@ def main():
 
     print("")
     print("=== ALMG: verba indenizatoria ===")
-    print("   janela %s a %s (movel: politica de publicacao, nao inicio da verba)"
+    print("   janela %s a %s (POR MANDATO: mediana de 88 meses por deputado)"
           % tuple(obj["janela"]))
     print("   %d notas | %d deputados | %d meses-deputado" % (
         len(d), d["idDeputado"].nunique(), len(tarefas)))
     print("   pedido R$ %.2f mi | pago R$ %.2f mi | glosa R$ %.2f mi (%.2f%%)" % (
         ped/1e6, pago/1e6, glosa/1e6, obj["total"]["pctGlosa"]))
     print("")
-    print("=== por ano (meses < 12 = ano incompleto) ===")
+    print("=== por ano: o total engana, o por-deputado nao ===")
     for x in obj["serie"]:
         marca = "" if x["meses"] == 12 else "   <- %d meses" % x["meses"]
-        print("   %d  pago R$ %6.2f mi | %2d deputados%s" % (
-            x["ano"], x["pago"]/1e6, x["deputados"], marca))
+        print("   %d  total R$ %6.2f mi | %2d dep | por dep R$ %6.1f mil%s" % (
+            x["ano"], x["pago"]/1e6, x["deputados"],
+            x["porDeputado"]/1e3, marca))
+    comp = [x for x in obj["serie"] if x["meses"] == 12]
+    if len(comp) > 1:
+        a, b = comp[0], comp[-1]
+        ct = (b["pago"]/a["pago"] - 1) * 100
+        cd = (b["porDeputado"]/a["porDeputado"] - 1) * 100
+        print("   %d->%d: total %+.0f%% | por deputado %+.0f%%"
+              % (a["ano"], b["ano"], ct, cd))
+        print("   os %+.0f pontos de diferenca sao cobertura, nao gasto"
+              % (ct - cd))
     print("")
     print("=== no que o dinheiro vai ===")
     for c in obj["categorias"][:8]:
