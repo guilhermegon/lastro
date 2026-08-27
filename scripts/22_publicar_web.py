@@ -7,6 +7,19 @@ Brasil por UF e o agregado por estado e pleito. Tudo mais vem sob demanda.
 O agregado nacional é montado aqui, a partir dos arquivos por UF já validados, em
 vez de vir de um pipeline paralelo — assim não existe a possibilidade de o
 comparativo nacional discordar da tela do estado.
+
+**Os arquivos indexados por ano são partidos em um arquivo por ano.** A tela
+mostra um pleito de cada vez, mas o arquivo trazia os sete. Medido em São Paulo,
+o pior caso do país: a aba do estadual baixava 4.815 KB — 1.089 KB já
+comprimidos — para desenhar um ano. Partido, são 1.399 KB (333 KB servidos):
+**69% a menos na primeira tela**. O total em disco não muda; muda o que cada
+visitante puxa.
+
+Não é otimização de bytes — comprimir mais os mesmos arquivos renderia 4%, porque
+o gzip do servidor já corta 79%. É deixar de mandar seis anos que ninguém pediu.
+
+O app busca o ano aberto primeiro e os outros seis em segundo plano, então a
+troca de pleito continua instantânea depois dos primeiros segundos.
 """
 import json
 import shutil
@@ -23,6 +36,44 @@ geo = import_module("04_geo")
 ORIGEM = cfg.PROCESSED / "web"
 DESTINO = cfg.ROOT / "app" / "public" / "dados"
 CARGOS = ["presidente", "governador", "senador", "federal", "estadual"]
+
+
+# arquivos cuja chave de primeiro nivel e' o ano do pleito; o resto do dado
+# (base, padroes, cruzamentos, emendas) nao tem essa forma e fica inteiro
+POR_ANO = ["presidente", "governador", "senador", "federal", "estadual",
+           "rivais_estadual", "rivais_federal"]
+
+
+def parte_por_ano(pasta):
+    """`estadual.json` vira `estadual/2022.json` e irmaos. Ver docstring.
+
+    O monolito e' apagado: manter os dois dobraria o disco e abriria a chance de
+    a tela ler um e o indice o outro."""
+    cortados = 0
+    for nome in POR_ANO:
+        f = pasta / f"{nome}.json"
+        if not f.exists():
+            continue
+        d = json.loads(f.read_text(encoding="utf-8"))
+        anos = [k for k in d if str(k).isdigit()]
+        # se nao for a forma esperada, nao mexe: melhor servir grande do que
+        # servir errado
+        if len(anos) != len(d) or not anos:
+            continue
+        dir_ = pasta / nome
+        dir_.mkdir(exist_ok=True)
+        for ano in anos:
+            (dir_ / f"{ano}.json").write_text(
+                json.dumps(d[ano], separators=(",", ":"), ensure_ascii=False),
+                encoding="utf-8")
+        # a lista de anos vive aqui e nao no indice: uma UF pode nao ter um
+        # cargo num pleito, e o app precisa saber disso sem tentar e levar 404
+        (dir_ / "anos.json").write_text(
+            json.dumps(sorted(int(a) for a in anos), separators=(",", ":")),
+            encoding="utf-8")
+        f.unlink()
+        cortados += 1
+    return cortados
 
 
 def main():
@@ -45,6 +96,7 @@ def main():
     agregado, resumo = [], []
     for uf in ufs_dir:
         shutil.copytree(ORIGEM / uf, DESTINO / uf)
+        parte_por_ano(DESTINO / uf)
         base = json.loads((ORIGEM / uf / "base.json").read_text(encoding="utf-8"))
         n_mun = len(base["municipios"])
         est = ORIGEM / uf / "estadual.json"
@@ -127,21 +179,33 @@ def main():
              else " — SEM agregado nacional (rode 31_)"))
     com_ver = sum(1 for r in resumo if "capital" in r)
     com_riv = sum(1 for uf in ufs_dir
-                  if (DESTINO / uf / "rivais_estadual.json").exists()
-                  or (DESTINO / uf / "rivais_federal.json").exists())
+                  if (DESTINO / uf / "rivais_estadual").is_dir()
+                  or (DESTINO / uf / "rivais_federal").is_dir())
     print(f"vereador em {com_ver} capitais, rivais em {com_riv} UFs")
     print()
+    # o que o visitante baixa para ver UM pleito — que e' o numero que a divisao
+    # por ano existe para derrubar. Medir o diretorio inteiro voltaria a medir os
+    # sete anos e esconderia justamente o ganho.
+    ultimo = str(max(indice["anos"])) if indice.get("anos") else ""
     for uf in ("RR", "GO", "SP"):
         p = DESTINO / uf
         if not p.exists():
             continue
-        def kb(nome):
-            q = p / nome
-            return q.stat().st_size / 1024 if q.exists() else 0
-        print(f"  abertura em {uf}: índice {f.stat().st_size/1024:.0f} KB "
-              f"+ base {kb('base.json'):.0f} KB + estadual {kb('estadual.json'):.0f} KB"
-              f"  |  rivais {kb('rivais_estadual.json'):.0f} KB, "
-              f"vereador {kb('vereador.json'):.0f} KB")
+        def kb(*partes):
+            q = p.joinpath(*partes)
+            return q.stat().st_size / 1024 if q.is_file() else 0
+        def kb_dir(nome):
+            d = p / nome
+            return (sum(x.stat().st_size for x in d.glob("*.json")) / 1024
+                    if d.is_dir() else 0)
+        print(f"  abertura em {uf} no pleito de {ultimo}: "
+              f"índice {f.stat().st_size/1024:.0f} KB "
+              f"+ base {kb('base.json'):.0f} KB "
+              f"+ estadual {kb('estadual', ultimo + '.json'):.0f} KB "
+              f"+ rivais {kb('rivais_estadual', ultimo + '.json'):.0f} KB")
+        print(f"     (os sete anos, se fossem baixados juntos: "
+              f"estadual {kb_dir('estadual'):.0f} KB "
+              f"+ rivais {kb_dir('rivais_estadual'):.0f} KB)")
 
 
 if __name__ == "__main__":

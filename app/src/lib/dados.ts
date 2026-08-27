@@ -1,6 +1,6 @@
 import type {
-  BaseUF, Cargo, CargoComRival, Cruzamentos, DadosCargo, Indice, Padroes,
-  Rivais, Sigla, Vereador,
+  BaseUF, BlocoAno, BlocoRivais, Cargo, CargoComRival, Cruzamentos, Indice,
+  Padroes, Sigla, Vereador,
 } from "../tipos";
 
 const BASE = `${import.meta.env.BASE_URL}dados`;
@@ -37,17 +37,75 @@ export const carregarIndice = (): Promise<Indice> =>
 export const carregarBase = (uf: Sigla): Promise<BaseUF> =>
   comCache<BaseUF>(`base:${uf}`, `${BASE}/${uf}/base.json`);
 
-export const carregarCargo = (uf: Sigla, cargo: Cargo): Promise<DadosCargo> =>
-  comCache<DadosCargo>(`${uf}:${cargo}`, `${BASE}/${uf}/${cargo}.json`);
+/**
+ * Um arquivo por pleito, não um por cargo — ver 22_publicar_web.py.
+ *
+ * A tela mostra um ano de cada vez, e o arquivo trazia os sete. Em São Paulo,
+ * o pior caso do país, a aba do estadual baixava 2,7 MB para desenhar um ano;
+ * agora são 481 KB. Não é compressão: o gzip do servidor já corta 79% e
+ * espremer mais renderia 4%. É deixar de mandar seis anos que ninguém pediu.
+ */
+export const carregarCargoAno = (
+  uf: Sigla, cargo: Cargo, ano: number,
+): Promise<BlocoAno> =>
+  comCache<BlocoAno>(`${uf}:${cargo}:${ano}`,
+                     `${BASE}/${uf}/${cargo}/${ano}.json`);
+
+export const carregarRivaisAno = (
+  uf: Sigla, cargo: CargoComRival, ano: number,
+): Promise<BlocoRivais> =>
+  comCache<BlocoRivais>(`rivais:${uf}:${cargo}:${ano}`,
+                        `${BASE}/${uf}/rivais_${cargo}/${ano}.json`);
+
+/**
+ * Os anos que ESTE cargo tem NESTA UF.
+ *
+ * Vive ao lado dos arquivos e não no índice porque uma UF pode não ter disputado
+ * um cargo num pleito — sem esta lista, descobrir isso custaria um 404 por ano,
+ * e 404 é indistinguível de rede caída.
+ */
+export const carregarAnosCargo = (uf: Sigla, cargo: string): Promise<number[]> =>
+  comCache<number[]>(`anos:${uf}:${cargo}`, `${BASE}/${uf}/${cargo}/anos.json`);
+
+/**
+ * Puxa os demais pleitos em segundo plano, um de cada vez.
+ *
+ * Sequencial de propósito: o ponto é a tela aberta ficar pronta primeiro. Sete
+ * requisições paralelas competiriam com o que o usuário está esperando ver, que
+ * é exatamente o problema que a divisão por ano veio resolver.
+ *
+ * `comCache` guarda a promessa, então o que for pré-buscado aqui é entregue na
+ * hora quando o usuário troca de ano, e um clique durante a pré-busca não
+ * dispara segunda requisição.
+ */
+export async function prebuscar(
+  uf: Sigla, cargo: Cargo, anos: number[], jaTem: number,
+  rival: boolean, vivo: () => boolean,
+  aoChegar: (ano: number, bloco: BlocoAno, riv: BlocoRivais | null) => void,
+): Promise<void> {
+  for (const ano of anos) {
+    if (ano === jaTem) continue;
+    if (!vivo()) return;
+    try {
+      const bloco = await carregarCargoAno(uf, cargo, ano);
+      let riv: BlocoRivais | null = null;
+      if (rival) {
+        riv = await carregarRivaisAno(uf, cargo as CargoComRival, ano)
+                .catch(() => null);
+      }
+      if (vivo()) aoChegar(ano, bloco, riv);
+    } catch {
+      // um pleito que falha não derruba os outros nem a tela: quem trocar para
+      // ele pega o erro no caminho normal, com aviso
+    }
+  }
+}
 
 export const carregarPadroes = (uf: Sigla): Promise<Padroes> =>
   comCache<Padroes>(`padroes:${uf}`, `${BASE}/${uf}/padroes.json`);
 
 export const carregarCruzamentos = (uf: Sigla): Promise<Cruzamentos> =>
   comCache<Cruzamentos>(`cruz:${uf}`, `${BASE}/${uf}/cruzamentos.json`);
-
-export const carregarRivais = (uf: Sigla, cargo: CargoComRival): Promise<Rivais> =>
-  comCache<Rivais>(`rivais:${uf}:${cargo}`, `${BASE}/${uf}/rivais_${cargo}.json`);
 
 export const carregarVereador = (uf: Sigla): Promise<Vereador> =>
   comCache<Vereador>(`ver:${uf}`, `${BASE}/${uf}/vereador.json`);

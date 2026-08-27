@@ -100,18 +100,27 @@ def montar_dados():
     for u in indice["ufs"]:
         uf = u["s"]
         base = json.loads((DADOS / uf / "base.json").read_text(encoding="utf-8"))
-        est = DADOS / uf / "estadual.json"
+        # Um arquivo por pleito desde a divisao do 22_. Antes era um monolito
+        # `estadual.json`; se este codigo continuasse procurando por ele, o
+        # `exists()` daria falso e o artefato sairia SEM VOTO NENHUM, calado.
+        # Por isso a ausencia aqui e' erro, nao dicionario vazio.
+        pasta = DADOS / uf / "estadual"
         anos = {}
-        if est.exists():
-            d = json.loads(est.read_text(encoding="utf-8"))
-            for ano, b in d.items():
-                anos[ano] = {
-                    "totalMun": b["totalMun"],
-                    "pleito": b["pleito"],
-                    "partidos": b.get("partidos", [])[:12],
-                    "fichas": [{k: f[k] for k in FICHA if k in f}
-                               for f in b["fichas"]],
-                }
+        for f in sorted(pasta.glob("*.json")) if pasta.is_dir() else []:
+            if not f.stem.isdigit():
+                continue                      # anos.json, o manifesto
+            b = json.loads(f.read_text(encoding="utf-8"))
+            anos[f.stem] = {
+                "totalMun": b["totalMun"],
+                "pleito": b["pleito"],
+                "partidos": b.get("partidos", [])[:12],
+                "fichas": [{k: f2[k] for k in FICHA if k in f2}
+                           for f2 in b["fichas"]],
+            }
+        # UF sem pleito nao e' erro: o DF elege deputado DISTRITAL, nao
+        # estadual, e nunca teve `estadual`. O que seria erro e' TODAS ficarem
+        # vazias — sinal de que a divisao por ano quebrou — e isso e' conferido
+        # depois do laco, com o total.
         def ler(nome):
             f = DADOS / uf / nome
             return json.loads(f.read_text(encoding="utf-8")) if f.exists() else None
@@ -126,6 +135,16 @@ def montar_dados():
                        "ad": ler("alego_admin.json"),
                        "ca": ler("cldf_admin.json"),
                        "av": ler("almg_verbas.json")}
+    # Gate: se a leitura por ano quebrar, todas as UFs saem vazias e o artefato
+    # fica com aparencia de pronto. Vinte e seis elegem deputado estadual — o DF
+    # elege distrital e fica de fora por desenho.
+    com_voto = sum(1 for e in estados.values() if e["a"])
+    if com_voto < 20:
+        raise SystemExit(
+            f"só {com_voto} UFs com pleito em {DADOS}. Esperado 26. "
+            "Rode 22_publicar_web.py — sem isto o artefato sai sem voto.")
+    print(f"  {com_voto} UFs com pleito estadual", flush=True)
+
     return {
         "anos": indice["anos"],
         "ufs": indice["ufs"],

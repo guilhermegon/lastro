@@ -5,8 +5,9 @@ import type {
 } from "./tipos";
 import { CARGOS } from "./tipos";
 import {
-  carregarBase, carregarCargo, carregarCruzamentos, carregarIndice, carregarPadroes,
-  carregarRivais, carregarVereador,
+  carregarAnosCargo, carregarBase, carregarCargoAno, carregarCruzamentos,
+  carregarIndice, carregarPadroes, carregarRivaisAno, carregarVereador,
+  prebuscar,
 } from "./lib/dados";
 import { numero } from "./lib/formato";
 import { noEstado } from "./lib/uf";
@@ -71,10 +72,13 @@ export default function App() {
     carregarIndice().then(setIndice).catch((e) => setErro(String(e)));
   }, []);
 
+  // Os mapas por ano acumulam, então precisam zerar quando muda o que eles
+  // indexam. Sem isto o pleito de 2022 de São Paulo apareceria sob Minas.
   useEffect(() => {
+    setCargo(null);
     setRivais(null);
     setVer(null);
-  }, [sel.uf]);
+  }, [sel.uf, sel.vista]);
 
   useEffect(() => {
     let vivo = true;
@@ -84,36 +88,65 @@ export default function App() {
     return () => { vivo = false; };
   }, [sel.uf]);
 
-  // Carrega só o recurso da aba aberta. É o motivo de os dados serem fatiados
-  // por UF e por cargo: em São Paulo, o estadual sozinho são 2,7 MB.
+  // Carrega só o recurso da aba aberta E só o pleito aberto. É o motivo de os
+  // dados serem fatiados por UF, por cargo e por ano: em São Paulo o estadual
+  // inteiro são 2,7 MB, e um pleito são 481 KB.
+  //
+  // Os demais pleitos vêm depois, em segundo plano, para que a troca de ano
+  // continue instantânea — ver `prebuscar` em lib/dados.
   useEffect(() => {
     let vivo = true;
     const v = sel.vista;
+    const ano = sel.ano;
     setCarregando(true);
     if (v === "nacional") {           // já está tudo no índice
       setCarregando(false);
       return () => { vivo = false; };
     }
-    const pedido =
-      v === "padroes" ? carregarPadroes(sel.uf).then((d) => vivo && setPadroes(d))
-      : v === "cruzamentos" ? carregarCruzamentos(sel.uf).then((d) => vivo && setCruz(d))
-      : v === "vereador" ? carregarVereador(sel.uf).then((d) => vivo && setVer(d))
-      : carregarCargo(sel.uf, v).then((d) => vivo && setCargo(d));
-
-    // Rivais vem em arquivo à parte e só nos proporcionais: quem abre a aba de
-    // presidente não deve pagar por ele. A falha aqui não derruba a tela — o
-    // painel simplesmente não aparece.
-    if (v === "estadual" || v === "federal") {
-      carregarRivais(sel.uf, v)
-        .then((d) => { if (vivo) setRivais(d); })
-        .catch(() => { if (vivo) setRivais(null); });
+    if (v === "padroes" || v === "cruzamentos" || v === "vereador") {
+      const p = v === "padroes"
+        ? carregarPadroes(sel.uf).then((d) => { if (vivo) setPadroes(d); })
+        : v === "cruzamentos"
+        ? carregarCruzamentos(sel.uf).then((d) => { if (vivo) setCruz(d); })
+        : carregarVereador(sel.uf).then((d) => { if (vivo) setVer(d); });
+      p.then(() => { if (vivo) setErro(null); })
+       .catch((e) => { if (vivo) setErro(String(e)); })
+       .finally(() => { if (vivo) setCarregando(false); });
+      return () => { vivo = false; };
     }
-    pedido
-      .then(() => { if (vivo) setErro(null); })
+
+    const proporcional = v === "estadual" || v === "federal";
+
+    // Rivais só nos proporcionais: quem abre a aba de presidente não deve pagar
+    // por ele. A falha aqui não derruba a tela — o painel não aparece.
+    if (proporcional) {
+      carregarRivaisAno(sel.uf, v, ano)
+        .then((d) => { if (vivo) setRivais((r) => ({ ...(r ?? {}), [ano]: d })); })
+        .catch(() => { /* sem rivais neste pleito */ });
+    }
+
+    carregarCargoAno(sel.uf, v, ano)
+      .then((d) => {
+        if (!vivo) return;
+        setCargo((c) => ({ ...(c ?? {}), [String(ano)]: d }));
+        setErro(null);
+      })
       .catch((e) => { if (vivo) setErro(String(e)); })
-      .finally(() => { if (vivo) setCarregando(false); });
+      .finally(() => {
+        if (!vivo) return;
+        setCarregando(false);
+        // Só agora: a pré-busca não pode competir com o que a tela espera.
+        carregarAnosCargo(sel.uf, v)
+          .then((anos) => prebuscar(
+            sel.uf, v, anos, ano, proporcional, () => vivo,
+            (a, bloco, riv) => {
+              setCargo((c) => ({ ...(c ?? {}), [String(a)]: bloco }));
+              if (riv) setRivais((r) => ({ ...(r ?? {}), [a]: riv }));
+            }))
+          .catch(() => { /* sem pré-busca; a troca de ano busca na hora */ });
+      });
     return () => { vivo = false; };
-  }, [sel.uf, sel.vista]);
+  }, [sel.uf, sel.vista, sel.ano]);
 
   useEffect(() => gravarURL(sel), [sel]);
 
@@ -221,7 +254,7 @@ export default function App() {
         )}
 
         {sel.vista !== "padroes" && sel.vista !== "cruzamentos"
-          && sel.vista !== "vereador" && base && cargo && (
+          && sel.vista !== "vereador" && base && cargo?.[String(sel.ano)] && (
           <VistaCargo
             cargo={sel.vista as Cargo}
             base={base}
