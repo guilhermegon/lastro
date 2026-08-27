@@ -5,7 +5,10 @@ data/raw/
 data/interim/
 data/processed/
 
-# Exceção: estes três são feitos à mão e não saem de lugar nenhum.
+# Exceção 1: `app/public/dados` É versionado — ver app/.gitignore. É o que a
+# Cloudflare precisa encontrar no clone para o site sair com dado.
+
+# Exceção 2: estes três são feitos à mão e não saem de lugar nenhum.
 !data/overrides/
 !data/overrides/*.csv
 
@@ -18,7 +21,6 @@ dist/dados_br.json
 
 app/node_modules/
 app/dist/
-app/public/dados/
 app/tsconfig.tsbuildinfo
 app/.wrangler/
 

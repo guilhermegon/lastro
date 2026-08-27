@@ -1,4 +1,18 @@
 node_modules/
 dist/
-# gerados por scripts/18_dados_web.py — reproduzíveis, não versionar
-public/dados/
+
+# `public/dados` É versionado, ao contrário do resto do dado gerado.
+#
+# A Cloudflare constrói a partir do que está no repositório: ela clona, roda
+# `npm run build` e publica `dist/`. Com esta pasta ignorada, o build saía com a
+# casca do app e nenhum dado — foi o que ficou no ar, respondendo 404 em
+# `indice.json`. Deploy por commit não funciona sem isto.
+#
+# Custo medido: 82,6 MB em disco, 18,2 MB como objeto git. E o custo é uma vez
+# só — git guarda por conteúdo, então reescrever arquivo idêntico não cria
+# objeto novo. Entre gerações só entra o que de fato mudou, e o voto só muda a
+# cada eleição.
+#
+# A linha divisória é esta: o que o site SERVE é versionado; o que o pipeline usa
+# para chegar lá não é. `data/interim` sozinho tem 5,3 GB e continua fora, com
+# `data/raw` e `data/processed` — ver .gitignore da raiz.
