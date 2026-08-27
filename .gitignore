@@ -20,6 +20,7 @@ app/node_modules/
 app/dist/
 app/public/dados/
 app/tsconfig.tsbuildinfo
+app/.wrangler/
 
 # ---- dumps de apuração: reproduzíveis por scripts/07 e 11 ----
 docs/_*.txt
