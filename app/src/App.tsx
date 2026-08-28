@@ -184,6 +184,8 @@ export default function App() {
   const nMun = resumo?.nm ?? base?.municipios.length ?? 0;
   const agregado = indice.agregado.find((a) => a.uf === sel.uf && a.ano === sel.ano);
   const anosComDado = indice.anos;
+  // vereador tem seus próprios anos; padrões mostra a série toda de uma vez
+  const usaAno = sel.vista !== "vereador" && sel.vista !== "padroes";
   const nacional = sel.vista === "nacional";
   const titulo = resumo && !nacional
     ? `Cadê o Voto ${noEstado(resumo.s, resumo.n)}?` : "Cadê o Voto?";
@@ -200,19 +202,33 @@ export default function App() {
                 {nacional
                   ? "Distribuição espacial do voto para deputado estadual em cada"
                     + " unidade da federação, de 1998 a 2022, município a município."
+                  : sel.vista === "vereador"
+                  ? "Vereadores da capital, por zona eleitoral, de 2000 a 2024."
                   : <>Onde cada candidato tirou voto
                       {nMun > 2 && <>, município a município</>}, em todos os
                       cargos, de 1998 a 2022.</>}
               </p>
             </div>
-            <div className="seg" role="group" aria-label="Pleito">
-              {anosComDado.map((a) => (
-                <button key={a} aria-pressed={a === sel.ano}
-                        onClick={() => setSel((s) => ({ ...s, ano: a, cand: 0 }))}>
-                  {a}
-                </button>
-              ))}
-            </div>
+            {/* Só onde este ano governa a tela.
+
+                Em "vereador" ele não governa: a eleição municipal cai em
+                2000, 2004, … 2024, sem um único ano em comum com os pleitos
+                gerais, e a vista tem seletor próprio. Os dois juntos mostravam
+                duas faixas de ano discordando na mesma tela, e a de cima —
+                inerte — parava em 2022, o que se lia como "falta 2024".
+
+                Em "padroes" também não: aquela tela mostra a série inteira de
+                uma vez, então escolher um ano não muda nada. */}
+            {usaAno && (
+              <div className="seg" role="group" aria-label="Pleito">
+                {anosComDado.map((a) => (
+                  <button key={a} aria-pressed={a === sel.ano}
+                          onClick={() => setSel((s) => ({ ...s, ano: a, cand: 0 }))}>
+                    {a}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <SeletorEstado ufs={indice.ufs} atual={sel.uf} aberto={gaveta}
