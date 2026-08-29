@@ -574,7 +574,13 @@ de base em y=52, só retângulos arredondados, hierarquia por opacidade, `--acce
 O Radar ganhou o único elemento novo do sistema — a quarta barra é **contorno**,
 não preenchimento, e vem adiante das outras: é projeção, não observação.
 
-## Próximos, quando o usuário decidir
+## AGUARDANDO — espera decisão do usuário ou evento externo
+
+O BEDEL lê o **título da seção** para saber que não há próximo item seguro
+aqui: a palavra AGUARDANDO precisa estar no cabeçalho, não só ao lado de cada
+item. Sem ela, o hook cobra estes três como se fossem executáveis — e nenhum
+é: os dois primeiros dependem de ação nas contas do usuário, e o terceiro do
+TSE publicar.
 
 - [ ] **AGUARDANDO** — separar `guilhermegon/lastro` da rede de fork antes de
   apagar o antigo (RAS 00 TKT 0007). Espera ação do usuário no GitHub.
