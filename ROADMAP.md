@@ -496,3 +496,88 @@ requisições simultâneas e um segundo entre elas, sob pena de bloqueio sem
 aviso. São dois workers com pausa de um segundo. A varredura leva o tempo que
 levar.
 
+## Marco 13 — o site sai do artefato, e nasce o terceiro produto
+
+- [x] Repositório novo (`guilhermegon/lastro`) com o dado versionado
+- [x] **Um arquivo por pleito**: 69% a menos na primeira tela
+- [x] Três abas portadas do artefato para o app: Emendômetro, API, Sobre
+- [x] Marcas de produto: Cadê o Voto?, Emendômetro, Radar
+- [x] **Radar** (`radar/`), o produto fechado, com a aba Projeção
+- [x] `47_publica_radar.py` e o gate que impede o dado do Radar de vazar
+
+### O que fazia o site não funcionar, e não era o que eu achava
+
+O site estava no ar como **casca vazia**: o HTML carregava e todo dado dava 404,
+porque `app/public/dados` estava no `.gitignore` e a Cloudflare constrói a partir
+do clone. Deploy por commit não podia funcionar assim.
+
+E o argumento com que eu tinha defendido não versionar o dado estava errado.
+Disse que o histórico cresceria ~17 MB por regeração. Não cresce: **git guarda
+por conteúdo**, então reescrever arquivo idêntico não cria objeto novo. Custo
+medido: 82,6 MB em disco, **18,2 MB como objeto**, uma vez.
+
+A linha divisória passou a ser: **o que o site serve é versionado; o que o
+pipeline usa para chegar lá não é.**
+
+### A redução que valia, e a que não valia
+
+Medi as duas. Espremer bytes — delta-encoding, desduplicação, arredondamento —
+rendia **4%**, porque o gzip do servidor já corta 79%. O que valia era outra
+coisa: a tela mostra um pleito e o arquivo trazia os sete.
+
+Partido por ano, São Paulo (pior caso do país) caiu de **4.815 KB para 1.401 KB**
+na primeira tela — 343 KB pela rede, com brotli. Os outros seis pleitos entram em
+pré-busca a partir dos 144 ms, depois do caminho crítico; trocar de ano faz zero
+requisições.
+
+Verificação: 1.299 blocos comparados contra a origem, **zero divergentes**, e o
+teste-ouro reproduz pelo caminho novo (Itumbiara 6.559, 27,57%).
+
+**E a mudança criou um defeito que quase passou:** `28_build_landing.py` lia o
+monolito `estadual.json`, que deixou de existir. O `exists()` daria falso, `anos`
+viria vazio e o artefato sairia **sem voto nenhum, com aparência de pronto**.
+Agora lê a divisão, e o gate é no total de UFs — porque uma UF vazia é legítima
+(o DF elege distrital) e todas vazias é regressão.
+
+### O 2024 que faltava era um seletor a mais
+
+Na aba de vereador havia duas faixas de ano. A global parava em 2022 e não
+governava nada ali; a da própria vista ia até 2024. Quem olhasse a de cima lia
+"falta 2024" — e a leitura estava certa sobre a tela. A global saiu de onde não
+manda: vereador (tem a própria) e padrões (mostra a série inteira).
+
+### Radar, e por que ele é uma aplicação à parte
+
+Lastro é a casa — no sentido de **respaldo**, como o ouro que lastreia moeda.
+Cadê o Voto? e Emendômetro são a vitrine. Radar recebe o que eles produzem e lê
+para a frente; Padrões e Cruzamentos saíram do site aberto e viraram o conteúdo
+dele.
+
+**A separação é de arquivo, não de tela.** Antes da mudança,
+`/dados/GO/padroes.json` respondia 200 no site — tirar a aba esconderia o botão e
+não o arquivo. Hoje o build público devolve 404 para os dois, verificado, e o
+`47_` aborta se algum deles reaparecer lá.
+
+**Isso ainda não é controle de acesso** (RAS 00 TKT 0008): é separação de build.
+Publicar para cliente exige Cloudflare Access ou Worker com token.
+
+A aba **Projeção** nunca entrega o número sozinho: sai sempre com R², desvio
+típico e número de pontos, e abaixo de 50% de ajuste a tela escreve que a série
+não tem tendência que se sustente. Goiás provou o valor disso na estreia — o
+ajuste da estabilidade de base é de **3%**, e o painel diz que o projetado vale
+como referência, não como previsão.
+
+### Marcas
+
+As três compartilham a mesma construção e só ela: régua vertical em x=12, linha
+de base em y=52, só retângulos arredondados, hierarquia por opacidade, `--accent`.
+O Radar ganhou o único elemento novo do sistema — a quarta barra é **contorno**,
+não preenchimento, e vem adiante das outras: é projeção, não observação.
+
+## Próximos, quando o usuário decidir
+
+- [ ] **AGUARDANDO** — separar `guilhermegon/lastro` da rede de fork antes de
+  apagar o antigo (RAS 00 TKT 0007). Espera ação do usuário no GitHub.
+- [ ] **AGUARDANDO** — autenticação do Radar antes de publicá-lo
+  (RAS 00 TKT 0008). Espera a conta Cloudflare do usuário.
+- [ ] **AGUARDANDO** — pleito de 2026 (TKT-003). Espera o TSE publicar.

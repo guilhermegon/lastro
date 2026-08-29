@@ -234,3 +234,125 @@ transforma a pergunta "dá para fazer?" em "quanto custa cada estado?".
 
 Não aplico a pré-autorização aqui: não é destravar progresso de algo em curso, é
 abrir uma frente nova de escopo aberto, e isso é decisão de dono.
+
+---
+
+### RAS 00 TKT 0007 — O fork privado impede apagar o repositório antigo
+
+| Campo | Valor |
+|---|---|
+| `type` | `HUMAN_ACTION` |
+| `criticality` | alta — a ação pedida destruiria o repositório novo |
+| `work_continues` | sim — o projeto já vive em `guilhermegon/lastro` |
+| `status` | **ABERTO** — depende de ação do usuário no GitHub |
+
+**summary.** O usuário pediu para apagar `GTzon/lastro` depois de confirmar o
+convite. Ao verificar, `guilhermegon/lastro` é **fork** de `GTzon/lastro`, e os
+dois são privados. A documentação do GitHub é literal: *"Deleting a private
+repository will delete all forks of the repository."* Apagar o antigo destruiria
+o novo. Por isso a exclusão não foi executada.
+
+**decision_needed.** Como separar os dois antes de apagar o antigo.
+
+**options.** (1) Criar repositório independente sob `guilhermegon` — não fork —,
+empurrar os commits e só então apagar `GTzon/lastro`. (2) Pedir ao Suporte do
+GitHub para retirar o fork da rede. (3) Tornar `GTzon/lastro` público por um
+instante, o que faz o fork sobreviver à exclusão.
+
+**leader_recommendation.** **Opção 1.** É a única que não depende de terceiro nem
+de prazo, e a única que eu consigo executar quase inteira: falta apenas o
+usuário criar o repositório vazio e me dar push. A opção 2 leva dias e depende
+do Suporte. A opção 3 expõe, ainda que por instantes, dado eleitoral que hoje
+está em repositório privado — trocar a política de visibilidade para contornar
+uma regra de exclusão é o tipo de atalho que este projeto recusa em toda outra
+camada.
+
+**Não aplicável sob a pré-autorização**: a criação do repositório e a exclusão do
+antigo são ações na conta do usuário. O ticket fica aberto com o caminho
+decidido; a parte técnica está pronta para rodar assim que houver o destino.
+
+---
+
+### RAS 00 TKT 0008 — O Radar não tem controle de acesso
+
+| Campo | Valor |
+|---|---|
+| `type` | `HUMAN_ACTION` |
+| `criticality` | alta — é o que separa produto fechado de produto aberto |
+| `work_continues` | sim — o Radar roda local e não é publicado |
+| `status` | **ABERTO** — depende da conta Cloudflare do usuário |
+
+**summary.** O Radar é o produto fechado, e hoje o que o fecha é separação de
+**build**, não de acesso: `scripts/22_` tira `padroes.json` e `cruzamentos.json`
+do build público e `scripts/47_` os publica em `radar/public/dados`, fora do que
+a Cloudflare constrói. O site aberto devolve 404 para os dois — verificado. Mas
+se o Radar for publicado como está, o dado dele volta a responder 200 para
+qualquer um: num site estático não existe premium.
+
+**decision_needed.** Que camada de autenticação usar antes de publicar o Radar.
+
+**options.** (1) Cloudflare Access na frente de um Worker separado. (2) Worker
+próprio que valide token antes de servir o JSON. (3) Não publicar: Radar segue
+rodando local para uso interno.
+
+**leader_recommendation.** **Opção 1 quando houver cliente; opção 3 até lá.** O
+Access resolve autenticação sem escrever código de sessão, e o projeto já está
+na Cloudflare — é a menor distância entre onde estamos e um produto entregável.
+Enquanto não há cliente, publicar não traz benefício e traz risco: um produto
+fechado que responde 200 é pior que um produto não publicado.
+
+**Aplicado o que cabe ao líder**: o Radar não entra no deploy, e `47_` tem gate
+que aborta se algum arquivo do Radar reaparecer no build público. A configuração
+do Access é ação do usuário.
+
+---
+
+### RAS 00 TKT 0009 — Dois caminhos de publicação, e só um em uso
+
+| Campo | Valor |
+|---|---|
+| `type` | `APPROVAL_NOW` |
+| `criticality` | baixa — dívida de manutenção, não defeito |
+| `work_continues` | sim |
+| `status` | **DECIDIDO** — pré-autorizado pelo líder, 2026-08-29 |
+
+**summary.** Escrevi `scripts/46_publica_site.py`, que publica o site numa branch
+órfã `gh-pages`, antes de descobrir que `guilhermegon` já havia configurado o
+deploy por Cloudflare Workers. O script ficou no repositório antigo e nunca foi
+portado para o novo.
+
+**decision_needed.** Portar o `46_` para o repositório novo, ou descartá-lo.
+
+**leader_recommendation.** **Descartar.** O deploy por commit na Cloudflare está
+funcionando e verificado. Um segundo caminho de publicação não usado é dívida
+que envelhece calada: quando alguém precisar dele, estará desatualizado em
+relação ao build que de fato roda — e o pior momento para descobrir isso é numa
+publicação de emergência. Se um dia o GitHub Pages for necessário, o script está
+preservado no histórico de `GTzon/lastro`.
+
+**Aplicado sob a pré-autorização de progresso.** O `46_` não é portado.
+
+---
+
+### RAS 00 TKT 0010 — A cópia antiga do projeto em `Documents\RASTRO`
+
+| Campo | Valor |
+|---|---|
+| `type` | `TRACKING_NO_APPROVAL` |
+| `criticality` | baixa |
+| `work_continues` | sim |
+| `status` | **ABERTO** — nada a decidir agora, registrado para não se perder |
+
+**summary.** O projeto passou a viver em `Documents\LASTRO\lastro`, ligado ao
+repositório novo. A pasta antiga `Documents\RASTRO` segue existindo com a árvore
+de trabalho completa, `data/processed` (143 MB), `data/interim` e o remoto
+apontando para `GTzon/lastro`.
+
+**Por que fica aberto e não é resolvido agora.** Apagar não é reversível, e a
+pasta antiga é hoje a única cópia local de `data/interim` — que não é versionado
+por ser grande demais e que o pipeline levaria horas para reconstruir a partir do
+TSE. Enquanto o repositório novo não estiver provado em uso, ela é o seguro.
+
+**leader_recommendation.** *Nenhuma ainda.* A decisão depende de um fato que
+ainda não existe: o repositório novo ter rodado o pipeline inteiro pelo menos uma
+vez. Antes disso, qualquer recomendação seria palpite sobre o próprio seguro.
