@@ -12,6 +12,9 @@
  *   3. hierarquia por opacidade (.42 / .66 / 1), nunca por segunda cor;
  *   4. `fill: var(--accent)`, então as três acompanham o tema sozinhas.
  *
+ * Os produtos não assinam "um produto Lastro": a moldura já diz isso, e repetir
+ * em texto o que o desenho afirma enfraquece os dois.
+ *
  * O que muda é o que vive dentro da moldura, e cada um diz o que o produto faz:
  * a Lastro empilha barras crescentes (a base que sustenta); "Cadê o Voto?"
  * espalha células por um território com uma acesa (onde o voto está); o
@@ -23,7 +26,7 @@
  *  As células são o município, que é a unidade de tudo neste produto. Uma está
  *  cheia e as outras em meio-tom: a pergunta do nome é "onde", e a resposta é
  *  um lugar entre muitos — não um total. */
-export function LogoCadeOVoto({ subtitulo = true }: { subtitulo?: boolean }) {
+export function LogoCadeOVoto() {
   const cel = [
     [21, 12, 0.28], [31, 12, 0.42], [41, 12, 0.28],
     [21, 22, 0.42], [31, 22, 1.00], [41, 22, 0.55],
@@ -44,12 +47,9 @@ export function LogoCadeOVoto({ subtitulo = true }: { subtitulo?: boolean }) {
           {/* o traço que aponta a célula acesa até a base — "chegou aqui" */}
           <rect x="33" y="32" width="4" height="14" rx="1.5" opacity=".66" />
         </g>
-        <text className="lastro-nome produto-nome" x="72" y={subtitulo ? 34 : 42}>
+        <text className="lastro-nome produto-nome" x="72" y="42">
           Cadê o Voto?
         </text>
-        {subtitulo && (
-          <text className="lastro-sub" x="73.5" y="50">UM PRODUTO LASTRO</text>
-        )}
       </svg>
     </span>
   );
@@ -60,7 +60,7 @@ export function LogoCadeOVoto({ subtitulo = true }: { subtitulo?: boolean }) {
  *  O nome promete um medidor, então o desenho é um. Os segmentos crescem da
  *  esquerda para a direita e o marcador cai num deles: emenda se lê como
  *  quantidade que chegou a algum ponto de uma escala, não como total solto. */
-export function LogoEmendometro({ subtitulo = true }: { subtitulo?: boolean }) {
+export function LogoEmendometro() {
   const seg = [
     [21, 0.30], [30, 0.44], [39, 0.58], [48, 0.78],
   ] as const;
@@ -80,12 +80,9 @@ export function LogoEmendometro({ subtitulo = true }: { subtitulo?: boolean }) {
           <rect x="28" y="14" width="10" height="4" rx="1.5" />
           <rect x="31.5" y="14" width="3" height="20" rx="1.5" />
         </g>
-        <text className="lastro-nome produto-nome" x="72" y={subtitulo ? 34 : 42}>
+        <text className="lastro-nome produto-nome" x="72" y="42">
           Emendômetro
         </text>
-        {subtitulo && (
-          <text className="lastro-sub" x="73.5" y="50">UM PRODUTO LASTRO</text>
-        )}
       </svg>
     </span>
   );
