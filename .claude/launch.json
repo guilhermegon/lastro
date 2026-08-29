@@ -38,6 +38,18 @@
         "app/dist"
       ],
       "port": 8742
+    },
+    {
+      "name": "radar",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8755",
+        "--directory",
+        "radar/dist"
+      ],
+      "port": 8755
     }
   ]
 }

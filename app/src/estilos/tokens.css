@@ -63,6 +63,11 @@ h1, h2, h3 { font-family: Archivo, sans-serif; margin: 0; letter-spacing: -.015e
    que LASTRO: a casa é a marca forte, o produto vem depois dela. Sem isso os
    dois competiriam pelo mesmo peso e nenhum leria como dono do outro. */
 .produto-nome { font-size: 25px; letter-spacing: -.4px; }
+/* A barra de projeção do Radar é contorno, não preenchimento: é o que
+   separa o que foi medido do que foi projetado. `currentColor` a amarra
+   ao mesmo --accent do resto da marca. */
+.lastro-mark { color: var(--accent); }
+.radar-projecao { stroke: var(--accent); }
 .marca h1 { font-size: var(--step-3); font-weight: 700; line-height: 1.05; }
 .marca > p { margin: 6px 0 0; color: var(--ink-2); font-size: var(--step--1); max-width: 64ch; }
 

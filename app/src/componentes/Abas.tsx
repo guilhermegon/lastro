@@ -4,7 +4,8 @@ export type Vista = "nacional" | Cargo | "vereador" | "padroes"
   | "cruzamentos" | "emendas" | "api" | "sobre";
 
 /** Ordem decrescente de escopo — o país, depois presidente até vereador — e as duas
- *  abas de análise, que não são cargo. A barra rola na horizontal no celular:
+ *  abas de análise. Padrões e Cruzamentos saíram daqui: viraram o Radar, o
+ *  produto fechado. A barra rola na horizontal no celular:
  *  sem isso, as últimas abas ficam fora da tela e sem como chegar nelas. */
 export function Abas({ atual, aoTrocar, cargosDisponiveis, temVereador, cidade,
                       temEmendas }: {
@@ -23,8 +24,6 @@ export function Abas({ atual, aoTrocar, cargosDisponiveis, temVereador, cidade,
     { id: "vereador" as Vista,
       rotulo: cidade ? `Vereador · ${cidade}` : "Vereador",
       ativo: temVereador },
-    { id: "padroes", rotulo: "Padrões", ativo: true },
-    { id: "cruzamentos", rotulo: "Cruzamentos", ativo: true },
     { id: "emendas", rotulo: "Emendômetro", ativo: temEmendas },
     { id: "api", rotulo: "API", ativo: true },
     { id: "sobre", rotulo: "Sobre", ativo: true },

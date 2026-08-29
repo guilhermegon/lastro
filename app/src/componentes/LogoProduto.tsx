@@ -6,8 +6,9 @@
  * construção — e só ela:
  *
  *   1. uma régua vertical à esquerda e uma linha de base embaixo, sempre nas
- *      mesmas coordenadas (x=12 e y=52). É o "lastro" do nome: tudo se apoia
- *      nessa quina, e é o que o olho reconhece antes de ler qualquer palavra;
+ *      mesmas coordenadas (x=12 e y=52). É o lastro no sentido do nome — o
+ *      respaldo, como o ouro que lastreia uma moeda: nada flutua solto, tudo se
+ *      apoia nessa quina. É o que o olho reconhece antes de ler a palavra;
  *   2. só retângulos de canto arredondado, nada de arco ou curva;
  *   3. hierarquia por opacidade (.42 / .66 / 1), nunca por segunda cor;
  *   4. `fill: var(--accent)`, então as três acompanham o tema sozinhas.
@@ -83,6 +84,39 @@ export function LogoEmendometro() {
         <text className="lastro-nome produto-nome" x="72" y="42">
           Emendômetro
         </text>
+      </svg>
+    </span>
+  );
+}
+
+/** "Radar" — o que já aconteceu, e o que vem.
+ *
+ *  Três barras cheias são medida: aconteceu, está no arquivo, é reproduzível.
+ *  A quarta é só contorno, e adiante das outras — é projeção, não observação.
+ *
+ *  O contorno é o único elemento novo que este sistema ganhou, e ele existe
+ *  para carregar exatamente essa distinção. Se um dia o desenho preencher a
+ *  quarta barra, estará dizendo que projeção e apuração são a mesma coisa. Não
+ *  são, e a marca do produto que projeta é o pior lugar para embaralhá-las. */
+export function LogoRadar() {
+  const barra = [
+    [21, 38, 8, 0.34], [30, 32, 14, 0.52], [39, 24, 22, 0.78],
+  ] as const;
+  return (
+    <span className="lastro produto" role="img" aria-label="Radar">
+      <svg viewBox="0 0 260 68" aria-hidden="true" focusable="false">
+        <g className="lastro-mark">
+          <rect x="12" y="12" width="4" height="44" rx="1" />
+          <rect x="12" y="52" width="52" height="4" rx="1.5" />
+          {barra.map(([x, y, h, o]) => (
+            <rect key={x} x={x} y={y} width="6" height={h} rx="2" opacity={o} />
+          ))}
+          {/* a projeção: contorno, nunca preenchida */}
+          <rect x="48" y="16" width="6" height="30" rx="2"
+                fill="none" stroke="currentColor" strokeWidth="1.6"
+                className="radar-projecao" />
+        </g>
+        <text className="lastro-nome produto-nome" x="72" y="42">Radar</text>
       </svg>
     </span>
   );

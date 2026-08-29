@@ -1,0 +1,6 @@
+node_modules/
+dist/
+
+# `public/dados` É versionado, como em app/. A diferença é o destino: a
+# Cloudflare constrói `app/` e publica `app/dist`; nada daqui vai ao ar.
+# O repositório é privado, e é ele que guarda o dado do produto fechado.

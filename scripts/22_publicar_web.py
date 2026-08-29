@@ -38,10 +38,35 @@ DESTINO = cfg.ROOT / "app" / "public" / "dados"
 CARGOS = ["presidente", "governador", "senador", "federal", "estadual"]
 
 
+# O que alimenta o Radar, o produto fechado. NAO vai para o build publico.
+#
+# Tirar a aba do site nao torna o dado privado: num site estatico tudo que esta
+# em `dist/` responde 200 para qualquer um. Medido antes desta mudanca —
+# `/dados/GO/padroes.json` estava no ar. Entao a separacao e' feita aqui, no
+# arquivo, e nao na tela.
+#
+# Estes seguem para `data/processed/radar/`, fora de `app/public`, e o produto
+# fechado se serve de la' quando tiver por onde autenticar.
+RADAR = ["padroes", "cruzamentos"]
+
 # arquivos cuja chave de primeiro nivel e' o ano do pleito; o resto do dado
-# (base, padroes, cruzamentos, emendas) nao tem essa forma e fica inteiro
+# (base, emendas) nao tem essa forma e fica inteiro
 POR_ANO = ["presidente", "governador", "senador", "federal", "estadual",
            "rivais_estadual", "rivais_federal"]
+
+
+def separa_radar(uf):
+    """Move o dado do produto fechado para fora do que vai ao ar."""
+    destino = cfg.PROCESSED / "radar" / uf
+    destino.mkdir(parents=True, exist_ok=True)
+    movidos = 0
+    for nome in RADAR:
+        f = DESTINO / uf / f"{nome}.json"
+        if f.exists():
+            shutil.copy2(f, destino / f"{nome}.json")
+            f.unlink()
+            movidos += 1
+    return movidos
 
 
 def parte_por_ano(pasta):
@@ -97,6 +122,7 @@ def main():
     for uf in ufs_dir:
         shutil.copytree(ORIGEM / uf, DESTINO / uf)
         parte_por_ano(DESTINO / uf)
+        separa_radar(uf)
         base = json.loads((ORIGEM / uf / "base.json").read_text(encoding="utf-8"))
         n_mun = len(base["municipios"])
         est = ORIGEM / uf / "estadual.json"
