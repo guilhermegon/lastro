@@ -8,6 +8,7 @@ import { Mapa } from "../componentes/Mapa";
 import { Legenda } from "../componentes/Legenda";
 import { Indices } from "../componentes/Indices";
 import { Cartoes } from "../componentes/Cartoes";
+import { LogoEmendometro } from "../componentes/LogoProduto";
 import type { EstadoDica } from "../componentes/Dica";
 
 /** R$ com magnitude, porque emenda vai de mil a bilhão na mesma tabela e
@@ -120,6 +121,10 @@ export function VistaEmendas({
 
   return (
     <>
+      {/* A marca do produto abre a aba. A Lastro fica no topo da página, como
+          casa; aqui quem fala é o produto. */}
+      <LogoEmendometro />
+
       <div className="controles">
         {esferasDisponiveis.length > 1 && (
           <div className="seg" role="group" aria-label="Esfera">
