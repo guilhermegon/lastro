@@ -1,11 +1,24 @@
 import { useCallback, useEffect, useState } from "react";
 import type {
-  BaseUF, Cargo, Cruzamentos, DadosCargo, Demografia, Emendas, Esfera, Indice,
+  AlegoAdmin, AlegoVerbas, AlmgVerbas, Assembleias, BaseUF, Cargo, CldfAdmin,
+  CldfVerbas, Cruzamentos, DadosCargo, Demografia, Emendas, Esfera, Indice,
   Padroes, Rivais, Sigla, Vereador,
 } from "./tipos";
+
+/** O pacote da aba API, buscado de uma vez porque a aba é nacional. */
+interface ApiCasas {
+  assembleias: Assembleias | null;
+  alegoVerbas: AlegoVerbas | null;
+  alegoAdmin: AlegoAdmin | null;
+  cldfVerbas: CldfVerbas | null;
+  cldfAdmin: CldfAdmin | null;
+  almgVerbas: AlmgVerbas | null;
+}
 import { CARGOS } from "./tipos";
 import {
   carregarAnosCargo, carregarBase, carregarCargoAno, carregarCruzamentos,
+  carregarAlegoAdmin, carregarAlegoVerbas, carregarAlmgVerbas,
+  carregarAssembleias, carregarCldfAdmin, carregarCldfVerbas,
   carregarDemografia, carregarEmendas, carregarEmendasEstadual, carregarIndice,
   carregarPadroes, carregarRivaisAno, carregarVereador, prebuscar,
 } from "./lib/dados";
@@ -20,6 +33,7 @@ import { VistaPadroes } from "./vistas/VistaPadroes";
 import { VistaCruzamentos } from "./vistas/VistaCruzamentos";
 import { VistaEmendas } from "./vistas/VistaEmendas";
 import { VistaSobre } from "./vistas/VistaSobre";
+import { VistaApi } from "./vistas/VistaApi";
 import { VistaVereador } from "./vistas/VistaVereador";
 import { VistaNacional } from "./vistas/VistaNacional";
 
@@ -35,7 +49,7 @@ interface Selecao { uf: Sigla; ano: number; vista: Vista; cand: number }
 
 function ehVista(v: string): v is Vista {
   return v === "nacional" || v === "padroes" || v === "cruzamentos"
-    || v === "vereador" || v === "emendas" || v === "sobre"
+    || v === "vereador" || v === "emendas" || v === "sobre" || v === "api"
     || (CARGOS as string[]).includes(v);
 }
 
@@ -72,6 +86,8 @@ export default function App() {
   const [emEst, setEmEst] = useState<Emendas | null | false>(null);
   const [esfera, setEsfera] = useState<Esfera>("federal");
   const [demo, setDemo] = useState<Demografia | null>(null);
+  // A aba API é nacional: carregada uma vez, não por UF.
+  const [api, setApi] = useState<ApiCasas | null>(null);
   const [sel, setSel] = useState<Selecao>(lerURL);
   const [gaveta, setGaveta] = useState(false);
   const [dica, setDica] = useState<EstadoDica | null>(null);
@@ -118,6 +134,25 @@ export default function App() {
     setCarregando(true);
     if (v === "nacional") {           // já está tudo no índice
       setCarregando(false);
+      return () => { vivo = false; };
+    }
+    if (v === "api") {
+      if (api) { setCarregando(false); return () => { vivo = false; }; }
+      // Cada arquivo falha por si: uma casa fora do ar não apaga as outras.
+      const nulo = () => null;
+      Promise.all([
+        carregarAssembleias().catch(nulo),
+        carregarAlegoVerbas().catch(nulo),
+        carregarAlegoAdmin().catch(nulo),
+        carregarCldfVerbas().catch(nulo),
+        carregarCldfAdmin().catch(nulo),
+        carregarAlmgVerbas().catch(nulo),
+      ]).then(([as, av, aa, cv, ca, mv]) => {
+        if (!vivo) return;
+        setApi({ assembleias: as, alegoVerbas: av, alegoAdmin: aa,
+                 cldfVerbas: cv, cldfAdmin: ca, almgVerbas: mv });
+        setErro(null);
+      }).finally(() => { if (vivo) setCarregando(false); });
       return () => { vivo = false; };
     }
     if (v === "sobre") {          // texto e método; nada a buscar
@@ -226,7 +261,8 @@ export default function App() {
   // O Emendômetro tem seus próprios anos (2015 em diante, todo ano — não só
   // ano de eleição), então também não usa a faixa de pleito.
   const usaAno = sel.vista !== "vereador" && sel.vista !== "padroes"
-    && sel.vista !== "emendas" && sel.vista !== "sobre";
+    && sel.vista !== "emendas" && sel.vista !== "sobre"
+    && sel.vista !== "api";
   // A esfera escolhida, se ela existir aqui; senão a que existir.
   const emAtual: Emendas | null =
     (esfera === "estadual" ? (emEst || null) : emFed) ?? emFed ?? null;
@@ -326,6 +362,8 @@ export default function App() {
             aoInspecionar={setDica}
           />
         )}
+
+        {sel.vista === "api" && api && <VistaApi {...api} />}
 
         {sel.vista === "sobre" && (
           <VistaSobre

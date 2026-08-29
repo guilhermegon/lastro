@@ -1,5 +1,6 @@
 import type {
   BaseUF, BlocoAno, BlocoRivais, Cargo, CargoComRival, Cruzamentos, Demografia,
+  AlegoAdmin, AlegoVerbas, AlmgVerbas, Assembleias, CldfAdmin, CldfVerbas,
   Emendas, EmendasBR, Indice, Padroes, Sigla, Vereador,
 } from "../tipos";
 
@@ -128,3 +129,26 @@ export const carregarEmendasBR = (): Promise<EmendasBR> =>
 /** População e área, para as leituras por habitante e por km². */
 export const carregarDemografia = (uf: Sigla): Promise<Demografia> =>
   comCache<Demografia>(`demo:${uf}`, `${BASE}/${uf}/demografia.json`);
+
+/* ---------- aba API ----------
+   Seis arquivos de três casas. A aba é nacional: não muda com o estado
+   escolhido, porque o achado é a comparação entre as casas cujo dado dá para
+   consumir — e são estas três. */
+
+export const carregarAssembleias = (): Promise<Assembleias> =>
+  comCache<Assembleias>("assembleias", `${BASE}/assembleias.json`);
+
+export const carregarAlegoVerbas = (): Promise<AlegoVerbas> =>
+  comCache<AlegoVerbas>("alegoV", `${BASE}/GO/alego_verbas.json`);
+
+export const carregarAlegoAdmin = (): Promise<AlegoAdmin> =>
+  comCache<AlegoAdmin>("alegoA", `${BASE}/GO/alego_admin.json`);
+
+export const carregarCldfVerbas = (): Promise<CldfVerbas> =>
+  comCache<CldfVerbas>("cldfV", `${BASE}/DF/cldf_verbas.json`);
+
+export const carregarCldfAdmin = (): Promise<CldfAdmin> =>
+  comCache<CldfAdmin>("cldfA", `${BASE}/DF/cldf_admin.json`);
+
+export const carregarAlmgVerbas = (): Promise<AlmgVerbas> =>
+  comCache<AlmgVerbas>("almgV", `${BASE}/MG/almg_verbas.json`);

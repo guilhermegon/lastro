@@ -252,6 +252,94 @@ export interface Demografia {
 
 export type Esfera = "federal" | "estadual";
 
+/* ---------- aba API: o que as assembleias publicam sobre si mesmas ----------
+   Estes tipos descrevem seis arquivos de origens diferentes — duas APIs REST e
+   um CKAN — e por isso não têm forma comum. Tentar unificá-los esconderia
+   justamente o achado: cada casa publica um pedaço diferente do mesmo objeto. */
+
+export interface CasaLegislativa {
+  sigla: string;
+  /** conjuntos de dados encontrados no portal */
+  n: number;
+  url: string;
+  /** API confirmada: devolve JSON consumível */
+  conf: boolean;
+  obs: string;
+  assuntos: number | null;
+}
+export type Assembleias = Record<string, CasaLegislativa>;
+
+export interface AlegoVerbas {
+  fonte: string;
+  periodo: [number, number];
+  total: { apresentado: number; indenizado: number; glosa: number;
+           nDeputados: number; nCasados: number };
+  serie: { ano: number; indenizado: number; glosa: number;
+           deputados: number; meses: number }[];
+  deputados: { n: string; t: number; g: number; pg: number; m: number;
+               ms: number; el: boolean }[];
+}
+
+export interface AlegoAdmin {
+  fonte: string;
+  anos: [number, number];
+  orcamento: { ano: number; autorizado: number; pessoal: number;
+               custeio: number; investimento: number }[];
+  diarias?: { n: number; nParlamentar: number; nServidor: number;
+              unitMediana: number; suspeitas: number; valorSuspeitas: number;
+              valorTotalBruto: number; pctSuspeitas: number };
+  terceirizados?: { registros: number; pessoas: number; empresas: number;
+                    porEmpresa: { n: string; q: number }[] };
+  contratos?: { n: number; fornecedores: number };
+}
+
+export interface CldfVerbas {
+  fonte: string;
+  periodo: [number, number];
+  grao: string;
+  total: { valor: number; notas: number; nDeputados: number;
+           semCategoria: number; pctSemCategoria: number };
+  /** deputados com verba publicada em cada ano — a razão de não comparar */
+  cobertura: { ano: number; deputados: number }[];
+  comparavel: boolean;
+  serie: { ano: number; valor: number; notas: number; deputados: number }[];
+  categorias: { n: string; v: number; q: number }[];
+  deputados: { n: string; t: number; m: number; q: number; a: number }[];
+}
+
+export interface CldfAdmin {
+  fonte: string;
+  despesas?: { ate: string; anosCompletos: number[];
+               serie: { ano: number; pago: number; empenhado: number;
+                        meses: number }[] };
+  duodecimo?: { ano: number; recebido: number; previsto: number;
+                meses: number }[];
+  terceirizados?: { registros: number; pessoas: number; empresas: number;
+                    meses: number; porEmpresa: { n: string; q: number }[] };
+  folha?: { mes: string; linhas: number; semDetalhe: number; pessoas: number;
+            bruto: number; deputados: number; brutoDeputados: number;
+            temLotacao: boolean; emGabinete: number; brutoGabinete: number;
+            pctGabinete: number;
+            porTipo: { n: string; q: number; v: number }[] };
+  folhaSerie?: { mes: string; pessoas: number; bruto: number }[];
+  folhaFalhas?: string[];
+}
+
+export interface AlmgVerbas {
+  fonte: string;
+  janela: [string, string];
+  total: { notas: number; deputados: number; mesesDeputado: number;
+           pedido: number; pago: number; glosa: number; pctGlosa: number;
+           comGlosa: number };
+  serie: { ano: number; pago: number; deputados: number;
+           porDeputado: number; meses: number }[];
+  categorias: { n: string; v: number; q: number }[];
+  fornecedores: { distintos: number; compartilhados: number;
+                  top: { n: string; dep: number; v: number }[] };
+  deputados: { medianaMensal: number; minMensal: number; maxMensal: number;
+               top: { n: string; p: string; v: number; m: number }[] };
+}
+
 export interface FichaVereador {
   sq: string;
   n: string;
