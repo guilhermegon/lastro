@@ -19,6 +19,7 @@ import { VistaCargo } from "./vistas/VistaCargo";
 import { VistaPadroes } from "./vistas/VistaPadroes";
 import { VistaCruzamentos } from "./vistas/VistaCruzamentos";
 import { VistaEmendas } from "./vistas/VistaEmendas";
+import { VistaSobre } from "./vistas/VistaSobre";
 import { VistaVereador } from "./vistas/VistaVereador";
 import { VistaNacional } from "./vistas/VistaNacional";
 
@@ -34,7 +35,8 @@ interface Selecao { uf: Sigla; ano: number; vista: Vista; cand: number }
 
 function ehVista(v: string): v is Vista {
   return v === "nacional" || v === "padroes" || v === "cruzamentos"
-    || v === "vereador" || v === "emendas" || (CARGOS as string[]).includes(v);
+    || v === "vereador" || v === "emendas" || v === "sobre"
+    || (CARGOS as string[]).includes(v);
 }
 
 function lerURL(): Selecao {
@@ -115,6 +117,10 @@ export default function App() {
     const ano = sel.ano;
     setCarregando(true);
     if (v === "nacional") {           // já está tudo no índice
+      setCarregando(false);
+      return () => { vivo = false; };
+    }
+    if (v === "sobre") {          // texto e método; nada a buscar
       setCarregando(false);
       return () => { vivo = false; };
     }
@@ -220,7 +226,7 @@ export default function App() {
   // O Emendômetro tem seus próprios anos (2015 em diante, todo ano — não só
   // ano de eleição), então também não usa a faixa de pleito.
   const usaAno = sel.vista !== "vereador" && sel.vista !== "padroes"
-    && sel.vista !== "emendas";
+    && sel.vista !== "emendas" && sel.vista !== "sobre";
   // A esfera escolhida, se ela existir aqui; senão a que existir.
   const emAtual: Emendas | null =
     (esfera === "estadual" ? (emEst || null) : emFed) ?? emFed ?? null;
@@ -319,6 +325,12 @@ export default function App() {
             demo={demo}
             aoInspecionar={setDica}
           />
+        )}
+
+        {sel.vista === "sobre" && (
+          <VistaSobre
+            nUF={indice.ufs.length}
+            nMun={indice.ufs.reduce((s, u) => s + (u.nm ?? 0), 0)} />
         )}
 
         {sel.vista === "vereador" && ver && (

@@ -1,7 +1,7 @@
 import { CARGOS, NOME_CARGO, type Cargo } from "../tipos";
 
 export type Vista = "nacional" | Cargo | "vereador" | "padroes"
-  | "cruzamentos" | "emendas";
+  | "cruzamentos" | "emendas" | "sobre";
 
 /** Ordem decrescente de escopo — o país, depois presidente até vereador — e as duas
  *  abas de análise, que não são cargo. A barra rola na horizontal no celular:
@@ -26,6 +26,7 @@ export function Abas({ atual, aoTrocar, cargosDisponiveis, temVereador, cidade,
     { id: "padroes", rotulo: "Padrões", ativo: true },
     { id: "cruzamentos", rotulo: "Cruzamentos", ativo: true },
     { id: "emendas", rotulo: "Emendômetro", ativo: temEmendas },
+    { id: "sobre", rotulo: "Sobre", ativo: true },
   ];
   return (
     <div className="abas" role="tablist">
