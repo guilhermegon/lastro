@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import type {
-  BaseUF, Cargo, Cruzamentos, DadosCargo, Indice, Padroes, Rivais, Sigla,
-  Vereador,
+  BaseUF, Cargo, Cruzamentos, DadosCargo, Demografia, Emendas, Esfera, Indice,
+  Padroes, Rivais, Sigla, Vereador,
 } from "./tipos";
 import { CARGOS } from "./tipos";
 import {
   carregarAnosCargo, carregarBase, carregarCargoAno, carregarCruzamentos,
-  carregarIndice, carregarPadroes, carregarRivaisAno, carregarVereador,
-  prebuscar,
+  carregarDemografia, carregarEmendas, carregarEmendasEstadual, carregarIndice,
+  carregarPadroes, carregarRivaisAno, carregarVereador, prebuscar,
 } from "./lib/dados";
 import { numero } from "./lib/formato";
 import { noEstado } from "./lib/uf";
@@ -18,6 +18,7 @@ import { Dica, type EstadoDica } from "./componentes/Dica";
 import { VistaCargo } from "./vistas/VistaCargo";
 import { VistaPadroes } from "./vistas/VistaPadroes";
 import { VistaCruzamentos } from "./vistas/VistaCruzamentos";
+import { VistaEmendas } from "./vistas/VistaEmendas";
 import { VistaVereador } from "./vistas/VistaVereador";
 import { VistaNacional } from "./vistas/VistaNacional";
 
@@ -33,7 +34,7 @@ interface Selecao { uf: Sigla; ano: number; vista: Vista; cand: number }
 
 function ehVista(v: string): v is Vista {
   return v === "nacional" || v === "padroes" || v === "cruzamentos"
-    || v === "vereador" || (CARGOS as string[]).includes(v);
+    || v === "vereador" || v === "emendas" || (CARGOS as string[]).includes(v);
 }
 
 function lerURL(): Selecao {
@@ -62,6 +63,13 @@ export default function App() {
   const [cruz, setCruz] = useState<Cruzamentos | null>(null);
   const [rivais, setRivais] = useState<Rivais | null>(null);
   const [ver, setVer] = useState<Vereador | null>(null);
+  // As duas esferas vivem em arquivos separados e nem toda UF tem a estadual:
+  // guardar as duas evita rebaixar ao alternar, e `null` distingue "não
+  // carregado" de "não existe aqui".
+  const [emFed, setEmFed] = useState<Emendas | null>(null);
+  const [emEst, setEmEst] = useState<Emendas | null | false>(null);
+  const [esfera, setEsfera] = useState<Esfera>("federal");
+  const [demo, setDemo] = useState<Demografia | null>(null);
   const [sel, setSel] = useState<Selecao>(lerURL);
   const [gaveta, setGaveta] = useState(false);
   const [dica, setDica] = useState<EstadoDica | null>(null);
@@ -79,6 +87,13 @@ export default function App() {
     setRivais(null);
     setVer(null);
   }, [sel.uf, sel.vista]);
+
+  useEffect(() => {
+    setEmFed(null);
+    setEmEst(null);
+    setDemo(null);
+    setEsfera("federal");
+  }, [sel.uf]);
 
   useEffect(() => {
     let vivo = true;
@@ -101,6 +116,23 @@ export default function App() {
     setCarregando(true);
     if (v === "nacional") {           // já está tudo no índice
       setCarregando(false);
+      return () => { vivo = false; };
+    }
+    if (v === "emendas") {
+      // Demografia é para as leituras por habitante e por km². Falha nela não
+      // derruba a tela: some a opção, não o mapa.
+      carregarDemografia(sel.uf).then((d) => { if (vivo) setDemo(d); })
+        .catch(() => { /* sem per capita */ });
+      // A estadual só existe onde o governo do estado publica com autor e
+      // município. `false` registra "procurei e não há", que é diferente de
+      // "ainda não busquei".
+      carregarEmendasEstadual(sel.uf)
+        .then((d) => { if (vivo) setEmEst(d); })
+        .catch(() => { if (vivo) setEmEst(false); });
+      carregarEmendas(sel.uf)
+        .then((d) => { if (vivo) { setEmFed(d); setErro(null); } })
+        .catch((e) => { if (vivo) setErro(String(e)); })
+        .finally(() => { if (vivo) setCarregando(false); });
       return () => { vivo = false; };
     }
     if (v === "padroes" || v === "cruzamentos" || v === "vereador") {
@@ -185,7 +217,13 @@ export default function App() {
   const agregado = indice.agregado.find((a) => a.uf === sel.uf && a.ano === sel.ano);
   const anosComDado = indice.anos;
   // vereador tem seus próprios anos; padrões mostra a série toda de uma vez
-  const usaAno = sel.vista !== "vereador" && sel.vista !== "padroes";
+  // O Emendômetro tem seus próprios anos (2015 em diante, todo ano — não só
+  // ano de eleição), então também não usa a faixa de pleito.
+  const usaAno = sel.vista !== "vereador" && sel.vista !== "padroes"
+    && sel.vista !== "emendas";
+  // A esfera escolhida, se ela existir aqui; senão a que existir.
+  const emAtual: Emendas | null =
+    (esfera === "estadual" ? (emEst || null) : emFed) ?? emFed ?? null;
   const nacional = sel.vista === "nacional";
   const titulo = resumo && !nacional
     ? `Cadê o Voto ${noEstado(resumo.s, resumo.n)}?` : "Cadê o Voto?";
@@ -237,6 +275,7 @@ export default function App() {
           <Abas atual={sel.vista} cargosDisponiveis={resumo?.cargos ?? CARGOS}
                 temVereador={resumo?.capital != null}
                 cidade={resumo?.capital}
+                temEmendas
                 aoTrocar={(v) => setSel((s) => ({ ...s, vista: v, cand: 0 }))} />
         </div>
       </div>
@@ -262,6 +301,24 @@ export default function App() {
         {sel.vista === "cruzamentos" && cruz && (
           <VistaCruzamentos c={cruz} ano={sel.ano} nMun={nMun}
                             uf={resumo?.n ?? sel.uf} />
+        )}
+
+        {/* O gate testa o objeto que de fato vai para a vista, não "alguma das
+            duas chegou". As duas esferas resolvem em ordem imprevisível: com a
+            estadual chegando primeiro, a condição antiga passava e a federal ia
+            nula, e a tela quebrava em `e.anos`. */}
+        {sel.vista === "emendas" && base && emAtual && (
+          <VistaEmendas
+            e={emAtual}
+            esfera={esfera}
+            esferasDisponiveis={emEst
+              ? (["federal", "estadual"] as Esfera[])
+              : (["federal"] as Esfera[])}
+            aoTrocarEsfera={setEsfera}
+            base={base}
+            demo={demo}
+            aoInspecionar={setDica}
+          />
         )}
 
         {sel.vista === "vereador" && ver && (

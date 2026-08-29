@@ -1,16 +1,19 @@
 import { CARGOS, NOME_CARGO, type Cargo } from "../tipos";
 
-export type Vista = "nacional" | Cargo | "vereador" | "padroes" | "cruzamentos";
+export type Vista = "nacional" | Cargo | "vereador" | "padroes"
+  | "cruzamentos" | "emendas";
 
 /** Ordem decrescente de escopo — o país, depois presidente até vereador — e as duas
  *  abas de análise, que não são cargo. A barra rola na horizontal no celular:
  *  sem isso, as últimas abas ficam fora da tela e sem como chegar nelas. */
-export function Abas({ atual, aoTrocar, cargosDisponiveis, temVereador, cidade }: {
+export function Abas({ atual, aoTrocar, cargosDisponiveis, temVereador, cidade,
+                      temEmendas }: {
   atual: Vista;
   aoTrocar: (v: Vista) => void;
   cargosDisponiveis: Cargo[];
   temVereador: boolean;
   cidade: string | undefined;
+  temEmendas: boolean;
 }) {
   const itens: { id: Vista; rotulo: string; ativo: boolean }[] = [
     { id: "nacional" as Vista, rotulo: "Nacional", ativo: true },
@@ -22,6 +25,7 @@ export function Abas({ atual, aoTrocar, cargosDisponiveis, temVereador, cidade }
       ativo: temVereador },
     { id: "padroes", rotulo: "Padrões", ativo: true },
     { id: "cruzamentos", rotulo: "Cruzamentos", ativo: true },
+    { id: "emendas", rotulo: "Emendômetro", ativo: temEmendas },
   ];
   return (
     <div className="abas" role="tablist">

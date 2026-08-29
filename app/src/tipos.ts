@@ -185,6 +185,73 @@ export interface BlocoRivais {
 export type CargoComRival = "estadual" | "federal";
 export type Rivais = Record<string, BlocoRivais>;
 
+/* ---------- Emendômetro ----------
+   A emenda tem a mesma forma do voto — `mi`/`mv` por município — de propósito:
+   é o que permite ao mapa e às tabelas serem os mesmos componentes. O que muda
+   é o que o número significa, e isso a tela diz em palavras. */
+
+export interface FichaEmenda {
+  n: string;
+  /** pago no ano, em reais */
+  t: number;
+  /** parte do pago que é Transferência Especial, a "emenda Pix" */
+  pix: number;
+  /** municípios e valores só do Pix */
+  pxi: number[];
+  pxv: number[];
+  emp: number;
+  /** nº de emendas e de municípios alcançados */
+  ne: number;
+  nm: number;
+  mi: number[];
+  mv: number[];
+  /** concentração: fatia do maior município, municípios efetivos, Gini */
+  t1: number;
+  ef: number;
+  gi: number;
+  /** o autor foi eleito, e por qual UF */
+  el: boolean;
+  ufEl: string;
+  /** emenda de bancada/comissão, sem autor individual */
+  amb: boolean;
+  /** função orçamentária dominante */
+  fn: string;
+}
+
+export interface BlocoEmenda {
+  totalMun: number[];
+  totalPix: number[];
+  fichas: FichaEmenda[];
+  pleito: {
+    pago: number; emp: number; nAutores: number; nEmendas: number;
+    nMun: number; pix: number; nPix: number; cortados: number;
+  };
+  partidos?: { nome: string; v: number; n: number }[];
+}
+
+export interface Emendas {
+  anos: Record<string, BlocoEmenda>;
+  /** o denominador honesto: quanto do total tem município identificado */
+  cobertura: { pago: number; pagoMun: number; pix: number; pixMun: number };
+  esfera?: string;
+}
+
+export interface EmendasBR {
+  anos: number[];
+  uf: { uf: string; ano: number; pago: number; pix: number; emp: number;
+        n: number; aut: number; pagoMun: number; nMun: number }[];
+  cobertura: { pago: number; pagoMun: number; pix: number; pixMun: number };
+}
+
+/** População e área por município, na ordem de `base.municipios`.
+ *  `null` onde o IBGE não tem o município — nunca zero, que seria um valor. */
+export interface Demografia {
+  pop: (number | null)[];
+  area: (number | null)[];
+}
+
+export type Esfera = "federal" | "estadual";
+
 export interface FichaVereador {
   sq: string;
   n: string;

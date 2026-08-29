@@ -1,6 +1,6 @@
 import type {
-  BaseUF, BlocoAno, BlocoRivais, Cargo, CargoComRival, Cruzamentos, Indice,
-  Padroes, Sigla, Vereador,
+  BaseUF, BlocoAno, BlocoRivais, Cargo, CargoComRival, Cruzamentos, Demografia,
+  Emendas, EmendasBR, Indice, Padroes, Sigla, Vereador,
 } from "../tipos";
 
 const BASE = `${import.meta.env.BASE_URL}dados`;
@@ -109,3 +109,22 @@ export const carregarCruzamentos = (uf: Sigla): Promise<Cruzamentos> =>
 
 export const carregarVereador = (uf: Sigla): Promise<Vereador> =>
   comCache<Vereador>(`ver:${uf}`, `${BASE}/${uf}/vereador.json`);
+
+/* ---------- Emendômetro ----------
+   A emenda federal existe para as 27 unidades; a estadual só onde o governo do
+   estado publica em formato tabular com autor e município — hoje Goiás e
+   Espírito Santo. Por isso `carregarEmendasEstadual` pode 404, e quem chama
+   trata isso como "esta esfera não existe aqui", não como erro. */
+
+export const carregarEmendas = (uf: Sigla): Promise<Emendas> =>
+  comCache<Emendas>(`emendas:${uf}`, `${BASE}/${uf}/emendas.json`);
+
+export const carregarEmendasEstadual = (uf: Sigla): Promise<Emendas> =>
+  comCache<Emendas>(`emendasE:${uf}`, `${BASE}/${uf}/emendas_estadual.json`);
+
+export const carregarEmendasBR = (): Promise<EmendasBR> =>
+  comCache<EmendasBR>("emendasBR", `${BASE}/emendas_br.json`);
+
+/** População e área, para as leituras por habitante e por km². */
+export const carregarDemografia = (uf: Sigla): Promise<Demografia> =>
+  comCache<Demografia>(`demo:${uf}`, `${BASE}/${uf}/demografia.json`);
