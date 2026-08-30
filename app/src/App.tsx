@@ -271,6 +271,8 @@ export default function App() {
   const nacional = sel.vista === "nacional";
   const naCasa = sel.vista === "home" || sel.vista === "api"
     || sel.vista === "sobre";
+  // As seções de "Cadê o Voto?": tudo que não é casa nem outro produto.
+  const ehCadeOVoto = !naCasa && sel.vista !== "emendas";
   // O cabeçalho dizia "Cadê o Voto em Goiás?" com o Emendômetro aberto: o
   // título ignorava o produto e olhava só o estado. Agora cada produto fala
   // por si, e a casa fala quando nenhum produto está aberto.
@@ -352,13 +354,27 @@ export default function App() {
             )}
           </div>
 
-          <SeletorEstado ufs={indice.ufs} atual={sel.uf} aberto={gaveta}
-                         aoAbrir={setGaveta} aoEscolher={trocarUF} />
+          {/* Nas telas da casa — home, API e Sobre — não há estado escolhido
+              nem seção de produto: a home é a vitrine, a API é nacional e o
+              Sobre é método. Mostrar "Qual seu estado?" ali pede uma escolha
+              que não muda nada, e mostrar as abas de cargo convida a entrar
+              numa seção de um produto que ainda não foi aberto — que é
+              justamente o achatamento que a fileira de produtos desfez. */}
+          {!naCasa && (
+            <SeletorEstado ufs={indice.ufs} atual={sel.uf} aberto={gaveta}
+                           aoAbrir={setGaveta} aoEscolher={trocarUF} />
+          )}
 
-          <Abas atual={sel.vista} cargosDisponiveis={resumo?.cargos ?? CARGOS}
-                temVereador={resumo?.capital != null}
-                cidade={resumo?.capital}
-                aoTrocar={(v) => setSel((s) => ({ ...s, vista: v, cand: 0 }))} />
+          {/* A barra de seções é de "Cadê o Voto?" — Nacional, os cargos e o
+              vereador. O Emendômetro tem os controles dele dentro da própria
+              tela (esfera, ano, medida, Pix), e mostrar as abas de cargo ali
+              ofereceria seções de outro produto. */}
+          {ehCadeOVoto && (
+            <Abas atual={sel.vista} cargosDisponiveis={resumo?.cargos ?? CARGOS}
+                  temVereador={resumo?.capital != null}
+                  cidade={resumo?.capital}
+                  aoTrocar={(v) => setSel((s) => ({ ...s, vista: v, cand: 0 }))} />
+          )}
         </div>
       </div>
 
