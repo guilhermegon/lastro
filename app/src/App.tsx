@@ -33,6 +33,7 @@ import { VistaEmendas } from "./vistas/VistaEmendas";
 import { VistaSobre } from "./vistas/VistaSobre";
 import { VistaApi } from "./vistas/VistaApi";
 import { VistaHome } from "./vistas/VistaHome";
+import { TrocaProduto } from "./componentes/TrocaProduto";
 import { VistaVereador } from "./vistas/VistaVereador";
 import { VistaNacional } from "./vistas/VistaNacional";
 
@@ -268,19 +269,58 @@ export default function App() {
   const emAtual: Emendas | null =
     (esfera === "estadual" ? (emEst || null) : emFed) ?? emFed ?? null;
   const nacional = sel.vista === "nacional";
-  const titulo = resumo && !nacional
-    ? `Cadê o Voto ${noEstado(resumo.s, resumo.n)}?` : "Cadê o Voto?";
+  const naCasa = sel.vista === "home" || sel.vista === "api"
+    || sel.vista === "sobre";
+  // O cabeçalho dizia "Cadê o Voto em Goiás?" com o Emendômetro aberto: o
+  // título ignorava o produto e olhava só o estado. Agora cada produto fala
+  // por si, e a casa fala quando nenhum produto está aberto.
+  const titulo =
+    sel.vista === "emendas"
+      ? (resumo ? `Emendômetro ${noEstado(resumo.s, resumo.n)}` : "Emendômetro")
+    : sel.vista === "api" ? "O que as assembleias publicam"
+    : sel.vista === "sobre" ? "Como este dado é feito"
+    : resumo && !nacional ? `Cadê o Voto ${noEstado(resumo.s, resumo.n)}?`
+    : "Cadê o Voto?";
 
   return (
     <>
       <div className="topo">
         <div className="wrap">
+          {/* Primeiro nível: a casa à esquerda, sempre clicável, e os produtos
+              lado a lado. Trocar de produto é um clique de qualquer lugar. */}
+          <div className="cabeca">
+            <Logo aoClicar={() => setSel((x) => ({ ...x, vista: "home", cand: 0 }))} />
+            <TrocaProduto
+              atual={sel.vista}
+              aoTrocar={(v) => setSel((x) => ({ ...x, vista: v, cand: 0 }))} />
+            <div className="meta">
+              {([["api", "API"], ["sobre", "Sobre"]] as [Vista, string][]).map(
+                ([id, r]) => (
+                  <button key={id} type="button"
+                          aria-current={sel.vista === id ? "true" : undefined}
+                          onClick={() => setSel((x) => ({ ...x, vista: id, cand: 0 }))}>
+                    {r}
+                  </button>
+                ))}
+            </div>
+          </div>
+
           <div className="topo-in">
             <div className="marca">
-              <Logo />
               <h1>{titulo}</h1>
               <p>
-                {nacional
+                {naCasa
+                  ? sel.vista === "api"
+                    ? "As 27 assembleias estaduais, o que cada uma publica sobre"
+                      + " si mesma, e três casas cujo dado dá para consumir."
+                    : sel.vista === "sobre"
+                    ? "De onde vem cada número, como ele é contado, e o que"
+                      + " decidimos não fazer."
+                    : ""
+                  : sel.vista === "emendas"
+                  ? "Para onde cada parlamentar mandou dinheiro, município a"
+                    + " município, com a transferência especial separada."
+                  : nacional
                   ? "Distribuição espacial do voto para deputado estadual em cada"
                     + " unidade da federação, de 1998 a 2022, município a município."
                   : sel.vista === "vereador"
@@ -318,7 +358,6 @@ export default function App() {
           <Abas atual={sel.vista} cargosDisponiveis={resumo?.cargos ?? CARGOS}
                 temVereador={resumo?.capital != null}
                 cidade={resumo?.capital}
-                temEmendas
                 aoTrocar={(v) => setSel((s) => ({ ...s, vista: v, cand: 0 }))} />
         </div>
       </div>

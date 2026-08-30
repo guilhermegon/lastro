@@ -309,3 +309,53 @@ footer p { margin: 3px 0; max-width: 80ch; }
   .casa { padding-top: 24px; }
   .casa .lastro { width: 240px; }
 }
+
+/* ---------- dois níveis de navegação ----------
+   Em cima o produto, embaixo as seções dele. Antes era uma barra só, com
+   Emendômetro entre Presidente e Senado — o cliente lia onze rótulos para
+   trocar de uma coisa que tem três opções. */
+.lastro-bt { background: none; border: 0; padding: 0; cursor: pointer;
+  border-radius: 6px; }
+.lastro-bt:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.lastro-bt:hover .lastro-nome { fill: var(--accent); }
+
+.cabeca { display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 20px; flex-wrap: wrap; padding-top: 14px; }
+.cabeca .lastro { width: 176px; margin: 0; }
+
+.produtos { display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; }
+.produto-bt { position: relative; display: flex; align-items: center;
+  background: var(--surface-2); border: 1px solid transparent; border-radius: 10px;
+  padding: 8px 14px 8px 4px; cursor: pointer;
+  transition: border-color .15s, background .15s; }
+.produto-bt .lastro { width: 158px; margin: 0; }
+.produto-bt:hover { border-color: var(--line); }
+.produto-bt.ativo { background: var(--surface); border-color: var(--accent); }
+/* Só o ativo mostra a marca em cor cheia. Os outros recuam sem sumir: têm de
+   continuar legíveis para serem alvo de clique, e não podem competir com o que
+   está aberto. */
+.produto-bt:not(.ativo):not(.fechado) { opacity: .62; }
+.produto-bt:not(.ativo):hover { opacity: 1; }
+.produto-bt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.produto-bt.fechado { cursor: default; opacity: .42; padding-right: 78px; }
+.produto-selo { position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  font: 500 .58rem/1 "IBM Plex Sans", sans-serif; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--ink-3);
+  border: 1px solid var(--line); border-radius: 999px; padding: 4px 7px;
+  white-space: nowrap; }
+
+/* A casa fica à direita, discreta: é meta, não produto. */
+.meta { display: flex; gap: 4px; align-items: center; }
+.meta button { font: 500 var(--step--1)/1 "IBM Plex Sans", sans-serif;
+  background: none; border: 0; color: var(--ink-3); cursor: pointer;
+  padding: 7px 10px; border-radius: 6px; }
+.meta button:hover { color: var(--ink); }
+.meta button[aria-current="true"] { color: var(--ink); background: var(--surface-2); }
+
+@media (max-width: 700px) {
+  .cabeca { flex-direction: column; gap: 12px; }
+  .produto-bt .lastro { width: 132px; }
+  .produto-bt.fechado { padding-right: 14px; }
+  .produto-selo { position: static; transform: none; margin-left: 6px; }
+}

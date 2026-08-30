@@ -4,20 +4,21 @@ export type Vista = "home" | "nacional" | Cargo | "vereador"
   | "emendas" | "api" | "sobre";
 
 /** Ordem decrescente de escopo — o país, depois presidente até vereador — e as duas
- *  abas de análise. Padrões e Cruzamentos saíram daqui: viraram o Radar, o
- *  produto fechado. A barra rola na horizontal no celular:
+ *  abas de análise. Esta barra é o SEGUNDO nível: são as seções de dentro de
+ *  Cadê o Voto?, não os produtos — trocar de produto é a fileira de cima.
+ *  Padrões e Cruzamentos saíram daqui: viraram o Radar. API e Sobre também
+ *  saíram: são da casa, não de Cadê o Voto?, e vivem no canto direito do
+ *  cabeçalho. Estavam aparecendo nos dois lugares. A barra rola na horizontal
+ *  no celular:
  *  sem isso, as últimas abas ficam fora da tela e sem como chegar nelas. */
-export function Abas({ atual, aoTrocar, cargosDisponiveis, temVereador, cidade,
-                      temEmendas }: {
+export function Abas({ atual, aoTrocar, cargosDisponiveis, temVereador, cidade }: {
   atual: Vista;
   aoTrocar: (v: Vista) => void;
   cargosDisponiveis: Cargo[];
   temVereador: boolean;
   cidade: string | undefined;
-  temEmendas: boolean;
 }) {
   const itens: { id: Vista; rotulo: string; ativo: boolean }[] = [
-    { id: "home" as Vista, rotulo: "Lastro", ativo: true },
     { id: "nacional" as Vista, rotulo: "Nacional", ativo: true },
     ...CARGOS.map((c) => ({
       id: c as Vista, rotulo: NOME_CARGO[c], ativo: cargosDisponiveis.includes(c),
@@ -25,9 +26,6 @@ export function Abas({ atual, aoTrocar, cargosDisponiveis, temVereador, cidade,
     { id: "vereador" as Vista,
       rotulo: cidade ? `Vereador · ${cidade}` : "Vereador",
       ativo: temVereador },
-    { id: "emendas", rotulo: "Emendômetro", ativo: temEmendas },
-    { id: "api", rotulo: "API", ativo: true },
-    { id: "sobre", rotulo: "Sobre", ativo: true },
   ];
   return (
     <div className="abas" role="tablist">
