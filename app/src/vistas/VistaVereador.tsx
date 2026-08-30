@@ -4,7 +4,7 @@ import type { EstadoDica } from "../componentes/Dica";
 import { Legenda } from "../componentes/Legenda";
 import { quantis } from "../lib/escalas";
 import { MapaZonas } from "../componentes/MapaZonas";
-import type { BaseUF, Urnas, Vereador, Zonas } from "../tipos";
+import type { BaseUF, Urnas, Vereador, Zonas, ZonasCidade } from "../tipos";
 import { decimal, numero, percentual } from "../lib/formato";
 import { token } from "../lib/escalas";
 import { Cartoes } from "../componentes/Cartoes";
@@ -19,7 +19,8 @@ import { ListaCandidatos } from "../componentes/ListaCandidatos";
  * pública de zona — a geografia entra como distribuição, não como desenho.
  */
 export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
-                                base, zonas, capital, aoInspecionar }: {
+                                base, zonas, capital, zonasCid,
+                                aoInspecionar }: {
   v: Vereador;
   selecionado: number;
   aoSelecionar: (i: number) => void;
@@ -31,6 +32,8 @@ export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
   zonas: Zonas | null;
   /** a capital do estado, apontada e nomeada no mapa das zonas */
   capital?: { i: number; nome: string };
+  /** zonas desenhadas dentro desta cidade; só onde há mais de uma */
+  zonasCid: ZonasCidade | null;
   aoInspecionar: (d: EstadoDica | null) => void;
 }) {
   const anos = useMemo(
@@ -71,6 +74,32 @@ export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
         .filter(Boolean).sort((x, y) => x.localeCompare(y, "pt-BR")),
     };
   }, [zonas, base, v.cod]);
+
+  /** Quantos locais têm o vizinho mais próximo na mesma zona.
+   *
+   *  É a medida que autoriza desenhar fronteira: acima de ~85% a zona ocupa
+   *  mancha contínua. Calculada aqui e não escrita à mão porque o número muda
+   *  com a cidade — e um número fixo no texto viraria mentira na cidade
+   *  seguinte. Medido em Goiânia 91,7%, Anápolis 92,4%, Aparecida 92,5% e Rio
+   *  Verde 87,1%. */
+  const porcentagemVizinho = useMemo(() => {
+    const pts = (urnas?.locais ?? []).filter((l) => l.lat != null && l.lon != null);
+    if (pts.length < 2) return "—";
+    let ok = 0;
+    for (const p of pts) {
+      let melhor = Infinity, zv = -1;
+      for (const q of pts) {
+        if (q === p) continue;
+        const kx = Math.cos(((p.lat as number) * Math.PI) / 180);
+        const dx = ((q.lon as number) - (p.lon as number)) * kx;
+        const dy = (q.lat as number) - (p.lat as number);
+        const d = dx * dx + dy * dy;
+        if (d < melhor) { melhor = d; zv = q.z; }
+      }
+      if (zv === p.z) ok++;
+    }
+    return `${((ok / pts.length) * 100).toFixed(1).replace(".", ",")}%`;
+  }, [urnas]);
 
   // Trocar de cidade ou de pleito zera a zona: a 34 de uma cidade não é a 34
   // de outra, e um filtro que sobrevive à troca esconderia a cidade nova atrás
@@ -171,9 +200,12 @@ export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
           áreas.{" "}
           {urnas && urnas.ano === ano
             ? <>O mapa desta tela é de outro tipo — <em>ponto</em>, um por local
-                de votação, dentro do contorno do município. A zona eleitoral, que
-                seria a divisão interna natural, o TSE publica sem malha
-                desenhada; o local de votação ele publica com coordenada.</>
+                de votação, dentro do contorno do município. A zona eleitoral,
+                que seria a divisão interna natural, o TSE publica sem malha
+                desenhada; o local de votação ele publica com coordenada. Onde a
+                cidade tem mais de uma zona, a divisão aparece atrás dos pontos,
+                derivada dessas coordenadas — a nota abaixo do mapa explica o
+                que ela é e o que ela não é.</>
             : <>A única divisão interna que o TSE publica é a zona eleitoral, e
                 ela não tem malha desenhada — há número e não há mapa.</>}
         </div>
@@ -241,6 +273,8 @@ export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
                   </div>
                 )}
                 <MapaUrnas
+                  zonasCidade={zonasCid}
+                  zonaEmFoco={zona}
                   realce={zona == null ? undefined
                     : (i) => urnas.locais[i]?.z === zona}
                   contorno={urnas.geo}
@@ -266,14 +300,27 @@ export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
                 <Legenda cortes={cortesUrna} semDado="Sem voto aqui" />
                 {zonasNoMapa.length > 1 && (
                   <div className="nota" style={{ marginTop: 12 }}>
-                    <strong>A zona eleitoral entra por seleção, e não por
-                    cor.</strong> São {zonasNoMapa.length} zonas aqui, e elas não
-                    são bairros: se interpenetram no mapa — em Goiânia, 19 dos 36
-                    pares de zonas têm áreas sobrepostas. {zonasNoMapa.length} cores
-                    embaralhadas no mesmo espaço não se leem; uma zona de cada vez
-                    mostra exatamente onde ela está e o quanto se mistura com as
-                    vizinhas. Os demais locais ficam apagados em vez de sumir,
-                    para a cidade continuar à vista por trás.
+                    <strong>A fronteira entre as zonas é derivada, não
+                    oficial.</strong> O TRE não publica malha de zona eleitoral.
+                    A linha aqui é a partição por <em>urna mais próxima</em>:
+                    cada ponto do território pertence à zona da urna mais perto
+                    dele. Ela coincide com o limite verdadeiro no miolo de cada
+                    zona e diverge junto da divisa, onde o limite oficial segue
+                    rua e bairro. Serve para situar, não para conferir em que
+                    zona fica um endereço.
+                    <br /><br />
+                    <strong>O que autoriza desenhá-la</strong> é a medição: em{" "}
+                    {v.cidade}, <span className="num">
+                    {porcentagemVizinho}</span> dos locais de votação têm o
+                    vizinho mais próximo na mesma zona — a zona ocupa mancha
+                    contínua, e mancha contínua tem fronteira. Em Goiânia, os
+                    176 bairros do cadastro estão cada um inteiramente dentro de
+                    uma zona só, que é o mesmo que o TRE afirma ao listar
+                    bairros por zona.
+                    <br /><br />
+                    As fichas acima acendem uma zona de cada vez, e os demais
+                    locais ficam apagados em vez de sumir — para a cidade
+                    continuar à vista por trás.
                   </div>
                 )}
                 <div className="nota" style={{ marginTop: 12 }}>

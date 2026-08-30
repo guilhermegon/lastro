@@ -1,5 +1,6 @@
-import { useMemo, type ReactNode } from "react";
+import { useId, useMemo, type ReactNode } from "react";
 import { corDaFaixa, quantis, SEM_VOTO, token } from "../lib/escalas";
+import type { ZonasCidade } from "../tipos";
 import type { EstadoDica } from "./Dica";
 
 export interface LocalUrna {
@@ -102,7 +103,7 @@ function caminho(anel: number[][], em: (p: Ponto) => Ponto) {
  * é a mesma confusão entre zero e ausência que o resto do projeto recusa.
  */
 export function MapaUrnas({ locais, valores, rotulo, descrever, aoInspecionar,
-                            contorno, realce }: {
+                            contorno, realce, zonasCidade, zonaEmFoco }: {
   locais: LocalUrna[];
   valores: number[];
   rotulo: string;
@@ -115,6 +116,10 @@ export function MapaUrnas({ locais, valores, rotulo, descrever, aoInspecionar,
    *  Someça-los mudaria o mapa; apagá-los mantém a cidade inteira à vista e
    *  responde onde a parte selecionada está DENTRO dela. */
   realce?: (i: number) => boolean;
+  /** as zonas eleitorais desenhadas dentro da cidade; só onde há mais de uma */
+  zonasCidade?: ZonasCidade | null;
+  /** zona selecionada nas fichas, para destacar a área junto com os pontos */
+  zonaEmFoco?: number | null;
 }) {
   const dados = useMemo(() => {
     const pts: (Ponto | null)[] = locais.map((l) =>
@@ -168,6 +173,10 @@ export function MapaUrnas({ locais, valores, rotulo, descrever, aoInspecionar,
     return { pts, principal, lupa, aneis, mancha, marca };
   }, [locais, contorno]);
 
+  // `useId` porque a mesma tela pode montar dois mapas (o grande e a lupa), e
+  // dois `clipPath` com o mesmo id fazem o segundo vencer no documento inteiro.
+  const idCorte = useId().replace(/:/g, "");
+
   const cortes = useMemo(
     () => quantis(valores.filter((v) => v > 0)), [valores]);
   const maior = useMemo(
@@ -220,6 +229,54 @@ export function MapaUrnas({ locais, valores, rotulo, descrever, aoInspecionar,
           strokeWidth="1.1" strokeLinejoin="round" />
   ));
 
+  /**
+   * As zonas eleitorais como área, atrás dos pontos.
+   *
+   * A fronteira é a partição por urna mais próxima, dissolvida por zona — não
+   * é o limite oficial do TRE, e a nota abaixo do mapa diz isso. As células
+   * saem retangulares na borda e é o `clipPath` do contorno que as apara: o
+   * recorte por polígono não-convexo o navegador faz de graça.
+   *
+   * Fica em opacidade baixa de propósito. O mapa continua sendo de VOTO: a
+   * zona é o chão sobre o qual os círculos se distribuem, e um chão que
+   * competisse em saturação com eles inverteria a leitura.
+   */
+  const areasDeZona = (em: (p: Ponto) => Ponto) => {
+    if (!zonasCidade || !dados.aneis) return null;
+    const foco = zonaEmFoco ?? null;
+    return (
+      <>
+        <defs>
+          <clipPath id={`cidade-${idCorte}`}>
+            {dados.aneis.map((a, i) => <path key={i} d={caminho(a, em)} />)}
+          </clipPath>
+        </defs>
+        <g clipPath={`url(#cidade-${idCorte})`}>
+          {zonasCidade.celulas.map((c, i) => {
+            const z = zonasCidade.zonas.find((x) => x.z === c.z);
+            const ativa = foco == null || foco === c.z;
+            return (
+              <path key={i}
+                    d={c.p.map((v, k) => {
+                      const [x, y] = em([v[0] as number, v[1] as number]);
+                      return `${k ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`;
+                    }).join("") + "Z"}
+                    fill={`var(--z${(z?.cor ?? 0) + 1})`}
+                    fillOpacity={ativa ? (foco == null ? 0.2 : 0.34) : 0.05} />
+            );
+          })}
+          {zonasCidade.limites.map((l, i) => {
+            const [x1, y1] = em([l[0] as number, l[1] as number]);
+            const [x2, y2] = em([l[2] as number, l[3] as number]);
+            return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
+                         stroke="var(--line-strong)" strokeWidth="1"
+                         strokeLinecap="round" />;
+          })}
+        </g>
+      </>
+    );
+  };
+
   return (
     <div className="urnas-quadros">
       <svg viewBox={`0 0 ${dados.principal.L} ${dados.principal.alt}`} role="img"
@@ -227,6 +284,7 @@ export function MapaUrnas({ locais, valores, rotulo, descrever, aoInspecionar,
            style={{ width: "100%", maxWidth: dados.principal.L, height: "auto",
                    display: "block", margin: "0 auto" }}>
         {municipio(dados.principal.em)}
+        {areasDeZona(dados.principal.em)}
         {dados.marca && (
           <rect x={dados.marca.x} y={dados.marca.y}
                 width={dados.marca.L} height={dados.marca.A}

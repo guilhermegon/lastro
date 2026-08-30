@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type {
   AlegoAdmin, AlegoVerbas, AlmgVerbas, Assembleias, BaseUF, Cargo, CldfAdmin,
   CldfVerbas, DadosCargo, Demografia, Emendas, EmendasBR, Esfera, Indice,
-  CidadeServida, Rivais, Sigla, Urnas, Vereador, Zonas,
+  CidadeServida, Rivais, Sigla, Urnas, Vereador, Zonas, ZonasCidade,
 } from "./tipos";
 
 /** O pacote da aba API, buscado de uma vez porque a aba é nacional. */
@@ -22,7 +22,7 @@ import {
   carregarDemografia, carregarEmendas, carregarEmendasBR,
   carregarEmendasEstadual, carregarIndice,
   carregarCidade, carregarCidades, carregarRivaisAno,
-  carregarUrnasCidade, carregarZonas, prebuscar,
+  carregarUrnasCidade, carregarZonas, carregarZonasCidade, prebuscar,
 } from "./lib/dados";
 import { numero } from "./lib/formato";
 import { noEstado } from "./lib/uf";
@@ -93,6 +93,7 @@ export default function App() {
   // Mapa de urna: existe só onde foi gerado, e a ausência não é erro.
   const [urnas, setUrnas] = useState<Urnas | null>(null);
   const [zonas, setZonas] = useState<Zonas | null>(null);
+  const [zonasCid, setZonasCid] = useState<ZonasCidade | null>(null);
   // As duas esferas vivem em arquivos separados e nem toda UF tem a estadual:
   // guardar as duas evita rebaixar ao alternar, e `null` distingue "não
   // carregado" de "não existe aqui".
@@ -129,6 +130,7 @@ export default function App() {
     setRivais(null);
     setVer(null);
     setUrnas(null);
+    setZonasCid(null);
   }, [sel.uf, sel.vista, sel.cid]);
 
   useEffect(() => {
@@ -241,6 +243,15 @@ export default function App() {
       // O mapa de urna existe só onde foi gerado. Zerar antes de pedir impede
       // que o mapa da cidade anterior fique na tela sob o nome da nova.
       setUrnas(null);
+      setZonasCid(null);
+      // As zonas desenhadas existem só nas cidades com mais de uma — quatro em
+      // Goiás. O 404 é ausência: a cidade inteira é uma zona só, e não há o que
+      // dividir. Vem junto com as urnas porque é o mesmo mapa.
+      if (c.cod) {
+        carregarZonasCidade(c.uf, c.cod)
+          .then((z) => { if (vivo) setZonasCid(z); })
+          .catch(() => { /* cidade de zona única */ });
+      }
       if (c.urna) {
         carregarUrnasCidade(c.uf, c.urna).then((u) => { if (vivo) setUrnas(u); })
           .catch(() => { if (vivo) setUrnas(null); });
@@ -605,6 +616,7 @@ export default function App() {
         {sel.vista === "vereador" && ver && (
           <VistaVereador v={ver} selecionado={sel.cand}
                          base={base} zonas={zonas} capital={capital}
+                         zonasCid={zonasCid}
                          aoSelecionar={(i) => setSel((s) => ({ ...s, cand: i }))}
                          urnas={urnas} aoInspecionar={setDica} />
         )}

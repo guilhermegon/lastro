@@ -2,6 +2,7 @@ import type {
   BaseUF, BlocoAno, BlocoRivais, Cargo, CargoComRival, Cruzamentos, Demografia,
   AlegoAdmin, AlegoVerbas, AlmgVerbas, Assembleias, CldfAdmin, CldfVerbas,
   Cidades, Emendas, EmendasBR, Indice, Padroes, Sigla, Urnas, Vereador, Zonas,
+  ZonasCidade,
 } from "../tipos";
 
 const BASE = `${import.meta.env.BASE_URL}dados`;
@@ -165,6 +166,12 @@ export const carregarCidades = (): Promise<Cidades> =>
  *  então quem chama trata a ausência como "ainda não mapeamos as zonas aqui". */
 export const carregarZonas = (uf: Sigla): Promise<Zonas> =>
   comCache<Zonas>(`zonas:${uf}`, `${BASE}/${uf}/zonas.json`);
+
+/** As zonas desenhadas DENTRO de uma cidade. Existe só onde a cidade tem mais
+ *  de uma zona — quatro municípios em Goiás —, então o 404 é ausência e quem
+ *  chama trata como "aqui a cidade inteira é uma zona só". */
+export const carregarZonasCidade = (uf: Sigla, cod: string): Promise<ZonasCidade> =>
+  comCache<ZonasCidade>(`zc:${uf}:${cod}`, `${BASE}/${uf}/zonas_cidade/${cod}.json`);
 
 /** Vereador de uma cidade, pelo caminho que o indice deu. */
 export const carregarCidade = (uf: Sigla, src: string): Promise<Vereador> =>

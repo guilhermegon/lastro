@@ -483,6 +483,34 @@ export interface ZonaEleitoral {
   cor: number | null;
 }
 
+/* ---------- zonas DENTRO da cidade (`zonas_cidade/{cod}.json`) ----------
+
+   Partição por local de votação mais próximo, dissolvida por zona. NÃO é o
+   limite oficial do TRE: coincide no miolo de cada zona e diverge junto da
+   divisa, onde o limite verdadeiro segue rua e bairro. Ver `57_zonas_cidade.py`.
+
+   As células saem retangulares na borda de propósito — quem as apara é o
+   `clipPath` do contorno do município, no próprio SVG. */
+
+export interface CelulaZona {
+  z: number;
+  /** anel em [lon, lat] */
+  p: [number, number][];
+}
+
+export interface ZonasCidade {
+  cidade: string;
+  cod: string | null;
+  ano: number;
+  nCores: number;
+  zonas: { z: number; cor: number; locais: number }[];
+  celulas: CelulaZona[];
+  /** segmentos de divisa entre zonas: [x1, y1, x2, y2] */
+  limites: [number, number, number, number][];
+  /** locais no mesmo endereço com zonas divergentes */
+  conflitos: number;
+}
+
 export interface Zonas {
   uf: Sigla;
   ano: number;

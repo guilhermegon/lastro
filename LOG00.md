@@ -1082,3 +1082,50 @@ cidade do link, que e' o que faz o endereco valer a pena compartilhar.
 cidade governa uma aba so': controle que vale para tudo vem antes da barra,
 controle de uma secao vem depois dela, encostado no que ele muda. Acima, lia-se
 como se valesse para Presidente e Estadual tambem.
+## 2026-08-30 — as zonas dentro da cidade, e a medicao que eu tinha feito errada
+
+O usuario mandou um infografico do TRE/GO com as 9 zonas de Goiania desenhadas
+como manchas contiguas e limpas, e pediu o mesmo para as outras cidades.
+
+**Eu tinha dito que isso nao dava.** A frase foi: "elas nao sao bairros: se
+interpenetram no mapa — em Goiania, 19 dos 36 pares de zonas tem areas
+sobrepostas". A evidencia era **sobreposicao de caixas delimitadoras**, e caixa
+nao prova interpenetracao nenhuma: duas regioes compactas e vizinhas tem caixas
+cruzadas quase sempre, porque a caixa de uma regiao em L cobre area que nao e'
+dela. Quando a minha medicao contradiz um mapa oficial, a medicao esta' errada.
+
+**A medida certa e' de vizinhanca**, e diz o contrario:
+
+| cidade | locais | zonas | vizinho mais proximo na mesma zona | bairros de uma zona so |
+|---|---|---|---|---|
+| Goiania | 349 | 9 | **91,7%** | **176/176** |
+| Anapolis | 118 | 3 | 92,4% | 74/77 |
+| Aparecida de Goiania | 106 | 3 | 92,5% | 81/82 |
+| Rio Verde | 70 | 2 | 87,1% | 41/46 |
+
+Em Goiania **100% dos bairros estao inteiramente numa zona so'** — exatamente o
+que o infografico do TRE afirma ao listar bairros por zona.
+
+**Como foi desenhado, sem scipy e sem shapely.** A celula de Voronoi sai por
+recorte sucessivo de meio-plano (Sutherland-Hodgman) a partir da caixa da
+cidade. As arestas internas entre celulas da MESMA zona somem, e o que resta e'
+a divisa. Detalhe que decidiu funcionar: o teste do recorte guarda , entao
+vertice sobre a mediatriz permanece — com  as duas celulas vizinhas
+produziriam arestas ligeiramente diferentes e a dissolucao deixaria fresta.
+
+**O recorte pelo contorno do municipio nao e' feito em Python.** As celulas saem
+retangulares na borda e quem as apara e' o  do SVG, com o contorno que
+o  ja' publicou. Recortar poligono nao-convexo em Python exigiria
+biblioteca; o navegador faz de graca e sem erro.
+
+Custo: 2,4 segundos e 114 KB para as quatro cidades. Goiania gastou **3 cores**
+para 9 zonas — prova adicional de compacidade, porque zona compacta tem poucas
+vizinhas.
+
+**E o mapa diz o que ele e'.** A fronteira e' derivada por urna mais proxima, nao
+e' o limite do TRE: coincide no miolo e diverge junto da divisa, onde o oficial
+segue rua e bairro. A nota na tela diz isso, e o percentual de vizinhanca e'
+**calculado no navegador a partir do dado**, nao escrito a mao — numero fixo no
+texto viraria mentira na cidade seguinte.
+
+Os pontos continuam por cima, como o usuario pediu: zonas e secoes no mesmo mapa.
