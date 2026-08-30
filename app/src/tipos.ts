@@ -459,6 +459,8 @@ export interface CidadeServida {
   urna: string | null;
   /** o TSE nao totalizou o ultimo pleito aqui */
   st: boolean;
+  /** e' a capital do estado — o ponto de partida da aba */
+  cap?: boolean;
 }
 
 export interface Cidades { cidades: CidadeServida[] }

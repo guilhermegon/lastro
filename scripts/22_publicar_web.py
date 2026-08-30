@@ -200,17 +200,40 @@ def main():
                 comurna = {c["cod"] for c in
                            json.loads(furn.read_text(encoding="utf-8"))["cidades"]
                            if c.get("comCoord", 0) > 0}
+            # Qual das cidades e' a capital. Onde a UF tem cobertura municipal,
+            # a capital entra como um municipio qualquer — e sem esta marca o
+            # front nao teria como distingui-la, caindo na primeira em ordem
+            # alfabetica. O nome vem do `vereador.json`, que e' o arquivo da
+            # capital, e o pareamento e' por nome normalizado porque a grafia
+            # varia entre a base do TSE e a do IBGE.
+            fver = ORIGEM / uf / "vereador.json"
+            cap = None
+            if fver.exists():
+                cap = geo.normalizar(
+                    json.loads(fver.read_text(encoding="utf-8"))["cidade"])
+            achou_cap = False
             for c in json.loads(fcid.read_text(encoding="utf-8"))["cidades"]:
-                cidades.append({
+                ehcap = cap is not None and geo.normalizar(c["nome"]) == cap
+                achou_cap = achou_cap or ehcap
+                item = {
                     "k": f"{uf}-{c['cod']}", "n": c["nome"], "uf": uf,
                     "cod": c["cod"], "src": f"cidades/{c['cod']}.json",
                     "urna": f"urnas/{c['cod']}.json" if c["cod"] in comurna else None,
                     "st": bool(c.get("st")),
-                })
+                }
+                if ehcap:
+                    item["cap"] = True
+                cidades.append(item)
+            # Ruidoso de proposito: sem capital marcada a aba volta a abrir na
+            # primeira cidade do alfabeto, e isso passaria despercebido.
+            if cap is not None and not achou_cap:
+                print(f"  AVISO {uf}: capital nao casou com nenhuma cidade")
         elif (ORIGEM / uf / "vereador.json").exists():
             v = json.loads((ORIGEM / uf / "vereador.json").read_text(encoding="utf-8"))
             cidades.append({"k": uf, "n": v["cidade"], "uf": uf, "cod": None,
-                            "src": "vereador.json", "urna": None, "st": False})
+                            "src": "vereador.json", "urna": None, "st": False,
+                            # onde so' a capital tem dado, ela e' a capital
+                            "cap": True})
     cidades.sort(key=lambda c: geo.normalizar(c["n"]))
     fc = DESTINO / "cidades.json"
     fc.write_text(json.dumps({"cidades": cidades}, separators=(",", ":"),

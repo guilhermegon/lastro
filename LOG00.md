@@ -1052,3 +1052,33 @@ Conferido clicando as sete abas em sequência a partir do link quebrado: todas
 carregam, a barra continua com sete botões, e a URL se corrige sozinha na
 chegada. E com `?uf=ZZ`, um 404 de verdade, a mensagem aparece na seção e o
 resto do site continua clicável.
+## 2026-08-30 — a aba de vereador comeca pela capital, e a gaveta desce
+
+**A capital nao estava no dado.** Enquanto a aba servia uma cidade por UF, "a
+capital" era a unica entrada e nao precisava de marca. Com a cobertura
+municipal, as 246 cidades de Goias entram todas pelo mesmo caminho
+(`cidades/{cod}.json`) e a entrada que vinha de `vereador.json` deixou de
+existir para essa UF. O padrao caiu no ultimo recurso da cadeia — a primeira
+cidade em ordem alfabetica — e a aba abria em **Abadia de Goias**.
+
+Nao era erro de logica: era informacao que faltava. Nada no `cidades.json`
+dizia qual das 246 e' a capital. Agora diz, com um `cap: true` pareado por nome
+normalizado contra o `vereador.json`, que e' o arquivo da capital. E o `22_`
+avisa em voz alta se a capital nao casar com nenhuma cidade — sem isso, a aba
+voltaria a abrir no alfabeto e ninguem notaria.
+
+**E um defeito que o mesmo caminho escondia:** trocar de ESTADO nao limpava a
+cidade. Dava para estar em Sao Paulo com Itumbiara aberta, porque a resolucao
+procura por `cid` antes de procurar por UF. Agora `trocarUF` limpa `cid`.
+
+**Entrar na aba tambem limpa.** Reabrir a ultima cidade escolhida soa
+prestativo e nao e': a capital e' o unico ponto de partida que existe em toda
+UF, e voltar a aba num municipio qualquer do interior deixa o leitor sem
+referencia. Quem limpa e' o CLIQUE — um link com `cid` continua abrindo a
+cidade do link, que e' o que faz o endereco valer a pena compartilhar.
+
+**A gaveta desceu para depois das abas.** "Qual sua cidade?" ocupava o lugar de
+"Qual seu estado?", acima da barra. Mas o estado governa a tela inteira e a
+cidade governa uma aba so': controle que vale para tudo vem antes da barra,
+controle de uma secao vem depois dela, encostado no que ele muda. Acima, lia-se
+como se valesse para Presidente e Estadual tambem.

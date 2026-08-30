@@ -218,6 +218,7 @@ export default function App() {
       // diferença mora no índice, não aqui.
       if (!cidades) return () => { vivo = false; };
       const c = cidades.find((x) => x.k === sel.cid)
+        ?? cidades.find((x) => x.uf === sel.uf && x.cap)
         ?? cidades.find((x) => x.uf === sel.uf && x.src === "vereador.json")
         ?? cidades.find((x) => x.uf === sel.uf);
       if (!c) {
@@ -303,8 +304,23 @@ export default function App() {
   }, [indice, sel.uf, sel.vista]);
 
   const trocarUF = useCallback((uf: Sigla) => {
-    setSel((s) => ({ ...s, uf, cand: 0 }));
+    // `cid` sai junto. Sem isso dá para estar em São Paulo com Itumbiara
+    // aberta: a resolução procura por `cid` ANTES de procurar por UF, então a
+    // cidade antiga vence o estado novo.
+    setSel((s) => ({ ...s, uf, cid: "", cand: 0 }));
     setGaveta(false);
+  }, []);
+
+  // Entrar na aba de vereador começa pela capital, sempre.
+  //
+  // Antes a aba reabria a última cidade escolhida, o que soa prestativo e não
+  // é: a capital é o único ponto de partida que existe em toda UF, e voltar
+  // à aba num município qualquer do interior deixa o leitor sem referência de
+  // onde está. Quem limpa é o CLIQUE — um link com `cid` continua abrindo a
+  // cidade do link, que é o que faz o endereço valer a pena compartilhar.
+  const trocarVista = useCallback((v: Vista) => {
+    setSel((s) => ({ ...s, vista: v, cand: 0,
+                     cid: v === "vereador" ? "" : s.cid }));
   }, []);
 
   // A MESMA resolução do efeito que carrega a cidade, e de propósito: o rótulo
@@ -313,6 +329,7 @@ export default function App() {
   const cidadeAtual = useMemo(() => {
     if (!cidades) return undefined;
     return (cidades.find((x) => x.k === sel.cid)
+      ?? cidades.find((x) => x.uf === sel.uf && x.cap)
       ?? cidades.find((x) => x.uf === sel.uf && x.src === "vereador.json")
       ?? cidades.find((x) => x.uf === sel.uf))?.n;
   }, [cidades, sel.cid, sel.uf]);
@@ -383,7 +400,7 @@ export default function App() {
             <Logo aoClicar={() => setSel((x) => ({ ...x, vista: "home", cand: 0 }))} />
             <TrocaProduto
               atual={sel.vista}
-              aoTrocar={(v) => setSel((x) => ({ ...x, vista: v, cand: 0 }))} />
+              aoTrocar={trocarVista} />
             <div className="meta">
               {([["api", "API"], ["sobre", "Sobre"]] as [Vista, string][]).map(
                 ([id, r]) => (
@@ -458,17 +475,12 @@ export default function App() {
               justamente o achatamento que a fileira de produtos desfez. */}
           {/* No vereador a unidade e' a cidade, nao a UF: perguntar o estado
               faria o leitor traduzir a pergunta que ele tem na que a tela
-              aceita. Mesma navegacao, uma traducao a menos. */}
-          {!naCasa && (sel.vista === "vereador" ? (
-            <SeletorCidade
-              cidades={cidades} atual={sel.cid} uf={sel.uf} aberto={gaveta}
-              aoAbrir={setGaveta}
-              aoEscolher={(c) => setSel((x) => ({ ...x, uf: c.uf, cid: c.k,
-                                                  cand: 0 }))} />
-          ) : (
+              aceita. Mesma navegacao, uma traducao a menos. A gaveta de cidade
+              nao fica aqui — desceu para depois das abas, ver abaixo. */}
+          {!naCasa && sel.vista !== "vereador" && (
             <SeletorEstado ufs={indice.ufs} atual={sel.uf} aberto={gaveta}
                            aoAbrir={setGaveta} aoEscolher={trocarUF} />
-          ))}
+          )}
 
           {/* A barra de seções é de "Cadê o Voto?" — Nacional, os cargos e o
               vereador. O Emendômetro tem os controles dele dentro da própria
@@ -483,7 +495,20 @@ export default function App() {
                   temVereador={resumo?.ver === true}
                   cidade={resumo?.ver ? (cidadeAtual ?? resumo.capital) : undefined}
                   uf={sel.uf}
-                  aoTrocar={(v) => setSel((s) => ({ ...s, vista: v, cand: 0 }))} />
+                  aoTrocar={trocarVista} />
+          )}
+
+          {/* Depois das abas, e não antes: o estado governa a tela inteira, a
+              cidade governa UMA aba. Controle que vale para tudo vem antes da
+              barra; controle de uma seção vem depois dela, encostado no que
+              ele muda. Acima, "Qual sua cidade?" se lia como se valesse para
+              Presidente e Estadual também. */}
+          {sel.vista === "vereador" && (
+            <SeletorCidade
+              cidades={cidades} atual={sel.cid} uf={sel.uf} aberto={gaveta}
+              aoAbrir={setGaveta}
+              aoEscolher={(c) => setSel((x) => ({ ...x, uf: c.uf, cid: c.k,
+                                                  cand: 0 }))} />
           )}
         </div>
       </div>
@@ -533,7 +558,7 @@ export default function App() {
 
         {sel.vista === "home" && (
           <VistaHome
-            aoEntrar={(v) => setSel((s) => ({ ...s, vista: v, cand: 0 }))}
+            aoEntrar={trocarVista}
             nUF={indice.ufs.length}
             nMun={indice.ufs.reduce((t, u) => t + (u.nm ?? 0), 0)} />
         )}
