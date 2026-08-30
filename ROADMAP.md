@@ -743,6 +743,25 @@ não ler. O que continuava verdade era mais específico — não há *coropléti
 porque pintar área exige várias áreas; o mapa que existe é de outro tipo.
 
 
+## Marco 16 — os dois scripts que falhavam em silêncio
+
+- [x] `51_urnas_capital.py` **descartado** (RAS 00 TKT 0013). Substituído pelo
+  `54_`, e não só redundante: rodado fora de Goiás rejeitava 100% das
+  coordenadas por carregar a caixa geográfica de Goiás como constante, e gravava
+  os 26 arquivos vazios com código de saída zero. Conferido em `origin/main`
+  antes de apagar — lição do `46_`, que o registro dizia preservado e não estava.
+- [x] `53_vereador_uf_web.py` **aborta** onde antes avisava (RAS 00 TKT 0014).
+  Sem os zips de 2024 ele perdia oito municípios — Águas Lindas entre eles, com
+  200 mil habitantes — e saía com código zero.
+- [x] Portão testado com o zip renomeado: para com código 1 e nomeia o arquivo.
+- [x] Republicação byte a byte idêntica: é portão, não mudança de saída.
+
+**A regra que estes dois fecham:** falha silenciosa com código zero é pior que
+erro, porque é lida como sucesso. Em um só dia o projeto pagou por ela três
+vezes — os 26 mapas vazios do `51_`, os quatro arquivos do interim corrompidos
+que uma verificação com `usecols` mascarou, e estes oito municípios. Todo script
+que descarta entrada agora aborta.
+
 ## AGUARDANDO — espera evento externo ou comando do usuário
 
 O BEDEL lê o **título da seção** para saber que não há próximo item seguro

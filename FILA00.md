@@ -25,6 +25,20 @@ com `leader_recommendation` inequívoca:
 Dois ficaram abertos de propósito. RT aplica recomendação inequívoca; ele não
 inventa uma onde o próprio líder registrou que a escolha é do usuário.
 
+## RT de 2026-08-30, segunda rodada
+
+O usuário respondeu `RT` de novo, depois de duas recomendações formadas no
+mesmo dia sobre scripts que falham em silêncio.
+
+| Ticket | Resultado |
+|---|---|
+| RAS 00 TKT 0013 — `51_urnas_capital.py` | **descartado** — mesmo caso do `46_` (TKT-0009) |
+| RAS 00 TKT 0014 — `53_` avisava em vez de abortar | **corrigido** — aborta com código 1 |
+| TKT-003, RAS 00 TKT 0007, 0008 | sem mudança: seguem esperando evento ou ação do usuário |
+
+A aba API não entra: o usuário dispensou a pergunta sem escolher, então não há
+recomendação formada a aplicar.
+
 ---
 
 ### TKT-001 — Sigla e entrada no roster
@@ -464,6 +478,75 @@ errado.
 
 **A pasta `Documents\RASTRO` continua existindo** com código, `.git` e o remoto
 antigo — só os dados saíram. Apagar o resto é irreversível e não foi pedido.
+
+---
+
+### RAS 00 TKT 0013 — `51_urnas_capital.py`, o caminho que o `54_` substituiu
+
+| Campo | Valor |
+|---|---|
+| `type` | `APPROVAL_NOW` |
+| `criticality` | média — grava arquivo que ninguém lê, e grava errado fora de Goiás |
+| `work_continues` | sim |
+| `status` | **DECIDIDO por RT, 2026-08-30** — descartado |
+
+**summary.** O `51_` produz o mapa de urnas de **uma capital por UF**, no formato
+`{UF}/urnas_{ano}.json`. O `54_urnas_uf.py` o substituiu por um arquivo **por
+município** a partir de UM par de downloads para o estado inteiro, e Goiânia
+passou a entrar por `urnas/5208707.json` como qualquer outro município. O
+arquivo antigo já foi apagado; o script que o recria ficou.
+
+**E ele não é só redundante.** O docstring do `54_` registra o motivo da
+substituição: o `51_` carrega a caixa geográfica de Goiás como constante para
+rejeitar a sentinela `-1` do TSE, então rodá-lo nas 26 capitais **rejeitou 100%
+das coordenadas de todas elas** — São Paulo, Recife e Belém caem fora da caixa de
+Goiás — e gravou os 26 arquivos assim mesmo, com código de saída zero.
+
+**leader_recommendation.** **Descartar.** É o mesmo caso do `46_publica_site.py`
+no RAS 00 TKT 0009: segundo caminho de publicação não usado é dívida que
+envelhece calada, e o pior momento para descobrir que ele está desatualizado é
+numa publicação de emergência. Aqui é pior que no `46_`, porque este não só
+envelhece — ele já produz resultado errado e diz que deu certo.
+
+**Aplicado sob RT, e desta vez a premissa foi conferida ANTES.** O `46_` ensinou:
+o TKT-0009 afirmou que ele estava "preservado no histórico" e ele nunca havia
+sido empurrado. Antes de apagar o `51_`, verifiquei que ele está em
+`origin/main`, no commit `658db5a`. Está recuperável de verdade.
+
+---
+
+### RAS 00 TKT 0014 — O `53_` avisava onde os outros abortam
+
+| Campo | Valor |
+|---|---|
+| `type` | `APPROVAL_NOW` |
+| `criticality` | alta — perde município e relata sucesso |
+| `work_continues` | sim |
+| `status` | **DECIDIDO por RT, 2026-08-30** — corrigido |
+
+**summary.** O `53_vereador_uf_web.py` precisa de `secao_2024_GO.zip` e
+`consulta_cand_2024.zip` para montar os oito municípios de Goiás que o TSE não
+totalizou em 2024 — entre eles Águas Lindas, com 200 mil habitantes. Sem os
+zips, o script **não falhava**: imprimia um aviso, seguia e saía com código zero.
+Quem rodasse depois veria "246 cidades" e concluiria que deu certo.
+
+O alerta veio da sessão `rastro-85`, e foi **verificado neste repositório** antes
+de virar ticket: o ramo silencioso está no código, os dois zips estão presentes,
+e as oito cidades têm o pleito de 2024 montado com 51 a 60 fichas cada.
+
+**leader_recommendation.** **Abortar.** O resto do repositório já segue essa
+regra — o `49_` aborta se a contagem de campos divergir, o `56_` se um município
+ficar sem par, o `47_` se um arquivo do Radar vazar. O `53_` era a exceção, e é o
+mesmo modo de falha que este projeto já pagou duas vezes no mesmo dia: o `51_`
+gravando 26 mapas vazios com saída zero, e o `usecols` que mascarou quatro
+arquivos do interim corrompidos. **Falha silenciosa com código zero é pior que
+erro: ela é lida como sucesso.**
+
+**Aplicado sob RT, e o portão foi TESTADO.** Portão que nunca disparou não é
+portão: renomeei um dos zips, rodei, e o script parou com código **1** e mensagem
+que nomeia o arquivo que falta e a consequência. Zip reposto e confirmado. E a
+republicação com o script novo saiu **byte a byte idêntica** — é portão puro,
+não mudança de saída.
 
 ---
 

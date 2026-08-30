@@ -241,10 +241,28 @@ def ler_secao_2024(uf, alvos, mapa, corr):
     """
     zs = cfg.RAW / f"secao_{ANO_SECAO}_{uf}.zip"
     zc = cfg.RAW / f"consulta_cand_{ANO_SECAO}.zip"
-    if not (zs.exists() and zc.exists()):
-        print(f"    sem os zips de {ANO_SECAO} em data/raw — os {len(alvos)} "
-              f"municipios sem totalizacao ficam de fora", flush=True)
-        return None
+    # ABORTA, nao avisa. Sem estes dois zips os municipios sem totalizacao
+    # ficam sem o pleito de 2024 — e antes o script seguia, imprimia um aviso e
+    # saia com codigo ZERO. Quem rodasse depois veria "246 cidades" e concluiria
+    # que deu certo, com Aguas Lindas (200 mil habitantes) sem 2024.
+    #
+    # E' o mesmo modo de falha que este projeto ja pagou duas vezes: o
+    # `51_urnas_capital.py` gravou 26 mapas vazios com saida zero por usar a
+    # caixa geografica de Goias nas outras capitais, e uma verificacao com
+    # `usecols` mascarou quatro arquivos do interim corrompidos. Falha silenciosa
+    # com codigo zero e' pior que erro: ela e' lida como sucesso.
+    #
+    # O resto do repositorio ja segue esta regra — o `49_` aborta se a contagem
+    # de campos divergir, o `56_` se um municipio ficar sem par, o `47_` se um
+    # arquivo do Radar vazar. Este era a excecao.
+    faltam = [f.name for f in (zs, zc) if not f.exists()]
+    if faltam:
+        raise SystemExit(
+            f"ABORTADO: falta em data/raw: {', '.join(faltam)}\n"
+            f"Sem eles, os {len(alvos)} municipios sem totalizacao de "
+            f"{ANO_SECAO} sairiam sem o pleito, e a saida diria "
+            f"'{len(alvos)} de fora' no meio de um relatorio de sucesso.\n"
+            "Rode 54_urnas_uf.py, que baixa os dois, ou reponha os arquivos.")
 
     with zipfile.ZipFile(zs) as z:
         nome = [n for n in z.namelist() if n.lower().endswith(".csv")][0]
