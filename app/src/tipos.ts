@@ -464,3 +464,29 @@ export interface CidadeServida {
 }
 
 export interface Cidades { cidades: CidadeServida[] }
+
+/* ---------- zonas eleitorais (`web/{UF}/zonas.json`, ver `56_zonas_uf.py`) --
+
+   `porMun` e `cods` seguem a MESMA ordem de `base.json` — municípios do estado
+   por código IBGE — e o mapa indexa por posição. `cor` é `null` na zona que
+   parte um município: ela não desenha área, então não gasta cor. */
+
+export interface ZonaEleitoral {
+  z: number;
+  /** índices dos municípios da zona */
+  mi: number[];
+  /** todos os seus municípios são exclusivos dela — a zona tem fronteira */
+  exata: boolean;
+  cor: number | null;
+}
+
+export interface Zonas {
+  uf: Sigla;
+  ano: number;
+  nCores: number;
+  zonas: ZonaEleitoral[];
+  /** zona(s) de cada município, por índice */
+  porMun: number[][];
+  /** código IBGE de cada município, por índice */
+  cods: string[];
+}

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type {
   AlegoAdmin, AlegoVerbas, AlmgVerbas, Assembleias, BaseUF, Cargo, CldfAdmin,
   CldfVerbas, DadosCargo, Demografia, Emendas, EmendasBR, Esfera, Indice,
-  CidadeServida, Rivais, Sigla, Urnas, Vereador,
+  CidadeServida, Rivais, Sigla, Urnas, Vereador, Zonas,
 } from "./tipos";
 
 /** O pacote da aba API, buscado de uma vez porque a aba é nacional. */
@@ -22,7 +22,7 @@ import {
   carregarDemografia, carregarEmendas, carregarEmendasBR,
   carregarEmendasEstadual, carregarIndice,
   carregarCidade, carregarCidades, carregarRivaisAno,
-  carregarUrnasCidade, prebuscar,
+  carregarUrnasCidade, carregarZonas, prebuscar,
 } from "./lib/dados";
 import { numero } from "./lib/formato";
 import { noEstado } from "./lib/uf";
@@ -92,6 +92,7 @@ export default function App() {
   const [ver, setVer] = useState<Vereador | null>(null);
   // Mapa de urna: existe só onde foi gerado, e a ausência não é erro.
   const [urnas, setUrnas] = useState<Urnas | null>(null);
+  const [zonas, setZonas] = useState<Zonas | null>(null);
   // As duas esferas vivem em arquivos separados e nem toda UF tem a estadual:
   // guardar as duas evita rebaixar ao alternar, e `null` distingue "não
   // carregado" de "não existe aqui".
@@ -135,6 +136,18 @@ export default function App() {
     setEmEst(null);
     setDemo(null);
     setEsfera("federal");
+  }, [sel.uf]);
+
+  // As zonas existem onde o `56_` rodou — hoje só Goiás. O 404 é ausência, não
+  // erro: em UF sem mapeamento a seção simplesmente não aparece, como já
+  // acontece com a emenda estadual.
+  useEffect(() => {
+    let vivo = true;
+    setZonas(null);
+    carregarZonas(sel.uf)
+      .then((z) => { if (vivo) setZonas(z); })
+      .catch(() => { /* esta UF ainda não tem zonas mapeadas */ });
+    return () => { vivo = false; };
   }, [sel.uf]);
 
   useEffect(() => {
@@ -573,6 +586,7 @@ export default function App() {
 
         {sel.vista === "vereador" && ver && (
           <VistaVereador v={ver} selecionado={sel.cand}
+                         base={base} zonas={zonas}
                          aoSelecionar={(i) => setSel((s) => ({ ...s, cand: i }))}
                          urnas={urnas} aoInspecionar={setDica} />
         )}

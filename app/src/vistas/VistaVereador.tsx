@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MapaUrnas } from "../componentes/MapaUrnas";
 import type { EstadoDica } from "../componentes/Dica";
 import { Legenda } from "../componentes/Legenda";
 import { quantis } from "../lib/escalas";
-import type { Urnas, Vereador } from "../tipos";
+import { MapaZonas } from "../componentes/MapaZonas";
+import type { BaseUF, Urnas, Vereador, Zonas } from "../tipos";
 import { decimal, numero, percentual } from "../lib/formato";
 import { token } from "../lib/escalas";
 import { Cartoes } from "../componentes/Cartoes";
@@ -18,19 +19,61 @@ import { ListaCandidatos } from "../componentes/ListaCandidatos";
  * pública de zona — a geografia entra como distribuição, não como desenho.
  */
 export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
-                                aoInspecionar }: {
+                                base, zonas, aoInspecionar }: {
   v: Vereador;
   selecionado: number;
   aoSelecionar: (i: number) => void;
   /** voto por local de votação; existe só onde foi gerado */
   urnas: Urnas | null;
+  /** malha do estado, para o mapa das zonas */
+  base: BaseUF | null;
+  /** zonas eleitorais da UF; ausente onde ainda não foram mapeadas */
+  zonas: Zonas | null;
   aoInspecionar: (d: EstadoDica | null) => void;
 }) {
   const anos = useMemo(
     () => Object.keys(v.anos).map(Number).sort((a, b) => a - b), [v.anos]);
   const [ano, setAno] = useState(() => anos[anos.length - 1] ?? 2024);
+  /** zona em foco no mapa de urnas; `null` é "todas" */
+  const [zona, setZona] = useState<number | null>(null);
   const [filtro, setFiltro] = useState("");
   const bloco = v.anos[String(ano)];
+
+  /** As zonas presentes no mapa, com quantos locais cada uma tem.
+   *
+   *  Só aparece onde há mais de uma: em 242 dos 246 municípios de Goiás a
+   *  cidade inteira é uma zona só, e oferecer o filtro ali seria oferecer uma
+   *  divisão que não existe. */
+  const zonasNoMapa = useMemo(() => {
+    if (!urnas) return [] as [number, number][];
+    const c = new Map<number, number>();
+    urnas.locais.forEach((l) => c.set(l.z, (c.get(l.z) ?? 0) + 1));
+    return [...c.entries()].sort((a, b) => a[0] - b[0]);
+  }, [urnas]);
+
+  /** Índice do município aberto na malha do estado, e os que dividem a zona
+   *  com ele. O pareamento é por código IBGE — `zonas.cods` guarda a mesma
+   *  ordem de `base.json` — e nunca por nome: grafia varia, índice não. */
+  const noEstado = useMemo(() => {
+    if (!zonas || !base || !v.cod) return null;
+    const i = zonas.cods.indexOf(v.cod);
+    if (i < 0) return null;
+    const zs = zonas.porMun[i] ?? [];
+    const irmaos = new Set<number>();
+    zonas.zonas.forEach((z) => {
+      if (zs.includes(z.z)) z.mi.forEach((j) => { if (j !== i) irmaos.add(j); });
+    });
+    return {
+      i, zs,
+      irmaos: [...irmaos].map((j) => base.municipios[j]?.n ?? "")
+        .filter(Boolean).sort((x, y) => x.localeCompare(y, "pt-BR")),
+    };
+  }, [zonas, base, v.cod]);
+
+  // Trocar de cidade ou de pleito zera a zona: a 34 de uma cidade não é a 34
+  // de outra, e um filtro que sobrevive à troca esconderia a cidade nova atrás
+  // de uma seleção feita para a antiga.
+  useEffect(() => { setZona(null); }, [urnas]);
 
   const lista = useMemo(() => {
     const todos = bloco?.fichas ?? [];
@@ -179,7 +222,25 @@ export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
                     : <>Total de votos para vereador em cada local de votação de{" "}
                         {urnas.cidade}.</>}
                 </p>
+                {zonasNoMapa.length > 1 && (
+                  <div className="seg-rot" style={{ margin: "2px 0 12px" }}>
+                    <span className="et">Zona eleitoral</span>
+                    <div className="seg" role="group" aria-label="Zona eleitoral">
+                      <button aria-pressed={zona === null}
+                              onClick={() => setZona(null)}>todas</button>
+                      {zonasNoMapa.map(([z, n]) => (
+                        <button key={z} aria-pressed={zona === z}
+                                title={`${n} local(is) de votação`}
+                                onClick={() => setZona(zona === z ? null : z)}>
+                          {z}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <MapaUrnas
+                  realce={zona == null ? undefined
+                    : (i) => urnas.locais[i]?.z === zona}
                   contorno={urnas.geo}
                   locais={urnas.locais}
                   valores={porLocal}
@@ -201,6 +262,18 @@ export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
                     );
                   }} />
                 <Legenda cortes={cortesUrna} semDado="Sem voto aqui" />
+                {zonasNoMapa.length > 1 && (
+                  <div className="nota" style={{ marginTop: 12 }}>
+                    <strong>A zona eleitoral entra por seleção, e não por
+                    cor.</strong> São {zonasNoMapa.length} zonas aqui, e elas não
+                    são bairros: se interpenetram no mapa — em Goiânia, 19 dos 36
+                    pares de zonas têm áreas sobrepostas. {zonasNoMapa.length} cores
+                    embaralhadas no mesmo espaço não se leem; uma zona de cada vez
+                    mostra exatamente onde ela está e o quanto se mistura com as
+                    vizinhas. Os demais locais ficam apagados em vez de sumir,
+                    para a cidade continuar à vista por trás.
+                  </div>
+                )}
                 <div className="nota" style={{ marginTop: 12 }}>
                   <strong>É o grão mais fino deste projeto, e tem dois
                   limites.</strong> O local de votação é um endereço, não um
@@ -219,6 +292,57 @@ export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
                       Continuam somando nos totais: saem do desenho, não da
                       contagem.</>
                   )}
+                </div>
+              </div>
+            )}
+
+            {noEstado && base && zonas && (
+              <div className="cartaz">
+                <h2>A zona de {v.cidade} no estado</h2>
+                <p className="cap">
+                  {noEstado.zs.length === 1
+                    ? <>A <strong>zona {noEstado.zs[0]}</strong>{" "}
+                        {noEstado.irmaos.length
+                          ? <>cobre {v.cidade} e mais{" "}
+                              {numero(noEstado.irmaos.length)} município(s).</>
+                          : <>cobre só {v.cidade}.</>}</>
+                    : <>{v.cidade} sozinha contém{" "}
+                        <strong>{noEstado.zs.length} zonas</strong>{" "}
+                        ({noEstado.zs.join(", ")}) — por isso ela sai hachurada,
+                        e não pintada: a divisão existe dentro da cidade, e não
+                        há fronteira publicada para desenhá-la.</>}{" "}
+                  A cor não identifica a zona: ela só impede que duas vizinhas
+                  se confundam. São {zonas.nCores} cores para{" "}
+                  {numero(zonas.zonas.length)} zonas.
+                </p>
+                <MapaZonas geo={base.geo} municipios={base.municipios}
+                           zonas={zonas} idx={noEstado.i}
+                           aoInspecionar={aoInspecionar} />
+                {noEstado.irmaos.length > 0 && (
+                  <p className="cap" style={{ marginTop: 10 }}>
+                    <strong>Divide a zona com:</strong>{" "}
+                    {noEstado.irmaos.join(" · ")}.
+                  </p>
+                )}
+                <div className="nota" style={{ marginTop: 12 }}>
+                  <strong>A zona não cabe dentro do município — ela contém
+                  municípios.</strong> Em Goiás, 68 das 92 zonas cobrem mais de
+                  um, e 242 dos 246 municípios pertencem a uma zona só. É o que
+                  torna este mapa possível sem inventar fronteira: onde todos os
+                  municípios de uma zona são exclusivos dela, o limite da zona
+                  <em> é</em> a soma de limites municipais que o IBGE publicou.
+                  São 75 das 92 assim.
+                  <br /><br />
+                  As outras 17 encostam em Goiânia, Anápolis, Aparecida ou Rio
+                  Verde — as quatro cidades que sozinhas contêm várias zonas — e
+                  por isso não fecham fronteira: basta um pedaço da zona cair
+                  dentro de um município dividido para o limite dela deixar de
+                  existir no mapa. São <strong>12 municípios hachurados</strong>:
+                  os 4 divididos e mais 8 inteiros que dividem zona com eles.
+                  Ali a separação é por seção eleitoral, e seção não tem área —
+                  são 3.040 delas em 354 endereços só em Goiânia. Quem quiser ver
+                  zona nessas cidades usa o mapa de urnas acima, onde cada local
+                  de votação traz a sua.
                 </div>
               </div>
             )}

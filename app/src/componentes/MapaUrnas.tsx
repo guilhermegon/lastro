@@ -102,7 +102,7 @@ function caminho(anel: number[][], em: (p: Ponto) => Ponto) {
  * é a mesma confusão entre zero e ausência que o resto do projeto recusa.
  */
 export function MapaUrnas({ locais, valores, rotulo, descrever, aoInspecionar,
-                            contorno }: {
+                            contorno, realce }: {
   locais: LocalUrna[];
   valores: number[];
   rotulo: string;
@@ -111,6 +111,10 @@ export function MapaUrnas({ locais, valores, rotulo, descrever, aoInspecionar,
   /** ausente nos arquivos de capital anteriores ao `55_` — o mapa continua
    *  funcionando sem ele, enquadrado na nuvem, como era antes */
   contorno?: Contorno;
+  /** quando existe, os locais que NAO passam ficam apagados em vez de sumir.
+   *  Someça-los mudaria o mapa; apagá-los mantém a cidade inteira à vista e
+   *  responde onde a parte selecionada está DENTRO dela. */
+  realce?: (i: number) => boolean;
 }) {
   const dados = useMemo(() => {
     const pts: (Ponto | null)[] = locais.map((l) =>
@@ -182,7 +186,9 @@ export function MapaUrnas({ locais, valores, rotulo, descrever, aoInspecionar,
       const [cx, cy] = em(p);
       const v = valores[i] ?? 0;
       const r = raio(v, k);
+      const apagado = realce ? !realce(i) : false;
       const comum = {
+        opacity: apagado ? 0.16 : 1,
         onMouseEnter: (e: React.MouseEvent) =>
           aoInspecionar({ x: e.clientX, y: e.clientY, conteudo: descrever(i, v) }),
         onMouseLeave: () => aoInspecionar(null),

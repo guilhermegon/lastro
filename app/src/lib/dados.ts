@@ -1,7 +1,7 @@
 import type {
   BaseUF, BlocoAno, BlocoRivais, Cargo, CargoComRival, Cruzamentos, Demografia,
   AlegoAdmin, AlegoVerbas, AlmgVerbas, Assembleias, CldfAdmin, CldfVerbas,
-  Cidades, Emendas, EmendasBR, Indice, Padroes, Sigla, Urnas, Vereador,
+  Cidades, Emendas, EmendasBR, Indice, Padroes, Sigla, Urnas, Vereador, Zonas,
 } from "../tipos";
 
 const BASE = `${import.meta.env.BASE_URL}dados`;
@@ -160,6 +160,11 @@ export const carregarAlmgVerbas = (): Promise<AlmgVerbas> =>
  */
 export const carregarCidades = (): Promise<Cidades> =>
   comCache<Cidades>("cidades", `${BASE}/cidades.json`);
+
+/** As zonas eleitorais de uma UF. Existe onde o `56_` rodou — hoje Goiás —,
+ *  então quem chama trata a ausência como "ainda não mapeamos as zonas aqui". */
+export const carregarZonas = (uf: Sigla): Promise<Zonas> =>
+  comCache<Zonas>(`zonas:${uf}`, `${BASE}/${uf}/zonas.json`);
 
 /** Vereador de uma cidade, pelo caminho que o indice deu. */
 export const carregarCidade = (uf: Sigla, src: string): Promise<Vereador> =>

@@ -9,6 +9,10 @@
   --municipal: #4F46B8; --on-municipal: #FFFFFF;
   --sem-voto: #DFE6E6; --ink-sel: #5E6A6E;
   --s1: #C43D34; --s2: #E07B33; --s3: #DFBB3C; --s4: #6FAA38; --s5: #2C6E33;
+  /* zonas eleitorais: a cor NAO identifica a zona, so' separa vizinhas.
+     92 categorias nominais nao tem paleta; 5 bastam para que zonas que se
+     tocam nunca coincidam. Validadas em `validate_palette.js`. */
+  --z1: #0A8F84; --z2: #B45309; --z3: #8B21C9; --z4: #5A8A0C; --z5: #2563EB;
   --tinta-s1: #F5EEED; --tinta-s2: #3B2B20; --tinta-s3: #564D2E;
   --tinta-s4: #29361D; --tinta-s5: #C9E2CC;
   --shadow: 0 1px 2px rgba(17,24,26,.06), 0 4px 14px rgba(17,24,26,.05);
@@ -25,6 +29,7 @@
     --municipal: #A79BF2; --on-municipal: #06191A;
     --sem-voto: #2E3A3D; --ink-sel: #919EA1;
     --s1: #C4453D; --s2: #D0812F; --s3: #C9AE3B; --s4: #6FAC3D; --s5: #3E9A48;
+    --z1: #1E9C93; --z2: #C57A2E; --z3: #9A6BD0; --z4: #6E9E33; --z5: #4A82D8;
     --tinta-s1: #F9F5F4; --tinta-s2: #362A1D; --tinta-s3: #4A4328;
     --tinta-s4: #2A381E; --tinta-s5: #142516;
     --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
@@ -37,6 +42,7 @@
   --accent: #3FB9BE; --accent-soft: #17393B; --on-accent: #06191A;
   --sem-voto: #2E3A3D; --ink-sel: #919EA1;
   --s1: #C4453D; --s2: #D0812F; --s3: #C9AE3B; --s4: #6FAC3D; --s5: #3E9A48;
+  --z1: #1E9C93; --z2: #C57A2E; --z3: #9A6BD0; --z4: #6E9E33; --z5: #4A82D8;
   --tinta-s1: #F9F5F4; --tinta-s2: #362A1D; --tinta-s3: #4A4328;
   --tinta-s4: #2A381E; --tinta-s5: #142516;
   --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
