@@ -381,9 +381,13 @@ export default function App() {
               tela (esfera, ano, medida, Pix), e mostrar as abas de cargo ali
               ofereceria seções de outro produto. */}
           {ehCadeOVoto && (
+            /* `ver` liga a aba, `capital` só nomeia: sem arquivo de vereador
+               ela fica desligada e SEM cidade, porque "Vereador · Brasília"
+               apagado sugeriria dado faltando — Brasília não tem câmara
+               municipal, a CLDF acumula o papel. */
             <Abas atual={sel.vista} cargosDisponiveis={resumo?.cargos ?? CARGOS}
                   temVereador={resumo?.ver === true}
-                  cidade={resumo?.capital}
+                  cidade={resumo?.ver ? resumo.capital : undefined}
                   uf={sel.uf}
                   aoTrocar={(v) => setSel((s) => ({ ...s, vista: v, cand: 0 }))} />
           )}

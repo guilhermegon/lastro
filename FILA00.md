@@ -353,6 +353,78 @@ pasta antiga é hoje a única cópia local de `data/interim` — que não é ver
 por ser grande demais e que o pipeline levaria horas para reconstruir a partir do
 TSE. Enquanto o repositório novo não estiver provado em uso, ela é o seguro.
 
-**leader_recommendation.** *Nenhuma ainda.* A decisão depende de um fato que
-ainda não existe: o repositório novo ter rodado o pipeline inteiro pelo menos uma
-vez. Antes disso, qualquer recomendação seria palpite sobre o próprio seguro.
+**leader_recommendation (formada em 2026-08-30).** **Mover `data/`, nunca
+copiar nem apagar.** Medi o que a pasta antiga guarda:
+
+| | tamanho | custo de refazer |
+|---|---|---|
+| `data/interim` | 5,6 GB | **horas** — exige rebaixar 1,5 GB de zips do TSE |
+| `data/processed` | 143 MB | minutos, derivado do interim |
+| `data/raw` | 60 MB | transitório por desenho; a ingestão apaga os zips |
+| código | — | está no git, em `guilhermegon/lastro` |
+
+Só o `interim` é insubstituível. E o único commit não empurrado da pasta antiga
+é o `46_publica_site.py`, que o RAS 00 TKT 0009 já decidiu descartar — não há
+nada preso ali.
+
+Então a operação certa é **mover o diretório de dados** para um lugar que o
+projeto novo assuma, apontar `RASTRO_DATA` para ele de forma documentada, rodar
+o pipeline uma vez para provar, e só então o resto da pasta antiga pode ir. Mover
+não perde nada; copiar duplicaria 5,6 GB; apagar antes de mover perderia horas.
+
+**Fora da pré-autorização, e por isso segue aberto:** *onde* os dados devem
+morar é escolha do usuário — envolve disco, backup e talvez pasta sincronizada,
+que o `00_config` documenta como caso em que `RASTRO_DATA` é obrigatório. A
+recomendação está formada; o destino é a decisão que falta.
+
+**Nota de 2026-08-30:** esta sessão rodou o pipeline do repositório novo contra
+os dados da pasta antiga, via `RASTRO_DATA`, e funcionou. Isso prova que o
+arranjo serve — mas não satisfaz a condição original do ticket, porque o
+repositório novo continua sem `data/` próprio. A distinção importa: o que foi
+provado é o caminho, não a mudança.
+
+---
+
+### RAS 00 TKT 0011 — Distrito Federal equiparado a estado
+
+| Campo | Valor |
+|---|---|
+| `type` | `TRACKING_NO_APPROVAL` |
+| `criticality` | alta — mexe na camada de apuração |
+| `work_continues` | sim |
+| `status` | **EM VERIFICAÇÃO** — ingestão pronta, pipeline rodando, gate pendente |
+
+**summary.** O DF elege deputado **distrital** (cargo 8 do TSE) e o pipeline só
+ingeria o cargo 7, então ele era a única unidade da federação sem casa
+legislativa no painel. `49_df_distrital.py` traz os sete pleitos, equiparando
+distrital a estadual: **24 eleitos em cada ano**, batendo com as cadeiras da
+CLDF em sete pleitos independentes.
+
+**Por que é ticket e não só roadmap.** Mexe em apuração, que é onde a regra de
+auditoria deste projeto manda parar e olhar (DaRulez 3). E o gate ainda não
+correu: o teste-ouro de Goiás decide se a inclusão fica.
+
+**Três armadilhas encontradas, e uma delas eu criei:**
+
+1. **Corrompi quatro arquivos do interim.** Montei a lista de colunas a partir
+   de 2022 — 23 colunas, com federação — e anexei a todos os anos; 2002 a 2014
+   têm 20. Só apareceu quando tentei ler um arquivo inteiro e o pandas falhou.
+   A leitura de verificação anterior usava `usecols` e mascarava o desalinhamento.
+   Reparado removendo exatamente as linhas anexadas, e o teste-ouro voltou a
+   passar idêntico. O script agora alinha ao cabeçalho do ano e aborta se a
+   contagem divergir.
+2. **`contains("ELEITO")` casa com "NÃO ELEITO".** Relatei 286 eleitos numa Casa
+   de 24. O pipeline publicado não tem esse defeito — usa `startswith` mais uma
+   lista fechada que inclui `MEDIA` —, era só o meu diagnóstico.
+3. **Em 1998 o DF não tem arquivo próprio** no zip do TSE: está dentro do
+   `BRASIL.csv`, e naquele ano `QT_VOTOS_NOMINAIS` vem zerada, com os 872.072
+   votos na `_VALIDOS`.
+
+**O que a tela precisa continuar dizendo.** O DF é um município só: concentração,
+domínio, contiguidade e o mapa degeneram lá — 100% do voto no único município
+por construção, não por força política. O aviso está escrito em `VistaCargo`. A
+geografia intra-DF existe por zona eleitoral e não há malha publicada de zona,
+mesmo caso do vereador de capital.
+
+**work_continues** enquanto o pipeline roda. Se o teste-ouro de Goiás mudar um
+dígito, a inclusão volta atrás.
