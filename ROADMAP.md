@@ -682,16 +682,31 @@ quociente do DF em 2022 foi de **66.575** contra 55.854 e 33.327. Mesma Casa,
 preço de entrada dobrado em relação ao Tocantins.
 
 
-## AGUARDANDO — espera decisão do usuário ou evento externo
+## AGUARDANDO — espera evento externo ou comando do usuário
 
 O BEDEL lê o **título da seção** para saber que não há próximo item seguro
 aqui: a palavra AGUARDANDO precisa estar no cabeçalho, não só ao lado de cada
-item. Sem ela, o hook cobra estes três como se fossem executáveis — e nenhum
-é: os dois primeiros dependem de ação nas contas do usuário, e o terceiro do
-TSE publicar.
+item. Sem ela, o hook cobra estes quatro como se fossem executáveis — e nenhum
+é: três dependem de ação ou escolha do usuário, e o último do TSE publicar.
+
+Depois do **RT de 2026-08-30** nenhum destes espera decisão: os caminhos estão
+escolhidos e o que falta é um evento ou um comando de fora. O que muda é o tipo
+de espera, e por isso cada um diz agora exatamente o que destrava.
 
 - [ ] **AGUARDANDO** — separar `guilhermegon/lastro` da rede de fork antes de
-  apagar o antigo (RAS 00 TKT 0007). Espera ação do usuário no GitHub.
-- [ ] **AGUARDANDO** — autenticação do Radar antes de publicá-lo
-  (RAS 00 TKT 0008). Espera a conta Cloudflare do usuário.
-- [ ] **AGUARDANDO** — pleito de 2026 (TKT-003). Espera o TSE publicar.
+  apagar o antigo (RAS 00 TKT 0007). Caminho decidido: repositório independente.
+  Destrava com **um comando do usuário**, logado como `guilhermegon` — o `gh`
+  desta máquina é da conta GTzon: `gh repo create guilhermegon/lastro --private`.
+  Depois disso eu aponto o remoto e empurro. Apagar o antigo continua exigindo
+  confirmação explícita: é irreversível.
+- [ ] **AGUARDANDO** — Cloudflare Access no Radar (RAS 00 TKT 0008). Deixou de
+  ser decisão e virou **gatilho**: até haver cliente vale não publicar, que já
+  está em vigor e verificado; no primeiro cliente entra o Access, sem nova
+  rodada de decisão.
+- [ ] **AGUARDANDO** — destino do `data/` da pasta antiga (RAS 00 TKT 0010). O
+  método está aceito — **mover, nunca copiar nem apagar** — e o RT não fecha o
+  ticket porque o destino é escolha do usuário. Recomendado:
+  `Documents\LASTRO\dados`, mesmo volume (mover é renomear, instantâneo) e fora
+  de pasta sincronizada. Uma palavra fecha.
+- [ ] **AGUARDANDO** — pleito de 2026 (TKT-003). Espera o TSE publicar. É o
+  único dos quatro em que RT nada tinha a aplicar: não há decisão, há calendário.

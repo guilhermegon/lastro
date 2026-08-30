@@ -9,6 +9,22 @@ Tickets criados a partir daqui usam `RAS 00 TKT NNNN`. Os três abaixo **mantêm
 `TKT-NNN` com que nasceram — históricos não são renumerados
 (`preserve_historical_numbers: true`, `stable_ticket_id: true`).
 
+## RT de 2026-08-30
+
+O usuário respondeu `RT`. Aplicada a recomendação do líder a todo ticket aberto
+com `leader_recommendation` inequívoca:
+
+| Ticket | Resultado |
+|---|---|
+| TKT-003 — pleito de 2026 | **segue aberto** — não há recomendação a aplicar: espera o TSE publicar, não uma decisão |
+| RAS 00 TKT 0007 — fork privado | **decidido** — opção 1; falta o usuário criar o repositório, o `gh` daqui é de outra conta |
+| RAS 00 TKT 0008 — acesso do Radar | **decidido** — opção 3 agora, opção 1 quando houver cliente; vira gatilho |
+| RAS 00 TKT 0010 — pasta antiga | **segue aberto** — método aceito, destino é julgamento humano de fato |
+| RAS 00 TKT 0011 — Distrito Federal | **fechado pelo portão**, não pelo RT: o teste-ouro correu e passou |
+
+Dois ficaram abertos de propósito. RT aplica recomendação inequívoca; ele não
+inventa uma onde o próprio líder registrou que a escolha é do usuário.
+
 ---
 
 ### TKT-001 — Sigla e entrada no roster
@@ -244,7 +260,7 @@ abrir uma frente nova de escopo aberto, e isso é decisão de dono.
 | `type` | `HUMAN_ACTION` |
 | `criticality` | alta — a ação pedida destruiria o repositório novo |
 | `work_continues` | sim — o projeto já vive em `guilhermegon/lastro` |
-| `status` | **ABERTO** — depende de ação do usuário no GitHub |
+| `status` | **DECIDIDO por RT, 2026-08-30** — caminho fechado na opção 1; execução depende de ação do usuário no GitHub |
 
 **summary.** O usuário pediu para apagar `GTzon/lastro` depois de confirmar o
 convite. Ao verificar, `guilhermegon/lastro` é **fork** de `GTzon/lastro`, e os
@@ -271,6 +287,18 @@ camada.
 antigo são ações na conta do usuário. O ticket fica aberto com o caminho
 decidido; a parte técnica está pronta para rodar assim que houver o destino.
 
+**RT de 2026-08-30: opção 1 adotada.** E ao tentar executar o que caberia a mim,
+apareceu o motivo concreto de por que não cabe: o `gh` desta máquina está
+autenticado como **GTzon**, não como `guilhermegon`. Criar repositório sob
+`guilhermegon` exige a sessão do outro usuário — não é falta de permissão de
+escopo, é conta diferente. Falta um passo, e ele é do usuário:
+
+    gh repo create guilhermegon/lastro --private     # logado como guilhermegon
+
+Feito isso, eu aponto o remoto e empurro. **A exclusão de `GTzon/lastro`
+continua fora do RT**: é irreversível e destruiria o fork se a separação falhar,
+então exige confirmação explícita depois de o novo repositório estar provado.
+
 ---
 
 ### RAS 00 TKT 0008 — O Radar não tem controle de acesso
@@ -280,7 +308,7 @@ decidido; a parte técnica está pronta para rodar assim que houver o destino.
 | `type` | `HUMAN_ACTION` |
 | `criticality` | alta — é o que separa produto fechado de produto aberto |
 | `work_continues` | sim — o Radar roda local e não é publicado |
-| `status` | **ABERTO** — depende da conta Cloudflare do usuário |
+| `status` | **DECIDIDO por RT, 2026-08-30** — opção 3 agora; opção 1 quando houver cliente |
 
 **summary.** O Radar é o produto fechado, e hoje o que o fecha é separação de
 **build**, não de acesso: `scripts/22_` tira `padroes.json` e `cruzamentos.json`
@@ -304,6 +332,13 @@ fechado que responde 200 é pior que um produto não publicado.
 **Aplicado o que cabe ao líder**: o Radar não entra no deploy, e `47_` tem gate
 que aborta se algum arquivo do Radar reaparecer no build público. A configuração
 do Access é ação do usuário.
+
+**RT de 2026-08-30: adotada a recomendação em duas partes.** Vale a opção 3
+enquanto não houver cliente — e ela já está em vigor e verificada, sem nada novo
+a fazer. A opção 1 fica decidida de antemão para o dia em que houver: não
+precisará de nova rodada de decisão, só da configuração do Access.
+
+O ticket sai da fila de decisão e vira **gatilho**: reabre no primeiro cliente.
 
 ---
 
@@ -383,6 +418,24 @@ arranjo serve — mas não satisfaz a condição original do ticket, porque o
 repositório novo continua sem `data/` próprio. A distinção importa: o que foi
 provado é o caminho, não a mudança.
 
+**RT de 2026-08-30: este ticket NÃO fecha, e a política é que manda.** A
+recomendação é inequívoca sobre o **método** — mover, nunca copiar nem apagar —
+e silenciosa sobre o **destino**, que ela própria declara ser escolha do
+usuário. Aplicar "mover" sem destino é impossível, e RT não força decisão onde
+não há recomendação (`on_missing_recommendation`). O método fica registrado como
+aceito; o destino segue aberto.
+
+Para que a próxima palavra baste, o destino que eu recomendo é
+`C:\Users\Administrador\Documents\LASTRO\dados`: irmão do repositório e fora
+dele (o `.gitignore` não precisa saber que existe), no **mesmo volume** da pasta
+antiga — mover 5,6 GB dentro do mesmo volume é renomear, instantâneo e
+reversível —, e fora de qualquer pasta sincronizada, que é o caso que o
+`00_config` documenta como perigoso porque a ingestão grava e apaga zips de
+587 MB em segundos.
+
+Um "sim" a esse caminho fecha o ticket; outro destino também fecha, e aí só
+troco o alvo do `move`.
+
 ---
 
 ### RAS 00 TKT 0011 — Distrito Federal equiparado a estado
@@ -392,7 +445,7 @@ provado é o caminho, não a mudança.
 | `type` | `TRACKING_NO_APPROVAL` |
 | `criticality` | alta — mexe na camada de apuração |
 | `work_continues` | sim |
-| `status` | **EM VERIFICAÇÃO** — ingestão pronta, pipeline rodando, gate pendente |
+| `status` | **FECHADO** — o gate correu e passou, 2026-08-30 |
 
 **summary.** O DF elege deputado **distrital** (cargo 8 do TSE) e o pipeline só
 ingeria o cargo 7, então ele era a única unidade da federação sem casa
@@ -428,3 +481,18 @@ mesmo caso do vereador de capital.
 
 **work_continues** enquanto o pipeline roda. Se o teste-ouro de Goiás mudar um
 dígito, a inclusão volta atrás.
+
+**Fechamento (2026-08-30).** O gate correu e não mudou um dígito: Álvaro Guimarães
+12.160 / 12.398 / 18.646 / 27.074 / 35.660 / 23.788, Itumbiara 6.559 e 27,57%,
+idênticos ao painel do TSE/GO. O `15_valida_nacional` confirmou que o recorte de
+GO no arquivo do Brasil segue igual ao arquivo de GO nas 34 combinações
+cargo/ano — que era exatamente o risco do append. Publicado e verificado no ar:
+índice com 27 UFs e 189 linhas de agregado, aba **Distrital** no DF, 24 eleitos.
+
+O DF obrigou a corrigir três exibições degeneradas que passavam por medida — os
+dois coropléticos, a tipologia e a semelhança partidária — e revelou um defeito
+antigo: a aba de Vereador ligava por `capital` e não pelo arquivo, então ficava
+clicável no DF para cair num 404. Detalhe no ROADMAP, Marco 14.
+
+Este ticket **não** foi fechado por RT: foi fechado pelo portão. RT não decide
+gate — gate se decide rodando.
