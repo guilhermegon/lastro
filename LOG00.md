@@ -1109,13 +1109,13 @@ que o infografico do TRE afirma ao listar bairros por zona.
 **Como foi desenhado, sem scipy e sem shapely.** A celula de Voronoi sai por
 recorte sucessivo de meio-plano (Sutherland-Hodgman) a partir da caixa da
 cidade. As arestas internas entre celulas da MESMA zona somem, e o que resta e'
-a divisa. Detalhe que decidiu funcionar: o teste do recorte guarda , entao
+a divisa. Detalhe que decidiu funcionar: o teste do recorte guarda `>= 0`, entao
 vertice sobre a mediatriz permanece — com  as duas celulas vizinhas
 produziriam arestas ligeiramente diferentes e a dissolucao deixaria fresta.
 
 **O recorte pelo contorno do municipio nao e' feito em Python.** As celulas saem
-retangulares na borda e quem as apara e' o  do SVG, com o contorno que
-o  ja' publicou. Recortar poligono nao-convexo em Python exigiria
+retangulares na borda e quem as apara e' o `clipPath` do SVG, com o contorno
+que o `55_` ja' publicou. Recortar poligono nao-convexo em Python exigiria
 biblioteca; o navegador faz de graca e sem erro.
 
 Custo: 2,4 segundos e 114 KB para as quatro cidades. Goiania gastou **3 cores**
