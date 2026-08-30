@@ -703,11 +703,10 @@ de espera, e por isso cada um diz agora exatamente o que destrava.
   ser decisão e virou **gatilho**: até haver cliente vale não publicar, que já
   está em vigor e verificado; no primeiro cliente entra o Access, sem nova
   rodada de decisão.
-- [ ] **AGUARDANDO** — unificar as duas árvores de dados (RAS 00 TKT 0012). O
-  move do TKT-0010 revelou que o repositório tem `data/` próprio **em uso**: quem
-  define `RASTRO_DATA` escreve em `LASTRO\dados`, quem esquece escreve em
-  `lastro/data`, e as duas já divergiram. Recomendação formada (o `00_config`
-  preferir `../dados` e imprimir a árvore escolhida); espera a outra sessão
-  parar de escrever, para não trocar a árvore dela no meio de uma feature.
+- [x] **Unificadas as duas árvores de dados** (RAS 00 TKT 0012). O `00_config`
+  prefere `../dados` por padrão e imprime a árvore escolhida em `stderr` a cada
+  importação; `OVERRIDES` deixou de seguir `RASTRO_DATA` porque os overrides são
+  versionados. Provado com o teste-ouro **sem variável** e com a republicação do
+  site: nenhum arquivo perdido no build.
 - [ ] **AGUARDANDO** — pleito de 2026 (TKT-003). Espera o TSE publicar. É o
   único dos quatro em que RT nada tinha a aplicar: não há decisão, há calendário.

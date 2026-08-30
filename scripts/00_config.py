@@ -4,28 +4,69 @@ Painel: distribuicao espacial do voto para deputado estadual em Goias, 1998-2022
 Fonte: TSE, dados abertos (votacao_candidato_munzona).
 """
 import os
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-# RASTRO_DATA aponta o diretorio de dados para fora do projeto. Sem a variavel, nada
-# muda: continua `data/` aqui dentro.
-# Serve para dois casos. (1) Disco apertado: a ingestao chega a ~1,2 GB de pico e os
-# dados finais ocupam ~134 MB. (2) Projeto em pasta sincronizada (OneDrive, Dropbox) -
-# ai e' obrigatorio: a ingestao grava zips de ate 587 MB e os apaga segundos depois, o
-# sincronizador tenta subir cada um, e sincronizacao durante escrita produz copia em
-# conflito, que num diretorio de dados vira duplicata silenciosa.
-DATA = Path(os.environ.get("RASTRO_DATA") or (ROOT / "data")).resolve()
+# ---------------------------------------------------------------------------
+# ONDE MORAM OS DADOS
+#
+# Ate 2026-08-30 isto era so' `RASTRO_DATA or ROOT/data`, e o "or" custou caro:
+# duas sessoes trabalhando no mesmo repositorio produziram DUAS arvores de dados
+# com conteudo diferente. Quem exportava a variavel escrevia numa; quem esquecia
+# escrevia na outra; e nada avisava. O `22_publicar_web.py` apaga e reconstroi
+# `app/public/dados` a partir de `PROCESSED`, entao publicar de arvores
+# diferentes daria um site com metade dos arquivos de cada apuracao - sem erro
+# em lugar nenhum, porque cada arquivo e' individualmente valido. E' o modo de
+# falha que este projeto mais recusa: numero errado com aparencia de certo.
+#
+# A correcao tem duas partes, e nenhuma depende de alguem lembrar de nada:
+#   1. o padrao acerta sozinho - se existe `../dados` ao lado do repositorio,
+#      ele E' a arvore, sem precisar de variavel;
+#   2. a arvore escolhida e' IMPRESSA na importacao. Erro silencioso vira linha
+#      visivel, que e' a unica diferenca que importa quando o dado e' publico.
+#
+# `RASTRO_DATA` continua mandando quando definida, e segue obrigatoria se o
+# projeto voltar a morar em pasta sincronizada (OneDrive, Dropbox): a ingestao
+# grava zips de ate 587 MB e os apaga segundos depois, o sincronizador tenta
+# subir cada um, e sincronizacao durante escrita produz copia em conflito - que
+# num diretorio de dados vira duplicata silenciosa.
+# ---------------------------------------------------------------------------
+_CANONICO = ROOT.parent / "dados"
+
+if os.environ.get("RASTRO_DATA"):
+    DATA = Path(os.environ["RASTRO_DATA"]).resolve()
+    _origem = "RASTRO_DATA"
+elif _CANONICO.is_dir():
+    DATA = _CANONICO.resolve()
+    _origem = "padrao (../dados)"
+else:
+    DATA = (ROOT / "data").resolve()
+    _origem = "padrao (data/ do repositorio)"
 
 RAW = DATA / "raw"
 INTERIM = DATA / "interim"
 PROCESSED = DATA / "processed"
-OVERRIDES = DATA / "overrides"
+
+# OVERRIDES NAO segue DATA, e isto e' deliberado. Os tres CSV de override sao
+# feitos a mao, nao saem de lugar nenhum e SAO VERSIONADOS (ver `.gitignore`,
+# que ignora raw/interim/processed e abre excecao para `data/overrides/*.csv`).
+# Enquanto seguiam DATA, definir `RASTRO_DATA` fazia o pipeline ler uma COPIA
+# fora do git: editar o arquivo versionado nao mudava nada, e a divergencia so'
+# apareceria como pareamento errado num mapa. Dado derivado mora onde couber;
+# dado feito a mao mora onde o historico o guarda.
+OVERRIDES = ROOT / "data" / "overrides"
 DOCS = ROOT / "docs"
 DIST = ROOT / "dist"
 
 for _d in (RAW, INTERIM, PROCESSED, OVERRIDES, DOCS, DIST):
     _d.mkdir(parents=True, exist_ok=True)
+
+# Em stderr de proposito: aparece para quem esta' olhando e nao contamina a
+# saida de nenhum script. Uma linha, toda vez, para que rodar na arvore errada
+# seja uma coisa que se ve' - e nao uma coisa que se descobre no site.
+print(f"[dados] {DATA}  <- {_origem}", file=sys.stderr)
 
 ANOS = [1998, 2002, 2006, 2010, 2014, 2018, 2022]
 UF = "GO"

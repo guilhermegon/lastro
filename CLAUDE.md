@@ -71,11 +71,20 @@ aparência de certo — é o mesmo risco de dado enganoso que motiva a emenda do
 
       RASTRO_DATA=C:\Users\Administrador\Documents\LASTRO\dados
 
-  Sem a variável, `00_config` cai no `data/` de dentro do repositório — que **existe e
-  tem conteúdo próprio**. São duas árvores, e quem não define a variável escreve na de
-  dentro. Antes de rodar qualquer script do pipeline, saiba em qual das duas você está:
-  o `interim` de 5,6 GB — o insubstituível, horas para refazer a partir do TSE — mora
-  no canônico.
+  **Mas você não precisa definir nada**: desde 2026-08-30 o `00_config` usa `../dados`
+  por padrão quando a pasta existe, e **imprime em `stderr` qual árvore escolheu** a
+  cada importação:
+
+      [dados] C:\Users\Administrador\Documents\LASTRO\dados  <- padrao (../dados)
+
+  Se essa linha apontar para outro lugar, pare antes de rodar o resto. O `interim` de
+  5,6 GB — o insubstituível, horas para refazer a partir do TSE — mora no canônico.
+
+- **`data/overrides` é exceção e não segue `RASTRO_DATA`.** Os três CSV de override são
+  feitos à mão e **versionados**; o resto de `data/` é derivado e ignorado. Enquanto
+  seguiam a variável, definir `RASTRO_DATA` fazia o pipeline ler uma cópia fora do git —
+  editar o arquivo versionado não mudava nada, e a divergência só apareceria como
+  pareamento errado num mapa. Hoje `OVERRIDES` é sempre `ROOT/data/overrides`.
 
 - A variável `RASTRO_DATA` aponta o diretório de dados para fora do projeto. Útil quando
   o disco do projeto está apertado (a ingestão chega a ~1,2 GB de pico) ou se o projeto

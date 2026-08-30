@@ -474,7 +474,7 @@ antigo — só os dados saíram. Apagar o resto é irreversível e não foi pedi
 | `type` | `BLOCKING_DECISION` |
 | `criticality` | alta — é de onde sai o número que vai para o site |
 | `work_continues` | sim, com risco: cada sessão publica a partir da sua |
-| `status` | **ABERTO** — aberto em 2026-08-30, ao fechar o TKT-0010 |
+| `status` | **FECHADO** — unificado em 2026-08-30, no mesmo dia |
 
 **summary.** O pipeline lê e escreve em `cfg.DATA`, que é `RASTRO_DATA` quando a
 variável existe e `ROOT/data` quando não existe. Hoje as duas coisas existem e
@@ -507,6 +507,48 @@ insuficiente.
 preciso decidir **o que fazer com o conteúdo único de cada árvore** — e há uma
 sessão escrevendo numa delas agora. Mudar o padrão com trabalho em voo faria a
 próxima execução dela trocar de árvore no meio de uma feature.
+
+**Fechamento (2026-08-30).** O usuário mandou encerrar a outra sessão e unificar.
+Opção 1 aplicada.
+
+**O inventário desarmou o medo antes da primeira cópia.** Comparei as duas
+árvores arquivo a arquivo antes de mover qualquer coisa:
+
+| | |
+|---|---|
+| iguais nas duas | **503** |
+| só na interna | 505 — `GO/cidades/` (494), `veruf_GO_*` (7), zips (4) |
+| só na canônica | 308 — o `interim` de 5,6 GB, `raw/emendas_*`, DF estadual |
+| **diferentes** | **3** |
+
+E os três diferentes não eram conflito nenhum. `partidos_espectro.csv` diferia em
+**33 bytes para 33 linhas** — CRLF contra LF, mesmo conteúdo. `DF/federal.json` e
+`DF/presidente.json` diferiam porque a canônica é mais nova: tem o `sim: null` do
+DF. Nenhuma decisão de "qual versão vence" precisou ser tomada no escuro.
+
+**A unificação foi aditiva**, e nessa ordem: copiar o que só existia na interna,
+conferir byte a byte que tudo tinha par, e **só então** mover `raw`, `interim` e
+`processed` da interna para `_data_antiga/`, fora do repositório. Renomear é
+reversível; apagar não é, e havia outra sessão que podia querer olhar.
+
+**E o defeito que o inventário achou de graça.** `OVERRIDES` seguia `DATA`, mas os
+três CSV de override são feitos à mão e **versionados** — o `.gitignore` ignora
+`raw`, `interim` e `processed` e abre exceção para `data/overrides/*.csv`. Com
+`RASTRO_DATA` definida, o pipeline lia uma cópia fora do git: editar o arquivo
+versionado não mudava nada, e a divergência só apareceria como pareamento errado
+num mapa. `OVERRIDES` passou a ser sempre `ROOT/data/overrides`.
+
+**Provado.** Teste-ouro **sem variável de ambiente** — que era o ponto — passou.
+Republicado o site inteiro a partir da árvore única e comparado o build antes e
+depois: **nenhum arquivo perdido**, e os dois trabalhos convivem — DF estadual nos
+sete anos, `GO/cidades` com 247 arquivos e `urnas_2024`.
+
+**Nota que vale mais que o resto:** o build **já tinha perdido** o DF estadual. A
+outra sessão republicou a partir da árvore dela, que não tinha o DF, e o
+`22_publicar_web.py` apaga e reconstrói — os sete arquivos sumiram do
+`app/public/dados` e voltaram só agora. Não chegou ao git por sorte de
+cronologia, não por proteção. Era exatamente a falha prevista neste ticket, e ela
+aconteceu enquanto ele estava aberto.
 
 ---
 
