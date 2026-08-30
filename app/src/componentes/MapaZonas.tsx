@@ -1,5 +1,6 @@
 import { useMemo, type ReactNode } from "react";
 import { projetar } from "../lib/projecao";
+import { MarcaCapital } from "./MarcaCapital";
 import type { GeometriaMunicipio, Zonas } from "../tipos";
 import type { EstadoDica } from "./Dica";
 
@@ -25,15 +26,19 @@ import type { EstadoDica } from "./Dica";
  * cor. Bastam cinco (`56_zonas_uf.py` calcula e avisa se passar de seis). Quem
  * identifica é o rótulo, no toque.
  */
-export function MapaZonas({ geo, municipios, zonas, idx, aoInspecionar }: {
+export function MapaZonas({ geo, municipios, zonas, idx, capital,
+                            aoInspecionar }: {
   geo: (GeometriaMunicipio | null)[];
   municipios: { n: string }[];
   zonas: Zonas;
   /** índice do município aberto, ou -1 */
   idx: number;
+  /** a capital do estado, apontada e nomeada como em todo mapa de estado */
+  capital?: { i: number; nome: string };
   aoInspecionar: (d: EstadoDica | null) => void;
 }) {
-  const { caminhos, largura, altura } = useMemo(() => projetar(geo), [geo]);
+  const { caminhos, pontos, largura, altura } = useMemo(() => projetar(geo), [geo]);
+  const pCap = capital ? pontos[capital.i] : null;
 
   const emFoco = useMemo(() => {
     const zs = new Set(zonas.porMun[idx] ?? []);
@@ -104,6 +109,9 @@ export function MapaZonas({ geo, municipios, zonas, idx, aoInspecionar }: {
           />
         );
       })}
+      {pCap && capital && (
+        <MarcaCapital p={pCap} nome={capital.nome} largura={largura} />
+      )}
     </svg>
   );
 }

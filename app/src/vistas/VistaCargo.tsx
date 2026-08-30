@@ -23,11 +23,13 @@ interface Props {
   /** só chega nos proporcionais; nos majoritários a disputa não é dentro de
    *  uma lista e "rival" seria o próprio adversário da eleição */
   rivais: TRivais | null;
+  /** a capital do estado, apontada e nomeada nos dois coropléticos */
+  capital?: { i: number; nome: string };
 }
 
 export function VistaCargo({
   cargo, base, dados, ano, agregado, selecionado, aoSelecionar, aoInspecionar,
-  rivais,
+  rivais, capital,
 }: Props) {
   const [filtro, setFiltro] = useState("");
   const bloco = dados[String(ano)];
@@ -123,6 +125,7 @@ export function VistaCargo({
                 <h2>Votação</h2>
                 <p className="cap">Votos nominais recebidos em cada município.</p>
                 <Mapa geo={base.geo} valores={votos} cortes={cortesVotos}
+                      capital={capital}
                       rotulo="Votos nominais" aoInspecionar={aoInspecionar}
                       descrever={(i, v) => (
                         <>
@@ -140,6 +143,7 @@ export function VistaCargo({
                   Quanto representa do total de votos nominais apurados no município.
                 </p>
                 <Mapa geo={base.geo} valores={influencia} cortes={cortesInfl}
+                      capital={capital}
                       rotulo="Influência" aoInspecionar={aoInspecionar}
                       descrever={(i, v) => (
                         <>

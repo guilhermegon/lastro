@@ -19,7 +19,7 @@ import { ListaCandidatos } from "../componentes/ListaCandidatos";
  * pública de zona — a geografia entra como distribuição, não como desenho.
  */
 export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
-                                base, zonas, aoInspecionar }: {
+                                base, zonas, capital, aoInspecionar }: {
   v: Vereador;
   selecionado: number;
   aoSelecionar: (i: number) => void;
@@ -29,6 +29,8 @@ export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
   base: BaseUF | null;
   /** zonas eleitorais da UF; ausente onde ainda não foram mapeadas */
   zonas: Zonas | null;
+  /** a capital do estado, apontada e nomeada no mapa das zonas */
+  capital?: { i: number; nome: string };
   aoInspecionar: (d: EstadoDica | null) => void;
 }) {
   const anos = useMemo(
@@ -316,7 +318,7 @@ export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
                   {numero(zonas.zonas.length)} zonas.
                 </p>
                 <MapaZonas geo={base.geo} municipios={base.municipios}
-                           zonas={zonas} idx={noEstado.i}
+                           zonas={zonas} idx={noEstado.i} capital={capital}
                            aoInspecionar={aoInspecionar} />
                 {noEstado.irmaos.length > 0 && (
                   <p className="cap" style={{ marginTop: 10 }}>

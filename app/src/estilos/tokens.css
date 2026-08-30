@@ -435,3 +435,27 @@ footer p { margin: 3px 0; max-width: 80ch; }
 /* O `h1` da landing envolve a marca da casa: ele existe para a estrutura do
    documento, não para desenhar nada. Zera o que um `h1` traria por padrão. */
 .casa-h1 { margin: 0; font-size: inherit; font-weight: inherit; line-height: 0; }
+
+/* ---------- a capital em todo mapa de estado ----------
+
+   O disco externo usa a cor da SUPERFÍCIE e não uma cor fixa: ele existe para
+   separar a marca do preenchimento que estiver embaixo, que vai do vermelho ao
+   verde escuro no coroplético e a cinco cores no mapa de zonas. O rótulo leva
+   contorno da mesma superfície com `paint-order: stroke`, pelo mesmo motivo —
+   sem isso o nome some sobre a faixa escura e some de novo sobre a clara.
+
+   `pointer-events: none` para a marca não roubar o balão do município que ela
+   cobre: quem passa o mouse ali quer o dado da cidade, não o enfeite. */
+.capital-marca { pointer-events: none; }
+.capital-marca circle { fill: var(--surface); }
+.capital-marca circle.nucleo { fill: var(--ink); }
+.capital-marca text {
+  fill: var(--ink);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .2px;
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}

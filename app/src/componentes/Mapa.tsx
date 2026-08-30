@@ -2,6 +2,7 @@ import { useMemo, type ReactNode } from "react";
 import type { GeometriaMunicipio } from "../tipos";
 import { projetar } from "../lib/projecao";
 import { corDaFaixa } from "../lib/escalas";
+import { MarcaCapital } from "./MarcaCapital";
 import type { EstadoDica } from "./Dica";
 
 interface Props {
@@ -15,6 +16,9 @@ interface Props {
   /** quando existe, cada feição vira alvo de clique — é assim que o mapa
    *  nacional serve de porta de entrada para o estado */
   aoClicar?: (i: number) => void;
+  /** a capital do estado, apontada e nomeada. Ausente no mapa nacional, onde a
+   *  unidade é a UF e 27 rótulos seriam ruído, não referência. */
+  capital?: { i: number; nome: string };
 }
 
 /**
@@ -26,8 +30,9 @@ interface Props {
  * dá para saber o que ela é.
  */
 export function Mapa({ geo, valores, cortes, rotulo, descrever, aoInspecionar,
-                       aoClicar }: Props) {
-  const { caminhos, largura, altura } = useMemo(() => projetar(geo), [geo]);
+                       aoClicar, capital }: Props) {
+  const { caminhos, pontos, largura, altura } = useMemo(() => projetar(geo), [geo]);
+  const pCap = capital ? pontos[capital.i] : null;
 
   return (
     <svg viewBox={`0 0 ${largura} ${altura}`} role="img" aria-label={`Mapa: ${rotulo}`}>
@@ -53,6 +58,12 @@ export function Mapa({ geo, valores, cortes, rotulo, descrever, aoInspecionar,
           />
         );
       })}
+      {/* por último no SVG, de propósito: a marca fica acima de qualquer
+          preenchimento, e não é ela que some quando o município ao lado é
+          desenhado depois */}
+      {pCap && capital && (
+        <MarcaCapital p={pCap} nome={capital.nome} largura={largura} />
+      )}
     </svg>
   );
 }

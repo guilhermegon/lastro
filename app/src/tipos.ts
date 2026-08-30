@@ -41,6 +41,9 @@ export interface ResumoUF {
   capital?: string;
   /** há arquivo de vereador para esta UF — é isto que liga a aba */
   ver?: boolean;
+  /** índice da capital na ordenação de `base.json`. É índice e não nome porque
+   *  a grafia varia entre bases, e marca na cidade errada é pior que sem marca. */
+  capIdx?: number;
   /** municipios servidos nesta UF; ausente onde so' a capital tem dado */
   nCid?: number;
 }

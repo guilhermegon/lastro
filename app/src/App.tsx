@@ -380,6 +380,12 @@ export default function App() {
   }
 
   const resumo = indice.ufs.find((u) => u.s === sel.uf);
+  // A capital em todo mapa de ESTADO. `capIdx` estava no índice desde sempre e
+  // sem uso nenhum no app — era calculado no `22_` justamente para isto: um
+  // índice, e não uma busca por nome, porque a grafia varia entre bases e uma
+  // marca na cidade errada é pior que mapa sem marca.
+  const capital = resumo?.capital != null && resumo.capIdx != null
+    ? { i: resumo.capIdx, nome: resumo.capital } : undefined;
   const nMun = resumo?.nm ?? base?.municipios.length ?? 0;
   const agregado = indice.agregado.find((a) => a.uf === sel.uf && a.ano === sel.ano);
 
@@ -598,7 +604,7 @@ export default function App() {
 
         {sel.vista === "vereador" && ver && (
           <VistaVereador v={ver} selecionado={sel.cand}
-                         base={base} zonas={zonas}
+                         base={base} zonas={zonas} capital={capital}
                          aoSelecionar={(i) => setSel((s) => ({ ...s, cand: i }))}
                          urnas={urnas} aoInspecionar={setDica} />
         )}
@@ -611,6 +617,7 @@ export default function App() {
             dados={cargo}
             ano={sel.ano}
             agregado={agregado}
+            capital={capital}
             selecionado={sel.cand}
             aoSelecionar={(i) => setSel((s) => ({ ...s, cand: i }))}
             aoInspecionar={setDica}
