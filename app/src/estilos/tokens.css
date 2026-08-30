@@ -268,3 +268,44 @@ footer p { margin: 3px 0; max-width: 80ch; }
 .lista-fatos > li::before { content: ""; position: absolute; left: 0; top: .55em;
   width: 6px; height: 6px; border-radius: 2px; background: var(--accent); }
 .lista-fatos strong { color: var(--ink); }
+
+/* ---------- a home da casa ----------
+   Lastro em cima, produtos embaixo. O card inteiro é o alvo de clique, não um
+   link no rodapé dele: numa vitrine de três, obrigar a mirar um link pequeno é
+   trabalho que a página pode poupar. */
+.casa { padding: 40px 0 8px; }
+.casa .lastro { width: 300px; margin-bottom: 18px; }
+.casa-tese { color: var(--ink-2); font-size: var(--step-0); max-width: 62ch;
+  line-height: 1.5; margin: 0; }
+
+.vitrine { display: grid; gap: 16px; margin: 28px 0 40px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+
+.vitrine-card { display: flex; flex-direction: column; align-items: stretch;
+  text-align: left; font: inherit; color: inherit; position: relative;
+  border: 1px solid var(--line); cursor: pointer;
+  transition: border-color .15s, transform .15s; }
+.vitrine-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.vitrine-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.vitrine-card > h2 { font-size: var(--step-0); font-weight: 600; margin: 0 0 4px; }
+.vitrine-card > .cap { margin: 0 0 12px; }
+
+.vitrine-marca { margin-bottom: 14px; }
+.vitrine-marca .lastro { width: 190px; margin: 0; }
+
+.vitrine-num { margin-top: auto; font: 500 .72rem/1.5 "IBM Plex Mono", monospace;
+  color: var(--ink-3); }
+
+/* O card do Radar não leva a lugar nenhum: ele não está publicado. O cursor e o
+   selo dizem isso antes do clique frustrado. */
+.vitrine-fechado { cursor: default; }
+.vitrine-fechado:hover { border-color: var(--line); transform: none; }
+.vitrine-selo { position: absolute; top: 14px; right: 14px;
+  font: 500 .62rem/1 "IBM Plex Sans", sans-serif; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-3);
+  border: 1px solid var(--line); border-radius: 999px; padding: 5px 9px; }
+
+@media (max-width: 620px) {
+  .casa { padding-top: 24px; }
+  .casa .lastro { width: 240px; }
+}

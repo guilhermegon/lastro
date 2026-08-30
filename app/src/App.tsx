@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import type {
   AlegoAdmin, AlegoVerbas, AlmgVerbas, Assembleias, BaseUF, Cargo, CldfAdmin,
-  CldfVerbas, Cruzamentos, DadosCargo, Demografia, Emendas, Esfera, Indice,
-  Padroes, Rivais, Sigla, Vereador,
+  CldfVerbas, DadosCargo, Demografia, Emendas, Esfera, Indice,
+  Rivais, Sigla, Vereador,
 } from "./tipos";
 
 /** O pacote da aba API, buscado de uma vez porque a aba é nacional. */
@@ -16,11 +16,11 @@ interface ApiCasas {
 }
 import { CARGOS } from "./tipos";
 import {
-  carregarAnosCargo, carregarBase, carregarCargoAno, carregarCruzamentos,
+  carregarAnosCargo, carregarBase, carregarCargoAno,
   carregarAlegoAdmin, carregarAlegoVerbas, carregarAlmgVerbas,
   carregarAssembleias, carregarCldfAdmin, carregarCldfVerbas,
   carregarDemografia, carregarEmendas, carregarEmendasEstadual, carregarIndice,
-  carregarPadroes, carregarRivaisAno, carregarVereador, prebuscar,
+  carregarRivaisAno, carregarVereador, prebuscar,
 } from "./lib/dados";
 import { numero } from "./lib/formato";
 import { noEstado } from "./lib/uf";
@@ -29,11 +29,10 @@ import { SeletorEstado } from "./componentes/SeletorEstado";
 import { Abas, type Vista } from "./componentes/Abas";
 import { Dica, type EstadoDica } from "./componentes/Dica";
 import { VistaCargo } from "./vistas/VistaCargo";
-import { VistaPadroes } from "./vistas/VistaPadroes";
-import { VistaCruzamentos } from "./vistas/VistaCruzamentos";
 import { VistaEmendas } from "./vistas/VistaEmendas";
 import { VistaSobre } from "./vistas/VistaSobre";
 import { VistaApi } from "./vistas/VistaApi";
+import { VistaHome } from "./vistas/VistaHome";
 import { VistaVereador } from "./vistas/VistaVereador";
 import { VistaNacional } from "./vistas/VistaNacional";
 
@@ -48,18 +47,18 @@ import { VistaNacional } from "./vistas/VistaNacional";
 interface Selecao { uf: Sigla; ano: number; vista: Vista; cand: number }
 
 function ehVista(v: string): v is Vista {
-  return v === "nacional" || v === "padroes" || v === "cruzamentos"
-    || v === "vereador" || v === "emendas" || v === "sobre" || v === "api"
+  return v === "home" || v === "nacional" || v === "vereador"
+    || v === "emendas" || v === "sobre" || v === "api"
     || (CARGOS as string[]).includes(v);
 }
 
 function lerURL(): Selecao {
   const p = new URLSearchParams(location.search);
-  const v = p.get("v") ?? "nacional";
+  const v = p.get("v") ?? "home";
   return {
     uf: (p.get("uf") ?? "GO").toUpperCase(),
     ano: Number(p.get("ano") ?? 2022),
-    vista: ehVista(v) ? v : "nacional",
+    vista: ehVista(v) ? v : "home",
     cand: Number(p.get("c") ?? 0),
   };
 }
@@ -75,8 +74,6 @@ export default function App() {
   const [indice, setIndice] = useState<Indice | null>(null);
   const [base, setBase] = useState<BaseUF | null>(null);
   const [cargo, setCargo] = useState<DadosCargo | null>(null);
-  const [padroes, setPadroes] = useState<Padroes | null>(null);
-  const [cruz, setCruz] = useState<Cruzamentos | null>(null);
   const [rivais, setRivais] = useState<Rivais | null>(null);
   const [ver, setVer] = useState<Vereador | null>(null);
   // As duas esferas vivem em arquivos separados e nem toda UF tem a estadual:
@@ -136,6 +133,10 @@ export default function App() {
       setCarregando(false);
       return () => { vivo = false; };
     }
+    if (v === "home") {           // só marca e texto
+      setCarregando(false);
+      return () => { vivo = false; };
+    }
     if (v === "api") {
       if (api) { setCarregando(false); return () => { vivo = false; }; }
       // Cada arquivo falha por si: uma casa fora do ar não apaga as outras.
@@ -176,15 +177,11 @@ export default function App() {
         .finally(() => { if (vivo) setCarregando(false); });
       return () => { vivo = false; };
     }
-    if (v === "padroes" || v === "cruzamentos" || v === "vereador") {
-      const p = v === "padroes"
-        ? carregarPadroes(sel.uf).then((d) => { if (vivo) setPadroes(d); })
-        : v === "cruzamentos"
-        ? carregarCruzamentos(sel.uf).then((d) => { if (vivo) setCruz(d); })
-        : carregarVereador(sel.uf).then((d) => { if (vivo) setVer(d); });
-      p.then(() => { if (vivo) setErro(null); })
-       .catch((e) => { if (vivo) setErro(String(e)); })
-       .finally(() => { if (vivo) setCarregando(false); });
+    if (v === "vereador") {
+      carregarVereador(sel.uf)
+        .then((d) => { if (vivo) { setVer(d); setErro(null); } })
+        .catch((e) => { if (vivo) setErro(String(e)); })
+        .finally(() => { if (vivo) setCarregando(false); });
       return () => { vivo = false; };
     }
 
@@ -226,8 +223,12 @@ export default function App() {
   useEffect(() => {
     if (!indice) return;
     const r = indice.ufs.find((u) => u.s === sel.uf);
-    document.title = r && sel.vista !== "nacional"
-      ? `Cadê o Voto ${noEstado(r.s, r.n)}?` : "Cadê o Voto?";
+    // Na home quem fala é a casa; nas telas de produto, o produto.
+    document.title =
+      sel.vista === "home" ? "Lastro — Inteligência Política"
+      : sel.vista === "emendas" ? "Emendômetro"
+      : r && sel.vista !== "nacional" ? `Cadê o Voto ${noEstado(r.s, r.n)}?`
+      : "Cadê o Voto?";
   }, [indice, sel.uf, sel.vista]);
 
   const trocarUF = useCallback((uf: Sigla) => {
@@ -260,9 +261,9 @@ export default function App() {
   // vereador tem seus próprios anos; padrões mostra a série toda de uma vez
   // O Emendômetro tem seus próprios anos (2015 em diante, todo ano — não só
   // ano de eleição), então também não usa a faixa de pleito.
-  const usaAno = sel.vista !== "vereador" && sel.vista !== "padroes"
+  const usaAno = sel.vista !== "vereador"
     && sel.vista !== "emendas" && sel.vista !== "sobre"
-    && sel.vista !== "api";
+    && sel.vista !== "api" && sel.vista !== "home";
   // A esfera escolhida, se ela existir aqui; senão a que existir.
   const emAtual: Emendas | null =
     (esfera === "estadual" ? (emEst || null) : emFed) ?? emFed ?? null;
@@ -336,15 +337,6 @@ export default function App() {
                          aoInspecionar={setDica} />
         )}
 
-        {sel.vista === "padroes" && padroes && (
-          <VistaPadroes p={padroes} nMun={nMun} uf={resumo?.n ?? sel.uf} />
-        )}
-
-        {sel.vista === "cruzamentos" && cruz && (
-          <VistaCruzamentos c={cruz} ano={sel.ano} nMun={nMun}
-                            uf={resumo?.n ?? sel.uf} />
-        )}
-
         {/* O gate testa o objeto que de fato vai para a vista, não "alguma das
             duas chegou". As duas esferas resolvem em ordem imprevisível: com a
             estadual chegando primeiro, a condição antiga passava e a federal ia
@@ -363,6 +355,13 @@ export default function App() {
           />
         )}
 
+        {sel.vista === "home" && (
+          <VistaHome
+            aoEntrar={(v) => setSel((s) => ({ ...s, vista: v, cand: 0 }))}
+            nUF={indice.ufs.length}
+            nMun={indice.ufs.reduce((t, u) => t + (u.nm ?? 0), 0)} />
+        )}
+
         {sel.vista === "api" && api && <VistaApi {...api} />}
 
         {sel.vista === "sobre" && (
@@ -376,8 +375,8 @@ export default function App() {
                          aoSelecionar={(i) => setSel((s) => ({ ...s, cand: i }))} />
         )}
 
-        {sel.vista !== "padroes" && sel.vista !== "cruzamentos"
-          && sel.vista !== "vereador" && base && cargo?.[String(sel.ano)] && (
+        {sel.vista !== "vereador" && sel.vista !== "home"
+          && sel.vista !== "emendas" && sel.vista !== "api" && sel.vista !== "sobre" && base && cargo?.[String(sel.ano)] && (
           <VistaCargo
             cargo={sel.vista as Cargo}
             base={base}

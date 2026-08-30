@@ -1,7 +1,7 @@
 import { CARGOS, NOME_CARGO, type Cargo } from "../tipos";
 
-export type Vista = "nacional" | Cargo | "vereador" | "padroes"
-  | "cruzamentos" | "emendas" | "api" | "sobre";
+export type Vista = "home" | "nacional" | Cargo | "vereador"
+  | "emendas" | "api" | "sobre";
 
 /** Ordem decrescente de escopo — o país, depois presidente até vereador — e as duas
  *  abas de análise. Padrões e Cruzamentos saíram daqui: viraram o Radar, o
@@ -17,6 +17,7 @@ export function Abas({ atual, aoTrocar, cargosDisponiveis, temVereador, cidade,
   temEmendas: boolean;
 }) {
   const itens: { id: Vista; rotulo: string; ativo: boolean }[] = [
+    { id: "home" as Vista, rotulo: "Lastro", ativo: true },
     { id: "nacional" as Vista, rotulo: "Nacional", ativo: true },
     ...CARGOS.map((c) => ({
       id: c as Vista, rotulo: NOME_CARGO[c], ativo: cargosDisponiveis.includes(c),
