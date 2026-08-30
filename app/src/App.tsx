@@ -67,7 +67,9 @@ function lerURL(): Selecao {
   const v = p.get("v") ?? "home";
   return {
     uf: (p.get("uf") ?? "GO").toUpperCase(),
-    ano: Number(p.get("ano") ?? 2022),
+    // `Number("abc")` e' NaN, e NaN escapa de qualquer `includes` mais
+    // adiante sem nunca ser igual a nada. Vira 2022 aqui, na porta.
+    ano: Number.isFinite(Number(p.get("ano"))) ? Number(p.get("ano")) : 2022,
     vista: ehVista(v) ? v : "home",
     cand: Number(p.get("c") ?? 0),
     cid: p.get("cid") ?? "",
@@ -269,6 +271,24 @@ export default function App() {
     return () => { vivo = false; };
   }, [sel.uf, sel.vista, sel.ano, sel.cid, cidades]);
 
+  // O ano da URL contra a lista de pleitos que existe de verdade.
+  //
+  // A aba de vereador tem escala propria — 2000, 2004, ... 2024 — e nenhum ano
+  // em comum com os pleitos gerais. Ela guarda o ano dela em estado local, e
+  // por isso nunca sujou `sel.ano`; quem suja e' um LINK. Compartilhar
+  // `?v=vereador&ano=2024` e depois clicar em Presidente pedia
+  // `presidente/2024.json`, que nao existe.
+  //
+  // Encaixa no pleito imediatamente anterior em vez de pular para o ultimo:
+  // quem abriu um link de 2024 quer o mais recente, e o mais recente que os
+  // cargos gerais tem e' 2022 — nao 1998.
+  useEffect(() => {
+    if (!indice || indice.anos.includes(sel.ano)) return;
+    const encaixe = [...indice.anos].reverse().find((a) => a <= sel.ano)
+      ?? indice.anos[indice.anos.length - 1];
+    if (encaixe != null) setSel((s) => ({ ...s, ano: encaixe }));
+  }, [indice, sel.ano]);
+
   useEffect(() => gravarURL(sel), [sel]);
 
   useEffect(() => {
@@ -299,7 +319,13 @@ export default function App() {
 
   // Hooks antes de qualquer `return` antecipado: abaixo do `if (erro)` o
   // React renderizaria menos hooks num render que no outro (erro #310).
-  if (erro) {
+  // Sem índice não há o que desenhar em volta: aí a tela de erro é a tela
+  // inteira, e é a única vez em que isso é correto. Quando o índice existe e o
+  // que falhou foi UMA vista, o erro passou a morar dentro do conteúdo — ver
+  // `<main>`. Antes ele era um return antecipado e levava junto o cabeçalho, a
+  // fileira de produtos e a barra de abas: o leitor ficava numa tela de erro
+  // sem um único botão para sair dela.
+  if (erro && !indice) {
     return (
       <main className="wrap" style={{ padding: "3rem 0" }}>
         <h1>Não foi possível carregar os dados</h1>
@@ -463,6 +489,15 @@ export default function App() {
       </div>
 
       <main className="wrap">
+        {erro && (
+          <div className="nota" style={{ marginTop: 14 }}>
+            <strong>Esta seção não carregou.</strong> {erro}
+            <br /><br />
+            As abas acima continuam funcionando — o que falhou foi o dado desta
+            tela, não o site.
+          </div>
+        )}
+
         {carregando && (
           <p className="indice exp" style={{ padding: "14px 0 0" }}>
             Carregando {sel.uf}…

@@ -1020,3 +1020,35 @@ ensina o leitor a não ler.
 um `return` antecipado do componente, e o React derrubou a página inteira com o
 erro #310 — hook não pode ser condicional. Tela branca, e o `tsc` passou limpo,
 porque o compilador não vê ordem de hook.
+## 2026-08-30 — o beco sem saída que um link meu abriu
+
+O usuário mandou testar a barra de abas. Testei clicando as sete, e as sete
+quebravam — vindo de um link com `ano=2024`.
+
+**Duas falhas somadas.** A primeira: o ano vem da URL sem passar por lista
+nenhuma. O `ehVista` valida a vista; o ano era `Number(p.get("ano") ?? 2022)`
+e pronto. E a URL é feita para ser compartilhada — o próprio cabeçalho do
+arquivo diz que o estado da tela mora nela. A aba de vereador tem escala
+própria, 2000 a 2024, sem um único ano em comum com os pleitos gerais; ela
+guarda o ano dela em estado local e por isso nunca sujou `sel.ano`. Quem suja
+é um **link** — e o link foi meu, escrito na mensagem anterior. Clicar em
+Presidente pedia `presidente/2024.json`.
+
+A segunda: o 404 derrubava a página inteira. O `if (erro)` era um return
+antecipado que substituía tudo, inclusive a fileira de produtos e a barra de
+abas. O leitor ficava numa tela de erro **sem um único botão para sair**, só
+editando a URL.
+
+Sozinha, a primeira é um link ruim. Sozinha, a segunda é um erro feio. Juntas
+são um beco: basta um link com ano de outra escala.
+
+**Consertadas as duas, e de propósito as duas.** Corrigir só o ano deixaria o
+beco montado para o próximo arquivo que faltar. Agora o ano da URL é encaixado
+no pleito imediatamente anterior que existe — 2024 vira 2022, não 1998, porque
+quem abriu um link de 2024 quer o mais recente —, `ano=abc` vira 2022 na
+porta, e o erro de uma vista mora dentro do conteúdo, com a navegação de pé.
+
+Conferido clicando as sete abas em sequência a partir do link quebrado: todas
+carregam, a barra continua com sete botões, e a URL se corrige sozinha na
+chegada. E com `?uf=ZZ`, um 404 de verdade, a mensagem aparece na seção e o
+resto do site continua clicável.
