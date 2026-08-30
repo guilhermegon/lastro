@@ -309,8 +309,14 @@ export default function App() {
     if (!indice) return;
     const r = indice.ufs.find((u) => u.s === sel.uf);
     // Na home quem fala é a casa; nas telas de produto, o produto.
+    // API e Sobre sao telas da CASA, nao de um produto: sao nacionais e nao
+    // mudam com o estado. Enquanto caiam no ramo do produto, a aba de metodo
+    // abria com o titulo "Cadê o Voto em Goiás?" — um estado que ela nao
+    // menciona, num texto que vale para os 27.
     document.title =
       sel.vista === "home" ? "Lastro — Inteligência Política"
+      : sel.vista === "api" ? "O que as assembleias publicam — Lastro"
+      : sel.vista === "sobre" ? "Método e fontes — Lastro"
       : sel.vista === "emendas" ? "Emendômetro"
       : r && sel.vista !== "nacional" ? `Cadê o Voto ${noEstado(r.s, r.n)}?`
       : "Cadê o Voto?";
@@ -399,7 +405,7 @@ export default function App() {
     sel.vista === "emendas"
       ? (resumo ? `Emendômetro ${noEstado(resumo.s, resumo.n)}` : "Emendômetro")
     : sel.vista === "api" ? "O que as assembleias publicam"
-    : sel.vista === "sobre" ? "Como este dado é feito"
+    : sel.vista === "sobre" ? "Método, fontes e limites"
     : resumo && !nacional ? `Cadê o Voto ${noEstado(resumo.s, resumo.n)}?`
     : "Cadê o Voto?";
 
@@ -435,8 +441,8 @@ export default function App() {
                     ? "As 27 assembleias estaduais, o que cada uma publica sobre"
                       + " si mesma, e três casas cujo dado dá para consumir."
                     : sel.vista === "sobre"
-                    ? "De onde vem cada número, como ele é contado, e o que"
-                      + " decidimos não fazer."
+                    ? "Procedência de cada número, critério de apuração e"
+                      + " restrições metodológicas desta publicação."
                     : ""
                   : sel.vista === "emendas"
                   ? "Para onde cada parlamentar mandou dinheiro, município a"
