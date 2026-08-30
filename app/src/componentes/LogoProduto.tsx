@@ -89,32 +89,37 @@ export function LogoEmendometro() {
   );
 }
 
-/** "Radar" — o que já aconteceu, e o que vem.
+/** "Radar" — alcance e o que apareceu dentro dele.
  *
- *  Três barras cheias são medida: aconteceu, está no arquivo, é reproduzível.
- *  A quarta é só contorno, e adiante das outras — é projeção, não observação.
+ *  A primeira versao eram barras crescentes com a ultima em contorno. O desenho
+ *  estava certo no conceito e errado na vizinhanca: o Emendometro TAMBEM e'
+ *  barras crescentes, e na fileira de produtos, a 158 px, os dois liam quase
+ *  igual. Marca que nao se distingue da vizinha nao esta' cumprindo a funcao
+ *  dela, que e' deixar a troca de produto ser reconhecida de relance.
  *
- *  O contorno é o único elemento novo que este sistema ganhou, e ele existe
- *  para carregar exatamente essa distinção. Se um dia o desenho preencher a
- *  quarta barra, estará dizendo que projeção e apuração são a mesma coisa. Não
- *  são, e a marca do produto que projeta é o pior lugar para embaralhá-las. */
+ *  Agora sao tres arcos de alcance — quartos de moldura abertos a partir da
+ *  mesma quina em que tudo se apoia — e um bloco cheio alem do ultimo. O bloco
+ *  e' o que o radar viu antes de chegar, e por isso e' o unico elemento solido:
+ *  o alcance e' estrutura, a deteccao e' o achado.
+ *
+ *  Continua so' retangulo, hierarquia por opacidade e uma cor so'. */
 export function LogoRadar() {
-  const barra = [
-    [21, 38, 8, 0.34], [30, 32, 14, 0.52], [39, 24, 22, 0.78],
-  ] as const;
+  // raio, opacidade — o alcance cresce e ganha peso
+  const arco = [[11, 0.34], [21, 0.55], [31, 0.78]] as const;
   return (
     <span className="lastro produto" role="img" aria-label="Radar">
       <svg viewBox="0 0 260 68" aria-hidden="true" focusable="false">
         <g className="lastro-mark">
           <rect x="12" y="12" width="4" height="44" rx="1" />
           <rect x="12" y="52" width="52" height="4" rx="1.5" />
-          {barra.map(([x, y, h, o]) => (
-            <rect key={x} x={x} y={y} width="6" height={h} rx="2" opacity={o} />
+          {arco.map(([r, o]) => (
+            <g key={r} opacity={o}>
+              <rect x={21 + (r - 11)} y={52 - r} width="3" height={r} rx="1.5" />
+              <rect x="21" y={52 - r} width={r + 1} height="3" rx="1.5" />
+            </g>
           ))}
-          {/* a projeção: contorno, nunca preenchida */}
-          <rect x="48" y="16" width="6" height="30" rx="2"
-                fill="none" stroke="currentColor" strokeWidth="1.6"
-                className="radar-projecao" />
+          {/* o detectado: alem do ultimo alcance, e o unico solido */}
+          <rect x="52" y="14" width="9" height="9" rx="2.5" />
         </g>
         <text className="lastro-nome produto-nome" x="72" y="42">Radar</text>
       </svg>

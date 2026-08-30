@@ -185,10 +185,32 @@ export function VistaCargo({
                       municipios={municipios} />
             )}
 
+            {municipios.length === 1 && (
+              <div className="nota">
+                <strong>Aqui a geografia do voto não existe, e os índices
+                dizem isso.</strong> O Distrito Federal é um município só: todo
+                candidato tem 100% do voto no seu único município por
+                construção, não por força política. Concentração, domínio,
+                contiguidade e municípios efetivos são todos degenerados — não
+                estão errados, estão medindo um chão que não tem divisão.
+                <br /><br />
+                O que continua valendo é tudo que não depende de território: a
+                lista de eleitos, o quociente eleitoral, os votos do último
+                eleito e a análise partidária. A geografia intra-DF existe por
+                <em> zona eleitoral</em>, e não há malha publicada de zona —
+                mesmo caso do vereador de capital: há número e não há mapa.
+              </div>
+            )}
+
             <div className="duas">
               <div className="cartaz">
                 <h2>Concentração</h2>
-                <p className="cap">Os 20 municípios que mais renderam votos.</p>
+                <p className="cap">
+                  {municipios.length === 1
+                    ? "Um município só: a tabela abaixo tem uma linha, e ela é o "
+                      + "total do candidato."
+                    : "Os 20 municípios que mais renderam votos."}
+                </p>
                 <div className="rolagem">
                   <TabelaConcentracao atual={atual} municipios={municipios}
                                       totalMun={bloco.totalMun} />
