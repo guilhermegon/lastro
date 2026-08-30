@@ -393,3 +393,35 @@ footer p { margin: 3px 0; max-width: 80ch; }
    sem explicação pareceria recorte arbitrário. */
 .gaveta-nota { margin: 10px 2px 2px; font-size: .72rem; line-height: 1.5;
   color: var(--ink-3); max-width: 74ch; }
+
+/* ---------- mapa de urnas: o município e a lupa ----------
+
+   A lupa não é decoração nem "versão maior": ela existe porque desenhar o
+   contorno do município custou legibilidade em 109 das 246 cidades de Goiás,
+   onde a mancha de urnas ocupa menos de 15% da largura do território. O mapa
+   grande responde "onde no município"; a lupa responde "e entre si". Lado a
+   lado no desktop, empilhados no celular. */
+.urnas-quadros {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.urnas-quadros > svg { flex: 1 1 320px; min-width: 0; }
+.urnas-lupa {
+  flex: 0 1 250px;
+  margin: 0;
+  padding: 10px 12px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.urnas-lupa figcaption {
+  margin-top: 8px;
+  font-size: var(--step--1);
+  color: var(--ink-2);
+  line-height: 1.45;
+}
+@media (max-width: 640px) {
+  .urnas-lupa { flex: 1 1 100%; }
+}

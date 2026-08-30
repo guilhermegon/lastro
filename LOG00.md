@@ -972,3 +972,51 @@ combinações cargo/ano — o que era exatamente o risco do append.
 figurante: com as **mesmas 24 cadeiras** de Mato Grosso do Sul e do Tocantins, o
 quociente do DF em 2022 foi **66.575**, contra 55.854 e 33.327. Mesma Casa, o
 dobro do preço de entrada do Tocantins.
+## 2026-08-30 — o mapa de urnas ganha chão, e a medição que quase o impediu
+
+O mapa por local de votação era uma nuvem de círculos enquadrada na própria
+nuvem. O defeito não era feio, era **semântico**: como o quadro se ajustava aos
+pontos, "as urnas estão todas num canto" e "as urnas estão espalhadas" saíam
+idênticas na tela. O enquadramento apagava a única coisa que o mapa tinha a
+dizer.
+
+**Antes de desenhar a primeira linha, o portão.** Contorno errado é pior que
+contorno nenhum: sem fronteira o leitor vê uma nuvem e sabe que é uma nuvem;
+com fronteira, ele acredita na fronteira. Medi ponto-em-polígono nos 246
+municípios: **2.459 locais com coordenada, 4 fora — 0,16%**. Fui ver quanto é
+"fora": 60 a 90 metros. A esse zoom, um pixel. Não era coordenada errada do TSE,
+era precisão de limite entre duas bases — e a diferença entre "0,16% fora" e
+"0,16% a 80 metros" é a diferença entre publicar e não publicar.
+
+**Medi também a simplificação, e ela não existia.** Ia gerar o contorno numa
+tolerância menor que a do coroplético estadual; o teste mostrou que simplificar
+a malha bruta a 0,001 grau tira 234 vértices de 32.384 — 0,7%. A malha
+"intermediária" do IBGE já vem simplificada na origem. Não havia o que
+economizar, e escrever código de simplificação teria sido trabalho para nada.
+
+**E aí veio o número que mudou o desenho.** A mediana é de **4 locais de
+votação por cidade**, e em **109 dos 246** a mancha ocupa menos de 15% da largura
+do município. Enquadrar no município — que era o pedido, e é o certo — deixaria
+44% das cidades com os pontos num borrão. A saída foi a convenção cartográfica
+de sempre: **detalhe mais localizador**. O quadro principal continua o
+município; abaixo de 22% de mancha entra uma lupa, amarrada ao primeiro quadro
+por um retângulo tracejado.
+
+O retângulo, aliás, nasceu invisível: dimensionei pela caixa das coordenadas, que
+nessas cidades é sub-pixel, e ele ficou inteiro debaixo dos círculos — desenhado
+e sem existir. A marca tem de envolver os **círculos**, não os pontos.
+
+**A concentração é o achado, não o defeito.** Em Caçu os sete locais estão num
+canto de um município comprido: a cidade inteira vota na sede. Sem contorno,
+esse fato não tinha como aparecer.
+
+**E três textos contradiziam a tela.** A cobertura municipal chegou e ninguém
+mexeu na escrita: a aba dizia "Vereador · Goiânia" com Caçu aberto, o subtítulo
+dizia "Vereadores da capital", e a nota dizia "não há mapa" — escrita logo acima
+de um mapa. Texto que contradiz o que está na tela custa mais que texto ausente:
+ensina o leitor a não ler.
+
+**Um erro meu no caminho:** pendurei o `useMemo` da cidade selecionada depois de
+um `return` antecipado do componente, e o React derrubou a página inteira com o
+erro #310 — hook não pode ser condicional. Tela branca, e o `tsc` passou limpo,
+porque o compilador não vê ordem de hook.

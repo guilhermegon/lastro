@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type {
   AlegoAdmin, AlegoVerbas, AlmgVerbas, Assembleias, BaseUF, Cargo, CldfAdmin,
   CldfVerbas, DadosCargo, Demografia, Emendas, EmendasBR, Esfera, Indice,
@@ -287,6 +287,18 @@ export default function App() {
     setGaveta(false);
   }, []);
 
+  // A MESMA resolução do efeito que carrega a cidade, e de propósito: o rótulo
+  // da aba e o subtítulo têm de nomear a cidade que está na tela. Enquanto
+  // usavam `resumo.capital`, a aba dizia "Goiânia" com Caçu aberto.
+  const cidadeAtual = useMemo(() => {
+    if (!cidades) return undefined;
+    return (cidades.find((x) => x.k === sel.cid)
+      ?? cidades.find((x) => x.uf === sel.uf && x.src === "vereador.json")
+      ?? cidades.find((x) => x.uf === sel.uf))?.n;
+  }, [cidades, sel.cid, sel.uf]);
+
+  // Hooks antes de qualquer `return` antecipado: abaixo do `if (erro)` o
+  // React renderizaria menos hooks num render que no outro (erro #310).
   if (erro) {
     return (
       <main className="wrap" style={{ padding: "3rem 0" }}>
@@ -308,6 +320,7 @@ export default function App() {
   const resumo = indice.ufs.find((u) => u.s === sel.uf);
   const nMun = resumo?.nm ?? base?.municipios.length ?? 0;
   const agregado = indice.agregado.find((a) => a.uf === sel.uf && a.ano === sel.ano);
+
   const anosComDado = indice.anos;
   // vereador tem seus próprios anos; padrões mostra a série toda de uma vez
   // O Emendômetro tem seus próprios anos (2015 em diante, todo ano — não só
@@ -376,7 +389,10 @@ export default function App() {
                   ? "Distribuição espacial do voto para deputado estadual em cada"
                     + " unidade da federação, de 1998 a 2022, município a município."
                   : sel.vista === "vereador"
-                  ? "Vereadores da capital, por zona eleitoral, de 2000 a 2024."
+                  ? (cidadeAtual
+                      ? `Vereadores de ${cidadeAtual}, por zona eleitoral e por `
+                        + "local de votação, de 2000 a 2024."
+                      : "Vereadores, por zona eleitoral, de 2000 a 2024.")
                   : <>Onde cada candidato tirou voto
                       {nMun > 2 && <>, município a município</>}, em todos os
                       cargos, de 1998 a 2022.</>}
@@ -439,7 +455,7 @@ export default function App() {
                municipal, a CLDF acumula o papel. */
             <Abas atual={sel.vista} cargosDisponiveis={resumo?.cargos ?? CARGOS}
                   temVereador={resumo?.ver === true}
-                  cidade={resumo?.ver ? resumo.capital : undefined}
+                  cidade={resumo?.ver ? (cidadeAtual ?? resumo.capital) : undefined}
                   uf={sel.uf}
                   aoTrocar={(v) => setSel((s) => ({ ...s, vista: v, cand: 0 }))} />
           )}

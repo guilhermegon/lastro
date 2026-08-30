@@ -392,6 +392,12 @@ export interface Urnas {
   locais: LocalVotacao[];
   totalLocal: number[];
   fichas: FichaUrna[];
+  /** anéis externos do município em [lon, lat], da malha bruta do IBGE.
+   *
+   *  Ausente nos arquivos de capital gerados antes do `55_contorno_municipio.py`
+   *  — o mapa continua funcionando sem ele, enquadrado na nuvem de pontos como
+   *  era antes de haver chão. */
+  geo?: number[][][];
 }
 
 export interface FichaVereador {

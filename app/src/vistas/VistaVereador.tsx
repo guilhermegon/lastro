@@ -113,12 +113,24 @@ export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
             deles em Goiás.
           </div>
         )}
+        {/* A segunda metade desta nota dizia "não há mapa", e passou a ser
+            falsa no dia em que o mapa de urnas nasceu — ficava escrita logo
+            acima dele. O que continua verdade é mais específico: não há
+            *coroplético*, porque uma cidade é um município só e o coroplético
+            precisa de vários. O mapa que existe é de outro tipo. */}
         <div className="nota">
           <strong>Outro ciclo, outra geografia.</strong> A eleição municipal é
           de 2000, 2004, … 2024 — não há um único ano em comum com os pleitos
-          gerais, então esta aba nunca cruza com as outras. E como a cidade é um
-          município só, não há mapa: a única divisão interna que o TSE publica é
-          a zona eleitoral, que não tem malha desenhada.
+          gerais, então esta aba nunca cruza com as outras. E a cidade é um
+          município só: não há coroplético aqui, porque pintar área exige várias
+          áreas.{" "}
+          {urnas && urnas.ano === ano
+            ? <>O mapa desta tela é de outro tipo — <em>ponto</em>, um por local
+                de votação, dentro do contorno do município. A zona eleitoral, que
+                seria a divisão interna natural, o TSE publica sem malha
+                desenhada; o local de votação ele publica com coordenada.</>
+            : <>A única divisão interna que o TSE publica é a zona eleitoral, e
+                ela não tem malha desenhada — há número e não há mapa.</>}
         </div>
 
         {atual && (
@@ -168,6 +180,7 @@ export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
                         {urnas.cidade}.</>}
                 </p>
                 <MapaUrnas
+                  contorno={urnas.geo}
                   locais={urnas.locais}
                   valores={porLocal}
                   rotulo={atual ? atual.n : "Votos"}

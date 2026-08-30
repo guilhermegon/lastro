@@ -682,6 +682,67 @@ quociente do DF em 2022 foi de **66.575** contra 55.854 e 33.327. Mesma Casa,
 preço de entrada dobrado em relação ao Tocantins.
 
 
+## Marco 15 — o mapa de urnas ganha chão
+
+O mapa por local de votação nasceu sem município: uma nuvem de círculos
+enquadrada na própria nuvem. Funcionava como gráfico e não como mapa — o
+enquadramento se ajustava ao que existia, e então **"as urnas estão todas num
+canto" e "as urnas estão espalhadas" tinham exatamente a mesma aparência**.
+
+- [x] `55_contorno_municipio.py` — põe os anéis externos do município no arquivo
+  de urnas de cada cidade, da malha bruta do IBGE. Roda depois do `54_`.
+- [x] `MapaUrnas` desenha o contorno e enquadra no município.
+- [x] A *lupa*: segundo quadro ampliado quando a mancha é apertada demais.
+- [x] Três textos que a cobertura municipal tornou falsos, corrigidos.
+
+### O portão: as urnas caem dentro do próprio município?
+
+Contorno errado é pior que contorno nenhum — sem fronteira o leitor vê uma nuvem
+e sabe que é uma nuvem; com fronteira, ele **acredita na fronteira**. Medido
+antes de desenhar a primeira linha, nos 246 municípios: **2.459 locais com
+coordenada, 4 fora — 0,16%**. E os quatro estão a **60 a 90 metros** da divisa
+(Divinópolis de Goiás 70 m, Itapaci 60 m, Trindade 90 m, Luziânia 80 m), o que
+a esse zoom dá um pixel. Não é coordenada errada do TSE: é precisão de limite
+entre duas bases. Ficam desenhados onde o TSE disse que estão.
+
+### A malha bruta, sem simplificar — e a medição que decidiu isso
+
+O `04_geo` simplifica a 0,004 para o coroplético estadual, onde 246 municípios
+dividem a mesma tela. Aqui um município ocupa a tela inteira. Medi o custo de
+simplificar a malha bruta: **32.384 vértices para 32.150 a 0,001 grau — 0,7%**.
+A malha "intermediária" do IBGE já vem simplificada na origem e todo vértice
+dela é significativo. Não havia o que economizar: vai como está, mediana de 109
+vértices e ~2 KB por cidade, num arquivo que a tela já baixava.
+
+### A lupa, e o número que a tornou necessária
+
+Desenhar o município custa legibilidade, e o custo não é marginal: a mediana é
+de **4 locais de votação por cidade**, e em **109 dos 246** a mancha ocupa menos
+de 15% da largura do território. Enquadrados no município, esses 109 ficariam
+com os pontos empilhados num borrão.
+
+A saída não foi desistir do contorno nem enquadrar na nuvem: foi a convenção
+cartográfica de sempre — **detalhe mais localizador**. O quadro principal
+continua sendo o município, e quando a mancha fica abaixo de 22% da largura
+entra um segundo quadro ampliado, amarrado ao primeiro por um retângulo
+tracejado. O corte não é percentil: o raio do círculo chega a 13 px, então dois
+locais precisam de ~30 px entre si, o que com 4 pontos pede ~90 px num quadro de
+560 — 16%, arredondado para 22% com folga.
+
+E a concentração **é a informação**, não o defeito: em Caçu os sete locais estão
+todos num canto de um município comprido, porque a cidade inteira vota na sede.
+Sem contorno, esse fato não aparecia — e não havia como aparecer.
+
+### Três textos que contradiziam a tela
+
+A cobertura municipal chegou e os textos ficaram no lugar: a aba dizia
+**"Vereador · Goiânia"** com Caçu aberto, o subtítulo dizia "Vereadores da
+capital", e a nota dizia **"não há mapa"** escrita logo acima de um mapa. Texto
+que contradiz o que está na tela custa mais que texto ausente: ensina o leitor a
+não ler. O que continuava verdade era mais específico — não há *coroplético*,
+porque pintar área exige várias áreas; o mapa que existe é de outro tipo.
+
+
 ## AGUARDANDO — espera evento externo ou comando do usuário
 
 O BEDEL lê o **título da seção** para saber que não há próximo item seguro
