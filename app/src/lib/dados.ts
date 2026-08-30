@@ -1,7 +1,7 @@
 import type {
   BaseUF, BlocoAno, BlocoRivais, Cargo, CargoComRival, Cruzamentos, Demografia,
   AlegoAdmin, AlegoVerbas, AlmgVerbas, Assembleias, CldfAdmin, CldfVerbas,
-  Emendas, EmendasBR, Indice, Padroes, Sigla, Vereador,
+  Emendas, EmendasBR, Indice, Padroes, Sigla, Urnas, Vereador,
 } from "../tipos";
 
 const BASE = `${import.meta.env.BASE_URL}dados`;
@@ -152,3 +152,8 @@ export const carregarCldfAdmin = (): Promise<CldfAdmin> =>
 
 export const carregarAlmgVerbas = (): Promise<AlmgVerbas> =>
   comCache<AlmgVerbas>("almgV", `${BASE}/MG/almg_verbas.json`);
+
+/** Voto por local de votacao na capital. So' existe onde foi gerado — hoje
+ *  Goias — entao quem chama trata a ausencia como "ainda nao ha' mapa aqui". */
+export const carregarUrnas = (uf: Sigla, ano: number): Promise<Urnas> =>
+  comCache<Urnas>(`urnas:${uf}:${ano}`, `${BASE}/${uf}/urnas_${ano}.json`);

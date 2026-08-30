@@ -1,5 +1,9 @@
 import { useMemo, useState } from "react";
-import type { Vereador } from "../tipos";
+import { MapaUrnas } from "../componentes/MapaUrnas";
+import type { EstadoDica } from "../componentes/Dica";
+import { Legenda } from "../componentes/Legenda";
+import { quantis } from "../lib/escalas";
+import type { Urnas, Vereador } from "../tipos";
 import { decimal, numero, percentual } from "../lib/formato";
 import { token } from "../lib/escalas";
 import { Cartoes } from "../componentes/Cartoes";
@@ -13,10 +17,14 @@ import { ListaCandidatos } from "../componentes/ListaCandidatos";
  * arquivo do TSE oferece dentro da cidade é a zona eleitoral, e não há malha
  * pública de zona — a geografia entra como distribuição, não como desenho.
  */
-export function VistaVereador({ v, selecionado, aoSelecionar }: {
+export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
+                                aoInspecionar }: {
   v: Vereador;
   selecionado: number;
   aoSelecionar: (i: number) => void;
+  /** voto por local de votação; existe só onde foi gerado */
+  urnas: Urnas | null;
+  aoInspecionar: (d: EstadoDica | null) => void;
 }) {
   const anos = useMemo(
     () => Object.keys(v.anos).map(Number).sort((a, b) => a - b), [v.anos]);
@@ -31,6 +39,21 @@ export function VistaVereador({ v, selecionado, aoSelecionar }: {
   }, [bloco, filtro]);
 
   const atual = lista[selecionado] ?? lista[0];
+
+  /* O vetor por local do candidato aberto. Sem candidato, mostra o total do
+     local — que é o denominador de tudo o mais nesta tela. */
+  const porLocal = useMemo(() => {
+    const n = urnas?.locais.length ?? 0;
+    if (!urnas || !n) return [];
+    if (!atual) return urnas.totalLocal.slice(0, n);
+    const f = urnas.fichas.find((x) => x.sq === String(atual.sq));
+    const out = new Array<number>(n).fill(0);
+    f?.li.forEach((idx, k) => { if (idx < n) out[idx] = f.lv[k] ?? 0; });
+    return out;
+  }, [urnas, atual]);
+
+  const cortesUrna = useMemo(
+    () => quantis(porLocal.filter((x) => x > 0)), [porLocal]);
 
   if (!bloco) return <p className="indice exp">Sem dado neste pleito.</p>;
 
@@ -95,6 +118,62 @@ export function VistaVereador({ v, selecionado, aoSelecionar }: {
                 valor: percentual((atual.t / Math.max(bloco.pleito.total, 1)) * 100),
                 sub: `${numero(bloco.pleito.total)} no total` },
             ]} />
+
+            {urnas && urnas.ano === ano && (
+              <div className="cartaz">
+                <h2>Onde estão os votos, urna a urna</h2>
+                <p className="cap">
+                  {atual
+                    ? <>Votos de <strong>{atual.n}</strong> em cada um dos{" "}
+                        {numero(urnas.locais.length)} locais de votação de{" "}
+                        {urnas.cidade}. A área do círculo é proporcional ao
+                        voto; o anel vazio é local onde este candidato não teve
+                        voto — que é diferente de não haver urna ali.</>
+                    : <>Total de votos para vereador em cada local de votação de{" "}
+                        {urnas.cidade}.</>}
+                </p>
+                <MapaUrnas
+                  locais={urnas.locais}
+                  valores={porLocal}
+                  rotulo={atual ? atual.n : "Votos"}
+                  aoInspecionar={aoInspecionar}
+                  descrever={(i, val) => {
+                    const l = urnas.locais[i];
+                    const tot = urnas.totalLocal[i] ?? 0;
+                    return (
+                      <>
+                        <strong>{l?.n}</strong>
+                        <br />{l?.b} · zona {l?.z}
+                        <br />{numero(Math.round(val))} voto(s)
+                        {atual && tot > 0
+                          ? ` · ${percentual((val / tot) * 100, 1)} do local`
+                          : ""}
+                        <br />{numero(l?.e ?? 0)} eleitores
+                      </>
+                    );
+                  }} />
+                <Legenda cortes={cortesUrna} semDado="Sem voto aqui" />
+                <div className="nota" style={{ marginTop: 12 }}>
+                  <strong>É o grão mais fino deste projeto, e tem dois
+                  limites.</strong> O local de votação é um endereço, não um
+                  território: o ponto diz onde a urna estava, não onde o eleitor
+                  mora — quem vota numa escola pode morar a quarteirões dela. E a
+                  escala do círculo é <em>do candidato aberto</em>, não comum a
+                  todos: o maior ponto é sempre o maior local dele. Isso mostra o
+                  formato da votação de cada um, e não permite comparar tamanho
+                  entre candidatos — para isso, o total está na lista.
+                  {urnas.semCoordenada > 0 && (
+                    <> {numero(urnas.semCoordenada)} local(is) de{" "}
+                      {numero(urnas.locais.length)} ficam fora do mapa por não
+                      terem coordenada publicada
+                      {urnas.semCadastro > 0
+                        ? ` — um deles nem consta do cadastro de locais` : ""}.
+                      Continuam somando nos totais: saem do desenho, não da
+                      contagem.</>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="cartaz">
               <h2>Distribuição por zona eleitoral</h2>

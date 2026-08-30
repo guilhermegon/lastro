@@ -203,7 +203,11 @@ def main():
         fichas.sort(key=lambda f: -f["t"])
 
     obj = {
-        "cidade": cidade.title(), "uf": uf, "ano": ANO,
+        # o nome bonito vem do arquivo de vereador, que ja' o tem com acento;
+        # `cidade` aqui e' a chave sem acento, boa para casar e ruim para ler
+        "cidade": (json.loads(fver.read_text(encoding="utf-8")).get("cidade")
+                   if fver.exists() else cidade.title()),
+        "uf": uf, "ano": ANO,
         "eleitores": int(loc.eleitores.sum()),
         "secoes": int(loc.secoes.sum()),
         "semCoordenada": int((~loc.ok).sum()) + len(extras),

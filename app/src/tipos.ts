@@ -352,6 +352,46 @@ export interface AlmgVerbas {
                top: { n: string; p: string; v: number; m: number }[] };
 }
 
+/* ---------- voto por urna, na capital ----------
+   O grao mais fino do projeto: um local de votacao. `lat`/`lon` sao `null`
+   quando o TSE nao publica a coordenada — nunca 0 e nunca -1, que e' a
+   sentinela dele e poria a escola no Atlantico. */
+
+export interface LocalVotacao {
+  n: string;
+  b: string;
+  /** zona eleitoral: a chave do local e' (zona, local), nunca o local sozinho */
+  z: number;
+  lat: number | null;
+  lon: number | null;
+  /** eleitores aptos no local */
+  e: number;
+}
+
+export interface FichaUrna {
+  sq: string;
+  n: string;
+  t: number;
+  /** indices de local, e os votos correspondentes — esparso */
+  li: number[];
+  lv: number[];
+}
+
+export interface Urnas {
+  cidade: string;
+  uf: string;
+  ano: number;
+  eleitores: number;
+  secoes: number;
+  /** locais sem coordenada: ficam fora do mapa e dentro da contagem */
+  semCoordenada: number;
+  /** destes, os que nem constam do cadastro de locais */
+  semCadastro: number;
+  locais: LocalVotacao[];
+  totalLocal: number[];
+  fichas: FichaUrna[];
+}
+
 export interface FichaVereador {
   sq: string;
   n: string;

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import type {
   AlegoAdmin, AlegoVerbas, AlmgVerbas, Assembleias, BaseUF, Cargo, CldfAdmin,
   CldfVerbas, DadosCargo, Demografia, Emendas, EmendasBR, Esfera, Indice,
-  Rivais, Sigla, Vereador,
+  Rivais, Sigla, Urnas, Vereador,
 } from "./tipos";
 
 /** O pacote da aba API, buscado de uma vez porque a aba é nacional. */
@@ -21,7 +21,7 @@ import {
   carregarAssembleias, carregarCldfAdmin, carregarCldfVerbas,
   carregarDemografia, carregarEmendas, carregarEmendasBR,
   carregarEmendasEstadual, carregarIndice,
-  carregarRivaisAno, carregarVereador, prebuscar,
+  carregarRivaisAno, carregarUrnas, carregarVereador, prebuscar,
 } from "./lib/dados";
 import { numero } from "./lib/formato";
 import { noEstado } from "./lib/uf";
@@ -78,6 +78,8 @@ export default function App() {
   const [cargo, setCargo] = useState<DadosCargo | null>(null);
   const [rivais, setRivais] = useState<Rivais | null>(null);
   const [ver, setVer] = useState<Vereador | null>(null);
+  // Mapa de urna: existe só onde foi gerado, e a ausência não é erro.
+  const [urnas, setUrnas] = useState<Urnas | null>(null);
   // As duas esferas vivem em arquivos separados e nem toda UF tem a estadual:
   // guardar as duas evita rebaixar ao alternar, e `null` distingue "não
   // carregado" de "não existe aqui".
@@ -105,6 +107,7 @@ export default function App() {
     setCargo(null);
     setRivais(null);
     setVer(null);
+    setUrnas(null);
   }, [sel.uf, sel.vista]);
 
   useEffect(() => {
@@ -186,6 +189,9 @@ export default function App() {
       return () => { vivo = false; };
     }
     if (v === "vereador") {
+      // 2024 é o único pleito com mapa de urna por ora; falha = sem mapa
+      carregarUrnas(sel.uf, 2024).then((u) => { if (vivo) setUrnas(u); })
+        .catch(() => { if (vivo) setUrnas(null); });
       carregarVereador(sel.uf)
         .then((d) => { if (vivo) { setVer(d); setErro(null); } })
         .catch((e) => { if (vivo) setErro(String(e)); })
@@ -445,7 +451,8 @@ export default function App() {
 
         {sel.vista === "vereador" && ver && (
           <VistaVereador v={ver} selecionado={sel.cand}
-                         aoSelecionar={(i) => setSel((s) => ({ ...s, cand: i }))} />
+                         aoSelecionar={(i) => setSel((s) => ({ ...s, cand: i }))}
+                         urnas={urnas} aoInspecionar={setDica} />
         )}
 
         {sel.vista !== "vereador" && sel.vista !== "home"
