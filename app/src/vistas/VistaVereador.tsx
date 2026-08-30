@@ -119,6 +119,21 @@ export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
                 sub: `${numero(bloco.pleito.total)} no total` },
             ]} />
 
+            {/* Ausência do mapa é dita, nunca silenciosa: o seletor de cidade
+                convida a trocar, e uma seção que some sem explicação faz o
+                leitor achar que quebrou. */}
+            {!(urnas && urnas.ano === ano) && (
+              <div className="nota">
+                <strong>Sem mapa de urna {ano === 2024 ? "nesta cidade" : `em ${ano}`}.</strong>{" "}
+                {ano !== 2024
+                  ? "O mapa por local de votação existe só para 2024 — é o pleito"
+                    + " em que o TSE publica a coordenada de cada urna."
+                  : "A coordenada das urnas desta capital ainda não foi ingerida."
+                    + " O dado existe no TSE; falta o passo de coleta."}{" "}
+                A distribuição por zona eleitoral abaixo continua valendo.
+              </div>
+            )}
+
             {urnas && urnas.ano === ano && (
               <div className="cartaz">
                 <h2>Onde estão os votos, urna a urna</h2>

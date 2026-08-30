@@ -27,6 +27,7 @@ import { numero } from "./lib/formato";
 import { noEstado } from "./lib/uf";
 import { Logo } from "./componentes/Logo";
 import { SeletorEstado } from "./componentes/SeletorEstado";
+import { SeletorCidade } from "./componentes/SeletorCidade";
 import { Abas, type Vista } from "./componentes/Abas";
 import { Dica, type EstadoDica } from "./componentes/Dica";
 import { VistaCargo } from "./vistas/VistaCargo";
@@ -377,10 +378,16 @@ export default function App() {
               que não muda nada, e mostrar as abas de cargo convida a entrar
               numa seção de um produto que ainda não foi aberto — que é
               justamente o achatamento que a fileira de produtos desfez. */}
-          {!naCasa && (
+          {/* No vereador a unidade e' a cidade, nao a UF: perguntar o estado
+              faria o leitor traduzir a pergunta que ele tem na que a tela
+              aceita. Mesma navegacao, uma traducao a menos. */}
+          {!naCasa && (sel.vista === "vereador" ? (
+            <SeletorCidade ufs={indice.ufs} atual={sel.uf} aberto={gaveta}
+                           aoAbrir={setGaveta} aoEscolher={trocarUF} />
+          ) : (
             <SeletorEstado ufs={indice.ufs} atual={sel.uf} aberto={gaveta}
                            aoAbrir={setGaveta} aoEscolher={trocarUF} />
-          )}
+          ))}
 
           {/* A barra de seções é de "Cadê o Voto?" — Nacional, os cargos e o
               vereador. O Emendômetro tem os controles dele dentro da própria

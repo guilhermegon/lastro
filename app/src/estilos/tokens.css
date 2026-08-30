@@ -383,3 +383,8 @@ footer p { margin: 3px 0; max-width: 80ch; }
 .seg-rot > .et::before { content: ""; width: 9px; height: 9px; border-radius: 3px;
   background: var(--accent); }
 .seg-rot[data-pleito="municipal"] > .et::before { background: var(--municipal); }
+
+/* A nota da gaveta de cidades: diz o que a lista cobre. Uma lista de 27 cidades
+   sem explicação pareceria recorte arbitrário. */
+.gaveta-nota { margin: 10px 2px 2px; font-size: .72rem; line-height: 1.5;
+  color: var(--ink-3); max-width: 74ch; }
