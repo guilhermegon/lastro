@@ -1110,7 +1110,7 @@ que o infografico do TRE afirma ao listar bairros por zona.
 recorte sucessivo de meio-plano (Sutherland-Hodgman) a partir da caixa da
 cidade. As arestas internas entre celulas da MESMA zona somem, e o que resta e'
 a divisa. Detalhe que decidiu funcionar: o teste do recorte guarda `>= 0`, entao
-vertice sobre a mediatriz permanece — com  as duas celulas vizinhas
+vertice sobre a mediatriz permanece — com `> 0` as duas celulas vizinhas
 produziriam arestas ligeiramente diferentes e a dissolucao deixaria fresta.
 
 **O recorte pelo contorno do municipio nao e' feito em Python.** As celulas saem
