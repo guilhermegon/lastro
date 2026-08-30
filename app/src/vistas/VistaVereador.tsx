@@ -297,7 +297,7 @@ export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
                       </>
                     );
                   }} />
-                <Legenda cortes={cortesUrna} semDado="Sem voto aqui" />
+                <Legenda cortes={cortesUrna} semDado="Sem voto aqui" forma="anel" />
                 {zonasNoMapa.length > 1 && (
                   <div className="nota" style={{ marginTop: 12 }}>
                     <strong>A fronteira entre as zonas é derivada, não

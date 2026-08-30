@@ -1,5 +1,5 @@
 import { useId, useMemo, type ReactNode } from "react";
-import { corDaFaixa, quantis, SEM_VOTO, token } from "../lib/escalas";
+import { corDaFaixa, quantis } from "../lib/escalas";
 import type { ZonasCidade } from "../tipos";
 import type { EstadoDica } from "./Dica";
 
@@ -185,8 +185,12 @@ export function MapaUrnas({ locais, valores, rotulo, descrever, aoInspecionar,
   if (!dados) return <p className="indice exp">Sem coordenada para desenhar.</p>;
 
   // área ∝ voto ⇒ raio ∝ √voto — ver docstring
+  // O anel de zero tem raio FIXO e menor que qualquer círculo com voto: ele
+  // marca presença, não quantidade. 3,2 em vez de 2,4 porque abaixo disso o
+  // traço de 1,3 fecha o miolo e o anel vira ponto — e aí ele passa a parecer
+  // um local com pouquíssimo voto, que é exatamente o que ele não é.
   const raio = (v: number, k = 1) =>
-    (v > 0 ? 2.2 + 11 * Math.sqrt(v / maior) : 2.4) * k;
+    (v > 0 ? 2.2 + 11 * Math.sqrt(v / maior) : 3.2) * k;
 
   const circulos = (em: (p: Ponto) => Ponto, k: number) =>
     locais.map((_l, i) => {
@@ -207,12 +211,21 @@ export function MapaUrnas({ locais, valores, rotulo, descrever, aoInspecionar,
         },
         style: { cursor: "pointer" as const },
       };
-      // sem voto: anel vazio, para "não foi votado aqui" não virar "não há
-      // urna aqui" — ver docstring
+      // Sem voto: anel vazio, para "não foi votado aqui" não virar "não há
+      // urna aqui" — ver docstring.
+      //
+      // O traço é `--ink-3`, o cinza de TEXTO secundário, e não `--sem-voto`.
+      // Aquele é token de ÁREA: no coroplético preenche um município inteiro,
+      // onde quase se confundir com o fundo é o certo, porque a ausência não
+      // deve competir com o dado. Num anel de 3 px de raio ele sumia —
+      // #2E3A3D sobre #1E282B dá 1,2:1 no tema escuro —, e desenhado e
+      // invisível é pior que ausente: ninguém procura o que não sabe que
+      // existe. E as áreas de zona, que entraram atrás dos pontos depois,
+      // ainda põem uma lavagem de cor entre o anel e o fundo.
       if (v <= 0) {
         return (
           <circle key={i} cx={cx} cy={cy} r={r} fill="none"
-                  stroke={token(SEM_VOTO)} strokeWidth="1.2" {...comum} />
+                  stroke="var(--ink-3)" strokeWidth="1.3" {...comum} />
         );
       }
       return (

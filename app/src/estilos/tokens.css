@@ -459,3 +459,11 @@ footer p { margin: 3px 0; max-width: 80ch; }
   stroke-width: 3px;
   stroke-linejoin: round;
 }
+
+/* O swatch de "sem voto" no mapa de urnas e' um ANEL, porque a marca no mapa
+   e' um anel. Mesma cor e mesma espessura do circulo vazio. */
+.legenda .swatch.anel {
+  background: none;
+  border: 1.3px solid var(--ink-3);
+  border-radius: 50%;
+}
