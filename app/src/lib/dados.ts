@@ -153,11 +153,6 @@ export const carregarCldfAdmin = (): Promise<CldfAdmin> =>
 export const carregarAlmgVerbas = (): Promise<AlmgVerbas> =>
   comCache<AlmgVerbas>("almgV", `${BASE}/MG/almg_verbas.json`);
 
-/** Voto por local de votacao na capital. So' existe onde foi gerado — hoje
- *  Goias — entao quem chama trata a ausencia como "ainda nao ha' mapa aqui". */
-export const carregarUrnas = (uf: Sigla, ano: number): Promise<Urnas> =>
-  comCache<Urnas>(`urnas:${uf}:${ano}`, `${BASE}/${uf}/urnas_${ano}.json`);
-
 /** As cidades servidas, com o caminho de cada arquivo. 34 KB para 271 cidades.
  *
  *  Vem antes de escolher o estado de proposito: sem isso o leitor teria de
