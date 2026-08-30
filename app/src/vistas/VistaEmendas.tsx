@@ -4,6 +4,7 @@ import type {
 } from "../tipos";
 import { decimal, numero, percentual } from "../lib/formato";
 import { quantis } from "../lib/escalas";
+import { fundeMandato, LEGISLATURAS } from "../lib/mandato";
 import { Mapa } from "../componentes/Mapa";
 import { Legenda } from "../componentes/Legenda";
 import { Indices } from "../componentes/Indices";
@@ -74,12 +75,46 @@ export function VistaEmendas({
     }
   }, [anos, ano, anoCorrente]);
 
+  /* Ano ou mandato. O ano é unidade contábil e o mandato é a unidade política:
+     "quanto este parlamentar mandou para o território dele" é pergunta de
+     mandato, e a visão anual a esconde atrás da volatilidade de execução. */
+  const [porMandato, setPorMandato] = useState(false);
+  const [leg, setLeg] = useState<string>("");
+
+  const legsComDado = useMemo(
+    () => LEGISLATURAS.filter((l) => l.anos.some((a) => !!e.anos[String(a)])),
+    [e.anos]);
+
+  useEffect(() => {
+    if (porMandato && !legsComDado.some((l) => l.id === leg)) {
+      setLeg(legsComDado[legsComDado.length - 1]?.id ?? "");
+      setAutor(0);
+    }
+  }, [porMandato, legsComDado, leg]);
+
   const [medida, setMedida] = useState<Medida>("total");
   const [comPix, setComPix] = useState(true);
   const [autor, setAutor] = useState(0);
 
-  const bloco: BlocoEmenda | undefined = e.anos[String(ano)];
   const municipios = base.municipios;
+
+  const legAtual = legsComDado.find((l) => l.id === leg);
+  const blocoMandato = useMemo(
+    () => (porMandato && legAtual
+      ? fundeMandato(e.anos, legAtual, municipios.length) : null),
+    [porMandato, legAtual, e.anos, municipios.length]);
+
+  const bloco: BlocoEmenda | undefined =
+    porMandato ? (blocoMandato ?? undefined) : e.anos[String(ano)];
+
+  // O rótulo do período, para os textos não dizerem "em 2025" quando a tela
+  // mostra um mandato inteiro.
+  const periodo = porMandato ? (legAtual?.rotulo ?? "") : String(ano);
+  // A legislatura em curso ainda paga: em 2026 só 69,4% do empenhado virou
+  // pago, contra 96,3% em 2023. É o único ano de fato imaturo da série.
+  const emCurso = porMandato
+    ? !!legAtual?.anos.includes(anoCorrente)
+    : ano >= anoCorrente;
 
   /* O mapa mostra o total do município, não o de um autor: emenda se lê por
      território, e a pergunta "quanto chegou aqui" é a que interessa primeiro.
@@ -136,14 +171,35 @@ export function VistaEmendas({
             ))}
           </div>
         )}
-        <div className="seg" role="group" aria-label="Ano da emenda">
-          {anos.map((a) => (
-            <button key={a} aria-pressed={a === ano}
-                    onClick={() => { setAno(a); setAutor(0); }}>
-              {a}
-            </button>
-          ))}
+        <div className="seg" role="group" aria-label="Agrupamento">
+          <button aria-pressed={!porMandato}
+                  onClick={() => { setPorMandato(false); setAutor(0); }}>
+            Por ano
+          </button>
+          <button aria-pressed={porMandato}
+                  onClick={() => { setPorMandato(true); setAutor(0); }}>
+            Por mandato
+          </button>
         </div>
+        {porMandato ? (
+          <div className="seg" role="group" aria-label="Legislatura">
+            {legsComDado.map((l) => (
+              <button key={l.id} aria-pressed={l.id === leg}
+                      onClick={() => { setLeg(l.id); setAutor(0); }}>
+                {l.rotulo}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="seg" role="group" aria-label="Ano da emenda">
+            {anos.map((a) => (
+              <button key={a} aria-pressed={a === ano}
+                      onClick={() => { setAno(a); setAutor(0); }}>
+                {a}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="seg" role="group" aria-label="Medida">
           {(["total", "hab", "area"] as Medida[]).map((m) => (
             <button key={m} aria-pressed={m === medida}
@@ -163,23 +219,26 @@ export function VistaEmendas({
       </div>
 
       {!bloco ? (
-        <p className="cap">Sem emenda registrada em {ano}.</p>
+        <p className="cap">Sem emenda registrada em {periodo}.</p>
       ) : (
         <>
-          {ano >= anoCorrente && (
+          {emCurso && (
             <div className="nota">
-              <strong>{ano} está em execução.</strong> O ano corrente não fechou,
-              e o pagamento de emenda tem defasagem — o valor aqui é o que já
-              saiu, não o que o ano terá. Comparar com um ano completo mediria o
-              calendário, não a emenda.
+              <strong>{periodo} ainda está em execução.</strong> Em {anoCorrente}
+              , 69,4% do empenhado virou pago, contra 96,3% em 2023 — o valor
+              aqui é o que já saiu, não o que o período terá.
+              {porMandato
+                ? " Comparar este mandato com os anteriores subestima o atual."
+                : " Comparar com um ano completo mediria o calendário, não a"
+                  + " emenda."}
             </div>
           )}
 
           <Cartoes itens={[
-            { rotulo: "Pago em " + ano, valor: reais(p?.pago ?? 0),
+            { rotulo: "Pago em " + periodo, valor: reais(p?.pago ?? 0),
               sub: `${numero(p?.nEmendas ?? 0)} emendas` },
             { rotulo: "Autores", valor: numero(p?.nAutores ?? 0),
-              sub: "com emenda paga no ano" },
+              sub: porMandato ? "distintos no mandato" : "com emenda paga no ano" },
             { rotulo: "Municípios alcançados", valor: numero(p?.nMun ?? 0),
               sub: `de ${numero(municipios.length)}` },
             { rotulo: "Transferência especial", valor: reais(p?.pix ?? 0),
@@ -189,7 +248,7 @@ export function VistaEmendas({
           <div className="cartaz">
             <h2>Onde o dinheiro chegou{sufixo}</h2>
             <p className="cap">
-              {ROTULO_MEDIDA[medida]} por município em {ano},
+              {ROTULO_MEDIDA[medida]} por município em {periodo},
               {comPix ? " incluindo" : " excluindo"} a transferência especial —
               a chamada emenda Pix, que vai direto ao caixa da prefeitura sem
               projeto vinculado.
@@ -250,7 +309,7 @@ export function VistaEmendas({
               <div className="cartaz">
                 <h2>Quem mandou</h2>
                 <p className="cap">
-                  Autores por valor pago em {ano}. São só emendas
+                  Autores por valor pago em {periodo}. São só emendas
                   <strong> individuais</strong>: bancada, comissão e relator não
                   entram, e o cartaz abaixo diz quanto isso deixa de fora.
                 </p>
@@ -296,7 +355,8 @@ export function VistaEmendas({
                   { rotulo: "Pago", valor: reais(atual.t),
                     explicacao: `${numero(atual.ne)} emendas` },
                   { rotulo: "Municípios", valor: numero(atual.nm),
-                    explicacao: "alcançados no ano" },
+                    explicacao: porMandato ? "alcançados no mandato"
+                                           : "alcançados no ano" },
                   { rotulo: "No maior", valor: percentual(atual.t1, 1),
                     explicacao: "fatia do município que mais recebeu" },
                   { rotulo: "Municípios efetivos", valor: decimal(atual.ef, 1),
@@ -306,7 +366,7 @@ export function VistaEmendas({
                   <p className="cap">
                     <strong>{reais(atual.pix)}</strong> saíram como transferência
                     especial — {percentual((atual.pix / atual.t) * 100, 1)} do que
-                    este autor pagou no ano.
+                    este autor pagou {porMandato ? "no mandato" : "no ano"}.
                   </p>
                 )}
               </div>
