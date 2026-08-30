@@ -22,13 +22,25 @@ export const NOME_CARGO: Record<Cargo, string> = {
   estadual: "Estadual",
 };
 
+/** O DF nao elege deputado estadual: elege **distrital**, para a Camara
+ *  Legislativa, que acumula as competencias de assembleia e de camara municipal.
+ *  O dado entra no painel sob a chave `estadual` — e' o que torna as 27 unidades
+ *  comparaveis entre si — mas o rotulo tem de dizer o nome do cargo que existe.
+ *  Chave para comparar, rotulo para nao mentir. */
+export function nomeCargo(c: Cargo, uf?: Sigla): string {
+  return c === "estadual" && uf === "DF" ? "Distrital" : NOME_CARGO[c];
+}
+
 export interface ResumoUF {
   s: Sigla;
   n: string;
   /** municípios do estado */ nm: number;
   cargos: Cargo[];
-  /** capital, quando há histórico de vereador; o DF não tem */
+  /** capital do estado — a marca no mapa. Existe também no DF, que tem
+   *  capital e não tem câmara municipal: não confundir com `ver`. */
   capital?: string;
+  /** há arquivo de vereador para esta UF — é isto que liga a aba */
+  ver?: boolean;
 }
 
 export interface AgregadoUF {

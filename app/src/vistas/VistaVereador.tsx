@@ -46,7 +46,10 @@ export function VistaVereador({ v, selecionado, aoSelecionar }: {
       <aside className="rail">
         <div className="rail-bloco">
           <div className="rail-titulo">Pleito municipal</div>
-          <div className="seg" role="group" aria-label="Pleito municipal">
+          <div className="seg-rot" data-pleito="municipal">
+            <span className="et">Pleito municipal</span>
+            <div className="seg" data-pleito="municipal" role="group"
+                 aria-label="Pleito municipal">
             {anos.map((a) => (
               <button key={a} aria-pressed={a === ano}
                       onClick={() => { setAno(a); aoSelecionar(0); }}>
@@ -55,6 +58,7 @@ export function VistaVereador({ v, selecionado, aoSelecionar }: {
             ))}
           </div>
         </div>
+            </div>
         <ListaCandidatos
           titulo={`Vereador(a) · ${v.cidade}`}
           candidatos={lista}

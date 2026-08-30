@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { AgregadoUF, BaseUF, Cargo, DadosCargo, Rivais as TRivais } from "../tipos";
-import { MAJORITARIOS, NOME_CARGO } from "../tipos";
+import { MAJORITARIOS, nomeCargo } from "../tipos";
 import { quantis } from "../lib/escalas";
 import { decimal, numero, percentual } from "../lib/formato";
 import { Cartoes } from "../componentes/Cartoes";
@@ -60,7 +60,7 @@ export function VistaCargo({
   if (!bloco) {
     return (
       <p className="indice exp">
-        Sem dado de {NOME_CARGO[cargo].toLowerCase()} neste pleito.
+        Sem dado de {nomeCargo(cargo, base.uf).toLowerCase()} neste pleito.
       </p>
     );
   }
@@ -75,8 +75,8 @@ export function VistaCargo({
       <aside className="rail">
         <ListaCandidatos
           titulo={majoritario
-            ? `Candidato(a) · ${NOME_CARGO[cargo]}`
-            : `Eleito(a) · ${NOME_CARGO[cargo]}`}
+            ? `Candidato(a) · ${nomeCargo(cargo, base.uf)}`
+            : `Eleito(a) · ${nomeCargo(cargo, base.uf)}`}
           candidatos={lista}
           selecionado={selecionado}
           filtro={filtro}

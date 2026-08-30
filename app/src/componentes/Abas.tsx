@@ -1,4 +1,4 @@
-import { CARGOS, NOME_CARGO, type Cargo } from "../tipos";
+import { CARGOS, nomeCargo, type Cargo, type Sigla } from "../tipos";
 
 export type Vista = "home" | "nacional" | Cargo | "vereador"
   | "emendas" | "api" | "sobre";
@@ -11,17 +11,20 @@ export type Vista = "home" | "nacional" | Cargo | "vereador"
  *  cabeçalho. Estavam aparecendo nos dois lugares. A barra rola na horizontal
  *  no celular:
  *  sem isso, as últimas abas ficam fora da tela e sem como chegar nelas. */
-export function Abas({ atual, aoTrocar, cargosDisponiveis, temVereador, cidade }: {
+export function Abas({ atual, aoTrocar, cargosDisponiveis, temVereador, cidade,
+                       uf }: {
   atual: Vista;
   aoTrocar: (v: Vista) => void;
   cargosDisponiveis: Cargo[];
   temVereador: boolean;
   cidade: string | undefined;
+  /** so para o rotulo: no DF a aba do proporcional estadual chama Distrital */
+  uf: Sigla | undefined;
 }) {
   const itens: { id: Vista; rotulo: string; ativo: boolean }[] = [
     { id: "nacional" as Vista, rotulo: "Nacional", ativo: true },
     ...CARGOS.map((c) => ({
-      id: c as Vista, rotulo: NOME_CARGO[c], ativo: cargosDisponiveis.includes(c),
+      id: c as Vista, rotulo: nomeCargo(c, uf), ativo: cargosDisponiveis.includes(c),
     })),
     { id: "vereador" as Vista,
       rotulo: cidade ? `Vereador · ${cidade}` : "Vereador",

@@ -350,13 +350,17 @@ export default function App() {
                 Em "padroes" também não: aquela tela mostra a série inteira de
                 uma vez, então escolher um ano não muda nada. */}
             {usaAno && (
-              <div className="seg" role="group" aria-label="Pleito">
+              <div className="seg-rot">
+                <span className="et">Pleito geral</span>
+              <div className="seg" data-pleito="geral" role="group"
+                   aria-label="Pleito geral">
                 {anosComDado.map((a) => (
                   <button key={a} aria-pressed={a === sel.ano}
                           onClick={() => setSel((s) => ({ ...s, ano: a, cand: 0 }))}>
                     {a}
                   </button>
                 ))}
+              </div>
               </div>
             )}
           </div>
@@ -378,8 +382,9 @@ export default function App() {
               ofereceria seções de outro produto. */}
           {ehCadeOVoto && (
             <Abas atual={sel.vista} cargosDisponiveis={resumo?.cargos ?? CARGOS}
-                  temVereador={resumo?.capital != null}
+                  temVereador={resumo?.ver === true}
                   cidade={resumo?.capital}
+                  uf={sel.uf}
                   aoTrocar={(v) => setSel((s) => ({ ...s, vista: v, cand: 0 }))} />
           )}
         </div>
@@ -463,8 +468,12 @@ export default function App() {
           municipal: IBGE. {resumo && `${resumo.n}: ${numero(nMun)} municípios.`}
         </p>
         <p>
-          O Distrito Federal elege deputado distrital e não estadual, por isso não
-          aparece na lista de estados: são 26 unidades.
+          O Distrito Federal elege deputado <em>distrital</em>, não estadual. Os 24
+          distritais são o equivalente funcional dos estaduais — a Câmara Legislativa
+          acumula as competências de assembleia e de câmara municipal — e por isso
+          entram no painel equiparados, o que fecha as 27 unidades. A aba se chama
+          Distrital lá, e o DF é um município só: a geografia do voto não existe
+          nele, e a tela diz isso.
         </p>
         <p>
           Municípios efetivos não se comparam entre estados sem cuidado — Roraima tem

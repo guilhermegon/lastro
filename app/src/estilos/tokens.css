@@ -6,6 +6,7 @@
   --ink: #11181A; --ink-2: #47565A; --ink-3: #606D70;
   --line: #D3DDDD; --line-strong: #B6C4C4;
   --accent: #0E6F72; --accent-soft: #D9EBEB; --on-accent: #FFFFFF;
+  --municipal: #4F46B8; --on-municipal: #FFFFFF;
   --sem-voto: #DFE6E6; --ink-sel: #5E6A6E;
   --s1: #C43D34; --s2: #E07B33; --s3: #DFBB3C; --s4: #6FAA38; --s5: #2C6E33;
   --tinta-s1: #F5EEED; --tinta-s2: #3B2B20; --tinta-s3: #564D2E;
@@ -20,6 +21,8 @@
     --ink: #E7EDED; --ink-2: #A5B4B7; --ink-3: #809093;
     --line: #2A3639; --line-strong: #3B4A4E;
     --accent: #3FB9BE; --accent-soft: #17393B; --on-accent: #06191A;
+  --municipal: #A79BF2; --on-municipal: #06191A;
+    --municipal: #A79BF2; --on-municipal: #06191A;
     --sem-voto: #2E3A3D; --ink-sel: #919EA1;
     --s1: #C4453D; --s2: #D0812F; --s3: #C9AE3B; --s4: #6FAC3D; --s5: #3E9A48;
     --tinta-s1: #F9F5F4; --tinta-s2: #362A1D; --tinta-s3: #4A4328;
@@ -357,3 +360,26 @@ footer p { margin: 3px 0; max-width: 80ch; }
   .produto-bt.fechado { padding-right: 14px; }
   .produto-selo { position: static; transform: none; margin-left: 6px; }
 }
+
+/* ---------- cor por tipo de pleito ----------
+   Eleição geral e eleição municipal NUNCA compartilham um ano: a geral cai em
+   1998, 2002, … 2022 e a municipal em 2000, 2004, … 2024. As duas faixas de ano
+   são então conjuntos disjuntos, e já produziram confusão — um leitor viu a
+   faixa geral parar em 2022 e leu "falta 2024", quando 2024 é de outro pleito.
+
+   A cor resolve o que o rótulo sozinho não resolvia: o índigo diz "isto é
+   municipal" antes de qualquer palavra ser lida. Contraste calculado, não
+   estimado: 7,24 no claro e 7,41 no escuro contra o texto que carrega.
+
+   É matiz distinta da rampa do mapa, que vai de vermelho a verde — índigo não
+   está nela, então não há como confundir seleção de ano com faixa de valor. */
+.seg[data-pleito="municipal"] button[aria-pressed="true"] {
+  background: var(--municipal); color: var(--on-municipal);
+}
+.seg-rot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.seg-rot > .et { font: 500 .62rem/1 "IBM Plex Sans", sans-serif;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3);
+  display: inline-flex; align-items: center; gap: 5px; }
+.seg-rot > .et::before { content: ""; width: 9px; height: 9px; border-radius: 3px;
+  background: var(--accent); }
+.seg-rot[data-pleito="municipal"] > .et::before { background: var(--municipal); }
