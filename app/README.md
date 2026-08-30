@@ -43,7 +43,7 @@ requisição só, e uma falha não fica presa no cache.
 Os arquivos de `public/dados/` são **gerados**, não editados à mão:
 
 ```bash
-python ../scripts/19_nacional_completo.py    # 5 cargos x 7 pleitos x 26 UFs
+python ../scripts/19_nacional_completo.py    # 5 cargos x 7 pleitos x 27 unidades
 python ../scripts/20_adjacencia.py           # vizinhança, da malha completa
 python ../scripts/21_padroes_cruzamentos.py  # padrões e cruzamentos por UF
 python ../scripts/22_publicar_web.py         # publica em public/dados

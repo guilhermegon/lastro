@@ -146,6 +146,10 @@ def main():
         if (ORIGEM / uf / "vereador.json").exists():
             v = json.loads((ORIGEM / uf / "vereador.json").read_text(encoding="utf-8"))
             r["capital"] = v["cidade"]
+            # `ver` e' quem liga a aba. `capital` NAO serve para isso: o DF tem
+            # capital e nao tem camara municipal, e a aba ficava clicavel para
+            # cair num 404. Um campo para a marca no mapa, outro para a aba.
+            r["ver"] = True
             # o indice da capital na ordenacao de base.json. Guardado aqui, e
             # nao procurado por nome no navegador: a grafia varia entre bases
             # e um mapa marcando a cidade errada e' pior que um sem marca.

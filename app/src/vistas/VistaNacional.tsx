@@ -53,7 +53,9 @@ export function VistaNacional({ indice, ano, aoEscolher, aoInspecionar }: {
 
   const linhas = useMemo(() => [...porUF.values()], [porUF]);
   const porFracao = useMemo(
-    () => [...linhas].sort((a, b) => (b.fr ?? 0) - (a.fr ?? 0)), [linhas]);
+    // sem fração não há posição no ranking: vai para o fim, e a célula
+    // mostra travessão — o último lugar aqui não é um resultado, é uma ausência
+    () => [...linhas].sort((a, b) => (b.fr ?? -1) - (a.fr ?? -1)), [linhas]);
   const porPreco = useMemo(
     () => [...linhas].sort((a, b) => b.ult - a.ult), [linhas]);
 
@@ -94,7 +96,15 @@ export function VistaNacional({ indice, ano, aoEscolher, aoInspecionar }: {
                 return (
                   <>
                     <strong>{d?.nome ?? s}</strong>
-                    {d ? (
+                    {!d ? (
+                      "sem dado neste pleito"
+                    ) : d.fr == null ? (
+                      <>
+                        Um município só: não há fração de estado a medir.
+                        <br />
+                        {d.cad} cadeiras, {numero(d.tot)} votos nominais
+                      </>
+                    ) : (
                       <>
                         Fração do estado:{" "}
                         <span className="num">{percentual(v, 1)}</span>
@@ -102,8 +112,6 @@ export function VistaNacional({ indice, ano, aoEscolher, aoInspecionar }: {
                         {decimal(d.ef ?? 0, 1)} municípios efetivos de{" "}
                         {numero(d.nmun)}
                       </>
-                    ) : (
-                      "elege deputado distrital, não estadual"
                     )}
                   </>
                 );
@@ -132,9 +140,9 @@ export function VistaNacional({ indice, ano, aoEscolher, aoInspecionar }: {
                   </td>
                   <td className="n">{numero(d.nmun)}</td>
                   <td className="n">{d.cad}</td>
-                  <td className="n">{decimal(d.ef ?? 0, 1)}</td>
-                  <td className="n">{percentual(d.fr ?? 0, 1)}</td>
-                  <td className="n">{percentual(d.t1 ?? 0, 1)}</td>
+                  <td className="n">{d.ef == null ? "—" : decimal(d.ef, 1)}</td>
+                  <td className="n">{d.fr == null ? "—" : percentual(d.fr, 1)}</td>
+                  <td className="n">{d.t1 == null ? "—" : percentual(d.t1, 1)}</td>
                 </tr>
               ))}
             </tbody>
@@ -150,8 +158,11 @@ export function VistaNacional({ indice, ano, aoEscolher, aoInspecionar }: {
         </div>
 
         <p className="cap">
-          O Distrito Federal fica sem cor: elege deputado distrital, não
-          estadual, e por isso não entra nesta comparação. São 26 unidades.
+          O Distrito Federal fica sem cor, e com travessão nas três últimas
+          colunas. Ele está no painel — os 24 distritais entram equiparados a
+          estaduais — mas é um município só: fração do estado, municípios
+          efetivos e maior município não têm o que medir ali. As colunas de
+          cadeiras, quociente e preço da cadeira valem, e o DF aparece nelas.
         </p>
       </div>
 

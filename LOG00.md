@@ -911,3 +911,64 @@ publicar utilizável*. Pernambuco documenta um esquema que nenhum arquivo usa, a
 Bahia publica o deputado e não o município, e a ALEGO publica uma diária de
 R$ 2,7 milhões. Nenhum desses casos aparece para quem lê a descrição em vez do
 arquivo.
+## 2026-08-30 — o Distrito Federal entra, e um append quase destruiu quatro anos
+
+O DF era a única unidade sem casa legislativa no painel: elege **deputado
+distrital**, cargo 8, e `cfg.CARGOS` só conhece o 7. Os 24 distritais entraram
+equiparados a estaduais — a Câmara Legislativa acumula as competências de
+assembleia e de câmara municipal — sob a chave `estadual`, com rótulo
+**Distrital** na tela. Sete anos, 24 eleitos em cada um.
+
+**O erro que quase passou.** `49_df_distrital.py` montou a lista de colunas a
+partir de 2022 — 23 campos — e anexou isso a 2002, 2006, 2010 e 2014, que têm
+20: os três campos de federação só existem de 2018 em diante. Quatro arquivos do
+interim ficaram com linhas desalinhadas.
+
+O que torna este caso pior que um bug comum é que **eu verifiquei e a
+verificação passou**. Conferi lendo com `usecols`, que só toca as primeiras
+colunas — e essas continuavam plausíveis. O estrago só apareceu quando o pandas
+falhou lendo o arquivo inteiro, `Expected 20 fields, saw 23`. Conferência que
+olha menos que o dano não é conferência; é aval.
+
+Reparo: remover as linhas cuja contagem de campos difere do cabeçalho — eram
+exatamente as anexadas, contíguas no fim (626, 645, 798 e 979). O teste-ouro
+voltou a passar idêntico. O portão virou código: o script agora lê o cabeçalho do
+arquivo alvo primeiro, alinha o DF a ele, e aborta se a contagem não bater.
+
+**1998 escondeu o DF duas vezes.** Não há `_1998_DF.csv`: o zip traz 26 CSV por
+UF mais um `_BRASIL.csv`, e o DF está lá dentro. Procurar pelo arquivo por UF
+devolve vazio, e vazio ali se leria como "o DF não elegeu distrital em 1998" —
+elegeu 24, com 594 candidatos. E o ano traz a armadilha já conhecida:
+`QT_VOTOS_NOMINAIS` zerada, os 872.072 votos em `_VALIDOS`.
+
+**286 eleitos numa Casa de 24.** Meu diagnóstico usou `contains("ELEITO")`, que
+casa com "NÃO ELEITO". O pipeline publicado nunca esteve errado — usa
+`startswith` mais a lista fechada. Foi absurdo o bastante para se denunciar; o
+que não é garantia para os erros que caem dentro do plausível.
+
+**O DF obrigou a arrumar o que degenera com cara de medida.** Um município só
+zera a geografia inteira, e o pior não é o índice degenerado — é ele parecer
+resultado. Saíram os dois coropléticos (polígono sempre cheio, legenda repetindo
+"51.792 a 51.792" cinco vezes) e a tipologia. A semelhança partidária virou
+`null` **no dado**, no `19_`, e não só na tela: cosseno de vetores de uma
+dimensão é 1,000 sempre, e quem lê o arquivo não viu a tela.
+
+**E na comparação nacional, `null` virava zero.** A tabela mostrava "0,0
+municípios efetivos" e "0,0%" de fração do estado para o DF, e a ordenação o
+punha no extremo, como se fosse a unidade com o voto **menos** espalhado do
+país. `?? 0` num campo anulado de propósito desfaz o cuidado que anulou.
+
+**Um defeito antigo veio junto.** A aba de Vereador ligava por `capital`, e o
+índice dá `capital` ao DF de propósito — a landing marca a capital no mapa. A aba
+ficava clicável e caía num 404 exibido como string de erro crua. Passava
+despercebido porque ninguém abria o DF. Agora `capital` é só a marca no mapa e o
+campo novo `ver` liga a aba: 26 UFs com flag e arquivo, o DF sem os dois.
+
+**Portões.** Teste-ouro de Goiás passou idêntico, e `15_valida_nacional` confirmou
+que o recorte de GO no arquivo do Brasil segue igual ao arquivo de GO nas 34
+combinações cargo/ano — o que era exatamente o risco do append.
+
+**O que o DF acrescenta.** Nas colunas que não dependem de território ele não é
+figurante: com as **mesmas 24 cadeiras** de Mato Grosso do Sul e do Tocantins, o
+quociente do DF em 2022 foi **66.575**, contra 55.854 e 33.327. Mesma Casa, o
+dobro do preço de entrada do Tocantins.

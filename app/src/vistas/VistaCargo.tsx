@@ -162,7 +162,9 @@ export function VistaCargo({
                 <br /><br />
                 O que continua valendo é tudo que não depende de território: a
                 lista de eleitos, o quociente eleitoral, os votos do último
-                eleito e a análise partidária. A geografia intra-DF existe por
+                eleito e a análise partidária — menos a coluna de semelhança, que
+                mede disputa de território e por isso sai com travessão. A
+                geografia intra-DF existe por
                 <em> zona eleitoral</em>, e não há malha publicada de zona —
                 mesmo caso do vereador de capital: há número e não há mapa.
               </div>

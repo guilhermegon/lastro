@@ -1,4 +1,4 @@
-"""Modelo completo de Goias replicado para as 26 UFs, nos cinco cargos.
+"""Modelo completo de Goias replicado para as 27 unidades, nos cinco cargos.
 
 Produz, por UF:
 
@@ -251,7 +251,12 @@ def processar_uf(g, uf, ano, cargo, idx, nomes_mun, viz, venc, lin, nomelin,
         t = sum(f["t"] for f in fs)
         fortes = [f for f in fs if f["t"] >= MIN_VOTOS_SIMILARIDADE]
         sim = None
-        if len(fortes) >= 2:
+        # Cosseno entre vetores de UMA dimensao e' 1,0 sempre: no DF, que e' um
+        # municipio so', a semelhanca sairia 1,000 para todo partido e se leria
+        # como "disputam o mesmo territorio", quando o que ha' e' ausencia de
+        # territorio. Sem chao para dividir, a medida nao existe — e nao existir
+        # se escreve None, nao 1,000.
+        if n > 1 and len(fortes) >= 2:
             M = np.vstack([vetores[f["sq"]] if f["sq"] in vetores else
                            np.zeros(n) for f in fortes])
             nor = np.linalg.norm(M, axis=1, keepdims=True)

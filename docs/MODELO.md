@@ -180,6 +180,50 @@ Documentadas aqui porque nenhuma delas é visível no dado e todas alteram resul
    exibido no mapa, não os municípios em que o deputado teve voto (Álvaro Guimarães
    teve voto em 190 dos 246 em 2018).
 
+13. **O DF não tem arquivo próprio em 1998.** O zip daquele ano traz 26 CSV por UF
+    mais um `..._1998_BRASIL.csv`, e o Distrito Federal está dentro do BRASIL — não
+    entre os 26. Procurar só por `_1998_DF.csv` devolve nada, e "nada" ali se leria
+    como "o DF não elegeu distrital em 1998": elegeu 24, com 594 candidatos e
+    872.072 votos. O BRASIL tem 44 colunas contra 23 do arquivo por UF, então a
+    seleção de colunas do ano vale igual. É o mesmo formato da armadilha 8, e a
+    conclusão é a mesma: ausência de arquivo nunca significa ausência de eleição.
+
+14. **O número de colunas do interim muda de ano para ano.** 2002, 2006, 2010 e 2014
+    têm 20 campos; 2018 e 2022 têm 23 — os três de federação só existem de 2018 em
+    diante. Anexar linhas montadas com o cabeçalho de um ano em arquivo de outro
+    desalinha tudo **em silêncio**, e conferir com `usecols` não pega: `usecols` só
+    toca as primeiras colunas, que continuam plausíveis. Quem anexa alinha ao
+    cabeçalho do arquivo alvo e aborta se a contagem de campos não bater
+    (`49_df_distrital.py`).
+
+15. **`contains("ELEITO")` casa com `NÃO ELEITO`.** A situação de eleito se testa com
+    `startswith("ELEITO")` mais a lista fechada que inclui `MEDIA` (armadilha 2).
+    Com `contains`, o DF de 2014 devolveu 286 eleitos numa Casa de 24. O pipeline
+    publicado sempre esteve certo; o erro foi de uma conferência à parte.
+
+### O DF no painel: chave `estadual`, rótulo `Distrital`
+
+O DF elege **deputado distrital**, cargo 8, e não estadual, cargo 7. Os 24
+distritais entram no painel sob a chave `estadual` — a Câmara Legislativa exerce
+as competências de assembleia estadual e de câmara municipal, o que os torna o
+equivalente funcional — e só assim as 27 unidades ficam comparáveis. A tela
+mostra **Distrital**: a chave serve à comparação, o rótulo ao leitor.
+
+O que **não** vale ali é tudo que pressupõe vários municípios. O DF é um
+município só, então concentração, domínio, contiguidade, Gini e municípios
+efetivos degeneram por construção. Duas consequências ficaram no dado, não só
+na tela:
+
+- `ef`, `t1` e `fr` do agregado por UF são **`null`** para o DF, e quem consome
+  o índice não deve trocar isso por zero: zero coloca o DF no extremo do ranking
+  de concentração, que é uma afirmação falsa.
+- `partidos[].sim` também é **`null`**: cosseno entre vetores de uma dimensão é
+  1,0 por construção, e 1,000 publicado se leria como "os candidatos do partido
+  disputam exatamente o mesmo território".
+
+A geografia intra-DF existe por **zona eleitoral**, e não há malha pública de
+zona — mesmo caso do vereador de capital: há número e não há mapa.
+
 
 ## Rivais territoriais (`web/{UF}/rivais_{cargo}.json`)
 

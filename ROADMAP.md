@@ -570,9 +570,117 @@ como referência, não como previsão.
 ### Marcas
 
 As três compartilham a mesma construção e só ela: régua vertical em x=12, linha
-de base em y=52, só retângulos arredondados, hierarquia por opacidade, `--accent`.
-O Radar ganhou o único elemento novo do sistema — a quarta barra é **contorno**,
-não preenchimento, e vem adiante das outras: é projeção, não observação.
+de base em y=52, só retângulos arredondados, hierarquia por opacidade, `--accent`,
+e todas ocupam a mesma caixa — x de 12 a 64, altura 44.
+
+**O Radar foi redesenhado, e o motivo é de vizinhança, não de conceito.** A
+primeira versão eram barras crescentes com a última em contorno: projeção em vez
+de observação, o que estava certo. Só que o Emendômetro **também** é barras
+crescentes, e na fileira de produtos, a 158 px, os dois liam quase igual — e a
+fileira existe justamente para a troca de produto ser reconhecida de relance.
+
+O desenho de hoje é alcance e detecção: três quartos de moldura abertos a partir
+da quina onde a régua encontra a linha de base, e um bloco cheio além do último.
+O bloco é o único elemento sólido de propósito — o alcance é estrutura, a
+detecção é o achado.
+
+## Marco 14 — o Distrito Federal entra no painel
+
+O DF era a única unidade da federação sem casa legislativa aqui: tinha
+presidente, governador, senador e federal, e não tinha a assembleia. Ele elege
+**deputado distrital** (cargo 8 no TSE), e `cfg.CARGOS` nunca incluiu o 8.
+
+Os 24 distritais são o equivalente funcional dos estaduais — a Câmara
+Legislativa acumula as competências de assembleia estadual e de câmara municipal
+— e por isso entram **equiparados**, sob a chave `estadual`. Chave para comparar,
+rótulo para não mentir: a aba se chama **Distrital** no DF, e só lá.
+
+- [x] `49_df_distrital.py` — baixa só o que falta, produz só o DF, anexa ao
+  interim existente. Sete anos, **24 eleitos em cada um**, batendo com as
+  cadeiras da CLDF em sete pleitos independentes.
+- [x] Republicação completa: `19_` → `22_` → `47_`. O índice fecha em **27 UFs e
+  189 linhas de agregado** (27 × 7), contra 26 antes.
+- [x] Portões: **teste-ouro de Goiás passou idêntico** e `15_valida_nacional`
+  confirmou que o recorte de GO no arquivo do Brasil segue igual ao arquivo de
+  GO nas 34 combinações cargo/ano.
+
+### Por que um script à parte, e não mudar `cfg.CARGOS`
+
+Mudar a constante refaria a ingestão inteira: sete anos, 27 UFs, cinco cargos,
+horas de download, e o teste-ouro no meio do caminho. O cargo 8 só existe no DF
+— o alcance real da mudança é **uma** UF. Nada do que já passou no teste-ouro
+foi reprocessado.
+
+### O append que corrompeu quatro arquivos, e o portão que nasceu dele
+
+A primeira versão montou a lista de colunas a partir de 2022 — 23 colunas, com
+os três campos de federação — e anexou isso a todos os anos. Os arquivos de
+2002, 2006, 2010 e 2014 têm **20**: a federação só existe de 2018 em diante. As
+linhas entraram desalinhadas em quatro arquivos.
+
+O pior não foi o erro, foi a minha verificação: eu conferi com `usecols`, que só
+toca as primeiras colunas, e ela passou. O estrago só apareceu quando o pandas
+falhou lendo o arquivo inteiro. Verificação que olha menos que o dano não é
+verificação.
+
+Reparo: remover as linhas cuja contagem de campos difere do cabeçalho — eram
+exatamente as anexadas, contíguas no fim. O portão virou código: agora o alvo é
+lido primeiro e o DF é alinhado ao cabeçalho **dele**, e o script aborta se o
+número de campos não bater.
+
+### 1998 esconde o DF, e esconde os votos também
+
+O zip de 1998 traz 26 CSV por UF mais um `..._1998_BRASIL.csv`, e o DF está
+dentro do BRASIL — não entre os 26. Procurar só por `_1998_DF.csv` devolve nada,
+e "nada" ali se leria como "o DF não elegeu distrital em 1998", que é falso:
+elegeu 24, com 594 candidatos e 872.072 votos. Somada à armadilha já conhecida
+do ano — `QT_VOTOS_NOMINAIS` zerada, votos em `_VALIDOS` — são duas chances de
+publicar um ano vazio com aparência de completo.
+
+### 286 eleitos numa Casa de 24
+
+Meu diagnóstico usou `contains("ELEITO")`, que casa com **"NÃO ELEITO"**. O
+pipeline publicado nunca esteve errado: usa `startswith` mais a lista fechada. O
+defeito era da minha conferência — e um número absurdo o bastante se denuncia
+sozinho, o que não é garantia nenhuma para os que não são.
+
+### O que o DF obrigou a arrumar na tela
+
+Um município só degenera toda a geografia, e degenerado **com cara de medida** é
+pior que ausente:
+
+- **Os dois coropléticos saíram.** Um polígono só, sempre cheio, igual para os 24
+  eleitos — e a legenda em quantis repetindo "51.792 a 51.792" cinco vezes. No
+  lugar, a explicação de por que não há mapa.
+- **A tipologia sumiu no DF.** "100,0%" ao lado de "de 1 município" o leitor
+  desconta sozinho; "Concentrado-Compartilhado" é uma **afirmação** sobre o
+  comportamento territorial, e ele acredita. Número degenerado com contexto
+  fica; rótulo degenerado sai.
+- **A semelhança partidária virou `null` no dado**, não só na tela: cosseno entre
+  vetores de uma dimensão é 1,000 sempre, e publicado se leria como "todo
+  partido do DF disputa exatamente o mesmo território" — o oposto do que o dado
+  diz. Corrigido no `19_`, porque quem lê o arquivo não viu a tela.
+- **Na comparação nacional, `null` virava zero.** A tabela mostrava "0,0
+  municípios efetivos" e "0,0%" de fração do estado, e a ordenação punha o DF no
+  extremo, como se fosse a unidade com o voto **menos** espalhado do país. Agora
+  é travessão, e o último lugar deixou de ser um resultado.
+
+### O defeito antigo que o DF revelou
+
+A aba de Vereador ligava por `capital`, não pelo arquivo de vereador. O índice
+dá `capital` ao DF de propósito — a landing marca a capital no mapa — e a aba
+ficava clicável para cair num 404 exibido como string de erro crua. Passava
+despercebido porque ninguém abria o DF. Separados os papéis: `capital` é a marca
+no mapa, o campo novo `ver` liga a aba. Conferido: 26 UFs com flag e arquivo, o
+DF sem nenhum dos dois, zero discordância nos dois sentidos.
+
+### O que o DF acrescenta à leitura
+
+Ele entra inteiro nas colunas que não dependem de território, e ali não é
+figurante: com as **mesmas 24 cadeiras** de Mato Grosso do Sul e do Tocantins, o
+quociente do DF em 2022 foi de **66.575** contra 55.854 e 33.327. Mesma Casa,
+preço de entrada dobrado em relação ao Tocantins.
+
 
 ## AGUARDANDO — espera decisão do usuário ou evento externo
 
