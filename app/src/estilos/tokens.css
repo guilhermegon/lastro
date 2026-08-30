@@ -431,3 +431,7 @@ footer p { margin: 3px 0; max-width: 80ch; }
 @media (max-width: 640px) {
   .urnas-lupa { flex: 1 1 100%; }
 }
+
+/* O `h1` da landing envolve a marca da casa: ele existe para a estrutura do
+   documento, não para desenhar nada. Zera o que um `h1` traria por padrão. */
+.casa-h1 { margin: 0; font-size: inherit; font-weight: inherit; line-height: 0; }

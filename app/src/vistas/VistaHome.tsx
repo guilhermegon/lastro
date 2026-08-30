@@ -67,7 +67,10 @@ export function VistaHome({ aoEntrar, nMun, nUF }: {
   return (
     <>
       <div className="casa">
-        <Logo />
+        {/* `h1` da página. A entrada é da casa, então o título de primeiro nível
+            é o nome dela — e não o de um produto que ainda não foi aberto. O
+            texto acessível vem do `aria-label` da marca. */}
+        <h1 className="casa-h1"><Logo /></h1>
         <p className="casa-tese">
           Geografia do voto e do dinheiro público no Brasil, a partir de dado
           aberto. Nada aqui é estimativa, projeção de intenção ou pesquisa: é

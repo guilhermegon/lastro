@@ -433,6 +433,11 @@ export default function App() {
           </div>
 
           <div className="topo-in">
+            {/* Na home quem dá o título é a própria vitrine, que abre com a
+                marca da casa em `h1`. Aqui o bloco caía no ramo do produto e
+                escrevia "Cadê o Voto em Goiás?" na entrada — um produto que
+                ainda não foi escolhido, e um estado que é só o padrão. */}
+            {sel.vista !== "home" && (
             <div className="marca">
               <h1>{titulo}</h1>
               <p>
@@ -460,6 +465,7 @@ export default function App() {
                       cargos, de 1998 a 2022.</>}
               </p>
             </div>
+            )}
             {/* Só onde este ano governa a tela.
 
                 Em "vereador" ele não governa: a eleição municipal cai em
