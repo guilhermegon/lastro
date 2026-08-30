@@ -19,7 +19,7 @@ com `leader_recommendation` inequívoca:
 | TKT-003 — pleito de 2026 | **segue aberto** — não há recomendação a aplicar: espera o TSE publicar, não uma decisão |
 | RAS 00 TKT 0007 — fork privado | **decidido** — opção 1; falta o usuário criar o repositório, o `gh` daqui é de outra conta |
 | RAS 00 TKT 0008 — acesso do Radar | **decidido** — opção 3 agora, opção 1 quando houver cliente; vira gatilho |
-| RAS 00 TKT 0010 — pasta antiga | **segue aberto** — método aceito, destino é julgamento humano de fato |
+| RAS 00 TKT 0010 — pasta antiga | **fechado no mesmo dia** — o usuário escolheu o destino logo depois; o move abriu o TKT-0012 |
 | RAS 00 TKT 0011 — Distrito Federal | **fechado pelo portão**, não pelo RT: o teste-ouro correu e passou |
 
 Dois ficaram abertos de propósito. RT aplica recomendação inequívoca; ele não
@@ -376,7 +376,7 @@ preservado no histórico de `GTzon/lastro`.
 | `type` | `TRACKING_NO_APPROVAL` |
 | `criticality` | baixa |
 | `work_continues` | sim |
-| `status` | **ABERTO** — nada a decidir agora, registrado para não se perder |
+| `status` | **FECHADO** — destino escolhido pelo usuário e movido, 2026-08-30 |
 
 **summary.** O projeto passou a viver em `Documents\LASTRO\lastro`, ligado ao
 repositório novo. A pasta antiga `Documents\RASTRO` segue existindo com a árvore
@@ -435,6 +435,78 @@ reversível —, e fora de qualquer pasta sincronizada, que é o caso que o
 
 Um "sim" a esse caminho fecha o ticket; outro destino também fecha, e aí só
 troco o alvo do `move`.
+
+**Fechamento (2026-08-30).** O usuário escolheu `Documents\LASTRO\dados`. Movido
+com `Move-Item`: **0,02 s**, porque mesmo volume é renomear — 814 arquivos e
+5.835,7 MB antes e depois, contagem e soma de bytes idênticas, origem inexistente
+ao fim. Provado com o teste-ouro rodando contra o caminho novo: passou.
+
+**E o fechamento revelou o que o ticket não sabia: há DUAS árvores de dados, não
+uma.** O repositório novo tem `data/` próprio, e ele não está vazio — outra
+sessão vem escrevendo lá porque não define `RASTRO_DATA` e o `00_config` cai no
+`ROOT/data`. No momento do move:
+
+| | `LASTRO\dados` (movido) | `lastro/data` (interno) |
+|---|---|---|
+| `interim` | 5.634 MB, 272 arquivos | 27,9 MB, 7 arquivos |
+| `processed` | 142 MB, 505 arquivos | 160 MB, **779 arquivos** |
+| `raw` | 58,9 MB | 212,7 MB (download em curso) |
+| `overrides` | 7 arquivos | 3 arquivos |
+
+As duas divergiram e **cada uma tem conteúdo que a outra não tem**. O `interim`
+insubstituível está no movido; o `processed` com mais arquivos está no interno.
+
+Unificar as duas é decisão nova, criada pela concorrência entre sessões, e não
+cabe neste ticket — nem se resolve enquanto a outra sessão estiver escrevendo.
+Registrado como **RAS 00 TKT 0012**. Nada foi mesclado: mesclar duas árvores
+`processed` divergentes é exatamente como se publica um site silenciosamente
+errado.
+
+**A pasta `Documents\RASTRO` continua existindo** com código, `.git` e o remoto
+antigo — só os dados saíram. Apagar o resto é irreversível e não foi pedido.
+
+---
+
+### RAS 00 TKT 0012 — Duas árvores de dados, e as duas em uso
+
+| Campo | Valor |
+|---|---|
+| `type` | `BLOCKING_DECISION` |
+| `criticality` | alta — é de onde sai o número que vai para o site |
+| `work_continues` | sim, com risco: cada sessão publica a partir da sua |
+| `status` | **ABERTO** — aberto em 2026-08-30, ao fechar o TKT-0010 |
+
+**summary.** O pipeline lê e escreve em `cfg.DATA`, que é `RASTRO_DATA` quando a
+variável existe e `ROOT/data` quando não existe. Hoje as duas coisas existem e
+as duas têm dado real: `Documents\LASTRO\dados` (canônico, com o `interim` de
+5,6 GB) e `Documents\LASTRO\lastro\data` (interno, com um `processed` de 779
+arquivos contra 505 do outro). Quem define a variável usa uma; quem esquece usa
+a outra, e nada avisa.
+
+**Por que isso é pior que desperdício de disco.** O `22_publicar_web.py` apaga e
+reconstrói `app/public/dados` inteiro a partir de `cfg.PROCESSED`. Duas sessões
+publicando de árvores diferentes produzem um site em que metade dos arquivos vem
+de uma apuração e metade de outra — sem erro em lugar nenhum, porque cada arquivo
+é individualmente válido. É o modo de falha que este projeto mais recusa: número
+errado com aparência de certo.
+
+**decision_needed.** Qual árvore é a única, e como o código passa a garantir isso.
+
+**options.** (1) `00_config` prefere `../dados` quando existe, e imprime na
+importação qual árvore escolheu — acaba com o "esqueci a variável" sem depender
+de disciplina. (2) `00_config` **falha** se `RASTRO_DATA` não estiver definida,
+tornando a escolha sempre explícita. (3) Manter como está e combinar por fora.
+
+**leader_recommendation.** **Opção 1.** Um padrão que acerta sozinho vale mais que
+uma regra que exige lembrar, e imprimir a árvore escolhida transforma um erro
+silencioso em uma linha visível. A opção 2 é mais rígida e quebraria todo script
+já escrito que não define a variável; a 3 é a situação atual, que já se mostrou
+insuficiente.
+
+**Fora da pré-autorização, e por isso aberto:** antes de trocar o padrão é
+preciso decidir **o que fazer com o conteúdo único de cada árvore** — e há uma
+sessão escrevendo numa delas agora. Mudar o padrão com trabalho em voo faria a
+próxima execução dela trocar de árvore no meio de uma feature.
 
 ---
 

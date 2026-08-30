@@ -65,6 +65,18 @@ aparência de certo — é o mesmo risco de dado enganoso que motiva a emenda do
   navegador — está em `CURL_HEADERS` (`scripts/00_config.py`). Não usar `-I` nem `-r`.
 - Os zips do TSE são nacionais (até 587 MB) e não há arquivo por UF. Com pouco espaço
   livre em disco, a ingestão apaga cada zip logo após extrair o CSV da UF.
+- **O diretório de dados canônico é `C:\Users\Administrador\Documents\LASTRO\dados`**,
+  irmão do repositório e fora dele. Foi para lá em 2026-08-30 (RAS 00 TKT 0010), vindo
+  da pasta antiga `Documents\RASTRO\data`. Para usá-lo:
+
+      RASTRO_DATA=C:\Users\Administrador\Documents\LASTRO\dados
+
+  Sem a variável, `00_config` cai no `data/` de dentro do repositório — que **existe e
+  tem conteúdo próprio**. São duas árvores, e quem não define a variável escreve na de
+  dentro. Antes de rodar qualquer script do pipeline, saiba em qual das duas você está:
+  o `interim` de 5,6 GB — o insubstituível, horas para refazer a partir do TSE — mora
+  no canônico.
+
 - A variável `RASTRO_DATA` aponta o diretório de dados para fora do projeto. Útil quando
   o disco do projeto está apertado (a ingestão chega a ~1,2 GB de pico) ou se o projeto
   voltar a morar em pasta sincronizada — nesse caso é obrigatória, porque os zips de
