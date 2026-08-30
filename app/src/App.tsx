@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import type {
   AlegoAdmin, AlegoVerbas, AlmgVerbas, Assembleias, BaseUF, Cargo, CldfAdmin,
   CldfVerbas, DadosCargo, Demografia, Emendas, EmendasBR, Esfera, Indice,
-  Rivais, Sigla, Urnas, Vereador,
+  CidadeServida, Rivais, Sigla, Urnas, Vereador,
 } from "./tipos";
 
 /** O pacote da aba API, buscado de uma vez porque a aba é nacional. */
@@ -21,7 +21,8 @@ import {
   carregarAssembleias, carregarCldfAdmin, carregarCldfVerbas,
   carregarDemografia, carregarEmendas, carregarEmendasBR,
   carregarEmendasEstadual, carregarIndice,
-  carregarRivaisAno, carregarUrnas, carregarVereador, prebuscar,
+  carregarCidade, carregarCidades, carregarRivaisAno,
+  carregarUrnasCidade, prebuscar,
 } from "./lib/dados";
 import { numero } from "./lib/formato";
 import { noEstado } from "./lib/uf";
@@ -47,7 +48,13 @@ import { VistaNacional } from "./vistas/VistaNacional";
  * exatamente o que está sendo visto, o botão voltar funciona e recarregar não
  * perde nada — sem biblioteca de rota.
  */
-interface Selecao { uf: Sigla; ano: number; vista: Vista; cand: number }
+interface Selecao {
+  uf: Sigla; ano: number; vista: Vista; cand: number;
+  /** cidade aberta na aba de vereador — a chave de `cidades.json`. Vazio
+   *  significa "a capital desta UF", que e' o que a aba servia antes de haver
+   *  cobertura municipal. */
+  cid: string;
+}
 
 function ehVista(v: string): v is Vista {
   return v === "home" || v === "nacional" || v === "vereador"
@@ -63,6 +70,7 @@ function lerURL(): Selecao {
     ano: Number(p.get("ano") ?? 2022),
     vista: ehVista(v) ? v : "home",
     cand: Number(p.get("c") ?? 0),
+    cid: p.get("cid") ?? "",
   };
 }
 
@@ -70,6 +78,7 @@ function gravarURL(s: Selecao) {
   const p = new URLSearchParams({
     uf: s.uf, ano: String(s.ano), v: s.vista, c: String(s.cand),
   });
+  if (s.cid) p.set("cid", s.cid);
   history.replaceState(null, "", `?${p}`);
 }
 
@@ -92,6 +101,9 @@ export default function App() {
   const [emBR, setEmBR] = useState<EmendasBR | null>(null);
   // A aba API é nacional: carregada uma vez, não por UF.
   const [api, setApi] = useState<ApiCasas | null>(null);
+  // As cidades servidas: uma vez por sessao, e so' quando a aba de vereador
+  // e' aberta — 34 KB que nao servem a mais nenhuma tela.
+  const [cidades, setCidades] = useState<CidadeServida[] | null>(null);
   const [sel, setSel] = useState<Selecao>(lerURL);
   const [gaveta, setGaveta] = useState(false);
   const [dica, setDica] = useState<EstadoDica | null>(null);
@@ -102,6 +114,11 @@ export default function App() {
     carregarIndice().then(setIndice).catch((e) => setErro(String(e)));
   }, []);
 
+  useEffect(() => {
+    if (sel.vista !== "vereador" || cidades) return;
+    carregarCidades().then((c) => setCidades(c.cidades)).catch(() => setCidades([]));
+  }, [sel.vista, cidades]);
+
   // Os mapas por ano acumulam, então precisam zerar quando muda o que eles
   // indexam. Sem isto o pleito de 2022 de São Paulo apareceria sob Minas.
   useEffect(() => {
@@ -109,7 +126,7 @@ export default function App() {
     setRivais(null);
     setVer(null);
     setUrnas(null);
-  }, [sel.uf, sel.vista]);
+  }, [sel.uf, sel.vista, sel.cid]);
 
   useEffect(() => {
     setEmFed(null);
@@ -190,10 +207,29 @@ export default function App() {
       return () => { vivo = false; };
     }
     if (v === "vereador") {
-      // 2024 é o único pleito com mapa de urna por ora; falha = sem mapa
-      carregarUrnas(sel.uf, 2024).then((u) => { if (vivo) setUrnas(u); })
-        .catch(() => { if (vivo) setUrnas(null); });
-      carregarVereador(sel.uf)
+      // A cidade manda, e a UF só entra quando nenhuma foi escolhida — aí é a
+      // capital, que é o que esta aba servia antes de haver cobertura
+      // municipal. Um link antigo, sem `cid`, continua abrindo o que abria.
+      //
+      // Cada cidade traz o CAMINHO do próprio arquivo, então a capital de São
+      // Paulo e um município de Goiás entram pela mesma linha de código: a
+      // diferença mora no índice, não aqui.
+      if (!cidades) return () => { vivo = false; };
+      const c = cidades.find((x) => x.k === sel.cid)
+        ?? cidades.find((x) => x.uf === sel.uf && x.src === "vereador.json")
+        ?? cidades.find((x) => x.uf === sel.uf);
+      if (!c) {
+        setErro(`Sem dado de vereador em ${sel.uf}.`);
+        return () => { vivo = false; };
+      }
+      // O mapa de urna existe só onde foi gerado. Zerar antes de pedir impede
+      // que o mapa da cidade anterior fique na tela sob o nome da nova.
+      setUrnas(null);
+      if (c.urna) {
+        carregarUrnasCidade(c.uf, c.urna).then((u) => { if (vivo) setUrnas(u); })
+          .catch(() => { if (vivo) setUrnas(null); });
+      }
+      carregarCidade(c.uf, c.src)
         .then((d) => { if (vivo) { setVer(d); setErro(null); } })
         .catch((e) => { if (vivo) setErro(String(e)); })
         .finally(() => { if (vivo) setCarregando(false); });
@@ -231,7 +267,7 @@ export default function App() {
           .catch(() => { /* sem pré-busca; a troca de ano busca na hora */ });
       });
     return () => { vivo = false; };
-  }, [sel.uf, sel.vista, sel.ano]);
+  }, [sel.uf, sel.vista, sel.ano, sel.cid, cidades]);
 
   useEffect(() => gravarURL(sel), [sel]);
 
@@ -382,8 +418,11 @@ export default function App() {
               faria o leitor traduzir a pergunta que ele tem na que a tela
               aceita. Mesma navegacao, uma traducao a menos. */}
           {!naCasa && (sel.vista === "vereador" ? (
-            <SeletorCidade ufs={indice.ufs} atual={sel.uf} aberto={gaveta}
-                           aoAbrir={setGaveta} aoEscolher={trocarUF} />
+            <SeletorCidade
+              cidades={cidades} atual={sel.cid} uf={sel.uf} aberto={gaveta}
+              aoAbrir={setGaveta}
+              aoEscolher={(c) => setSel((x) => ({ ...x, uf: c.uf, cid: c.k,
+                                                  cand: 0 }))} />
           ) : (
             <SeletorEstado ufs={indice.ufs} atual={sel.uf} aberto={gaveta}
                            aoAbrir={setGaveta} aoEscolher={trocarUF} />

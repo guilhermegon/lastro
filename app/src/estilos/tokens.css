@@ -110,6 +110,11 @@ h1, h2, h3 { font-family: Archivo, sans-serif; margin: 0; letter-spacing: -.015e
 .estados button[aria-pressed="true"] { background: var(--accent-soft);
   border-color: var(--accent); color: var(--ink); font-weight: 600; }
 .estados .sg { font-family: "IBM Plex Mono", monospace; font-size: .7rem; color: var(--ink-3); }
+/* A gaveta de cidade cresceu de 27 para 271 entradas: sem teto de altura ela
+   empurra a pagina inteira para baixo e o conteudo some da primeira tela. */
+.estados.rolagem { max-height: 300px; overflow-y: auto; }
+.gaveta-busca { padding: 10px 18px 0; border-top: 1px solid var(--line); }
+.estados.rolagem { border-top: 0; }
 
 .painel { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 20px; padding: 20px 0 40px; }
 @media (max-width: 900px) { .painel { grid-template-columns: 1fr; } }

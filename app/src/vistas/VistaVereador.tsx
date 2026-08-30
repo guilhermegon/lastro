@@ -93,6 +93,26 @@ export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
       </aside>
 
       <div className="conteudo">
+        {bloco.semTotalizacao && (
+          /* Sem isto a tela mostraria "Cadeiras 0" e uma camara vazia, e o
+             leitor concluiria que ninguem se elegeu em Aguas Lindas. O que
+             houve foi outra coisa: o TSE nao publicou quem se elegeu. Zero e
+             ausencia tem a mesma aparencia num numero, e sao opostos. */
+          <div className="nota">
+            <strong>O TSE não publicou o resultado totalizado deste pleito
+            aqui.</strong>{" "}
+            Os votos existem e estão nesta tela: vieram do arquivo de votação
+            por seção, que o TSE divulga por inteiro. O que não existe é a
+            marcação de quem foi eleito — em{" "}
+            <code>votacao_candidato_munzona</code> {v.cidade} não aparece com o
+            cargo de vereador, e em <code>consulta_cand</code> todos os
+            candidatos daqui estão com a situação <code>#NULO</code>. Por isso
+            a lista está ordenada por voto, e não por mandato, e cadeiras,
+            quociente e último eleito não aparecem: seriam zeros lidos como
+            resultado. São 23 municípios do país nessa situação em 2024, oito
+            deles em Goiás.
+          </div>
+        )}
         <div className="nota">
           <strong>Outro ciclo, outra geografia.</strong> A eleição municipal é
           de 2000, 2004, … 2024 — não há um único ano em comum com os pleitos
@@ -246,16 +266,29 @@ export function VistaVereador({ v, selecionado, aoSelecionar, urnas,
           <div className="cartaz">
             <h2>O pleito</h2>
             <Indices itens={[
-              { rotulo: "Cadeiras", valor: numero(bloco.pleito.cadeiras),
-                explicacao: "eleitos na câmara" },
-              { rotulo: "Candidatos", valor: numero(bloco.pleito.nCand),
-                explicacao: `${decimal(bloco.pleito.nCand / Math.max(bloco.pleito.cadeiras, 1), 1)} por cadeira` },
-              { rotulo: "Último eleito", valor: numero(bloco.pleito.ultimo),
-                explicacao: "menor votação que entrou" },
-              { rotulo: "Mais votado", valor: numero(bloco.pleito.maior),
-                explicacao: `${decimal(bloco.pleito.maior / Math.max(bloco.pleito.ultimo, 1), 1)}× o último` },
-              { rotulo: "Reincidência", valor: percentual(bloco.pleito.rePct, 1),
-                explicacao: "eleitos que já haviam concorrido antes" },
+              /* Cadeiras, "por cadeira", último eleito e a razão para ele são
+                 medidas do CORTE DE MANDATO. Sem totalização não há corte, e
+                 imprimir zero ali seria oferecer um resultado no lugar de uma
+                 ausência. */
+              ...(bloco.semTotalizacao ? [
+                { rotulo: "Candidatos", valor: numero(bloco.pleito.nCand),
+                  explicacao: "nenhum eleito publicado" },
+                { rotulo: "Mais votado", valor: numero(bloco.pleito.maior),
+                  explicacao: "maior votação apurada" },
+              ] : [
+                { rotulo: "Cadeiras", valor: numero(bloco.pleito.cadeiras),
+                  explicacao: "eleitos na câmara" },
+                { rotulo: "Candidatos", valor: numero(bloco.pleito.nCand),
+                  explicacao: `${decimal(bloco.pleito.nCand / Math.max(bloco.pleito.cadeiras, 1), 1)} por cadeira` },
+                { rotulo: "Último eleito", valor: numero(bloco.pleito.ultimo),
+                  explicacao: "menor votação que entrou" },
+                { rotulo: "Mais votado", valor: numero(bloco.pleito.maior),
+                  explicacao: `${decimal(bloco.pleito.maior / Math.max(bloco.pleito.ultimo, 1), 1)}× o último` },
+              ]),
+              ...(bloco.semTotalizacao ? [] : [
+                { rotulo: "Reincidência", valor: percentual(bloco.pleito.rePct, 1),
+                  explicacao: "eleitos que já haviam concorrido antes" },
+              ]),
               { rotulo: "Zonas", valor: numero(bloco.pleito.nz),
                 explicacao: "número e traçado mudam entre pleitos" },
             ]} />

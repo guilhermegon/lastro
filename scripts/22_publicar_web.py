@@ -164,7 +164,59 @@ def main():
             # o DF nao tem vereador, mas tem capital — e ela e' o unico municipio
             r["capital"] = base["municipios"][0]["n"]
             r["capIdx"] = 0
+
+        # Cobertura por municipio: quando existe, a gaveta "Qual sua cidade?"
+        # deixa de ser a lista das capitais e passa a ser a lista do que
+        # servimos de verdade naquele estado.
+        #
+        # Isto e' um `if` proprio, e nao a continuacao do de cima. Ja' esteve
+        # encadeado: o `elif uf == "DF"` acabou pendurado nele, e funcionava
+        # porque o DF nao tem `cidades/indice.json`. Funcionaria ate' o dia em
+        # que tivesse — o dia em que esta feature chegasse ao DF —, e ai o DF
+        # perderia a marca da capital no mapa sem nada avisar. Capital e
+        # cobertura sao decisoes diferentes e nao dividem cadeia.
+        fcid = ORIGEM / uf / "cidades" / "indice.json"
+        if fcid.exists():
+            r["nCid"] = len(json.loads(fcid.read_text(encoding="utf-8"))["cidades"])
         resumo.append(r)
+
+    # ---- indice nacional das cidades servidas ----
+    #
+    # A gaveta de cidade precisa saber o que existe ANTES de escolher um estado,
+    # senao o leitor teria de adivinhar em qual UF esta' a cidade dele para
+    # descobrir se ela esta' na lista. Sao 10 KB para 272 cidades hoje.
+    #
+    # Cada entrada carrega o CAMINHO do proprio arquivo em vez de uma regra de
+    # montagem: as capitais vem de `vereador.json`, os municipios de Goias de
+    # `cidades/{cod}.json`, e a tela nao precisa saber a diferenca. Quando a
+    # ingestao de outra UF chegar, muda o dado, nao o codigo.
+    cidades = []
+    for uf in ufs_dir:
+        fcid = ORIGEM / uf / "cidades" / "indice.json"
+        furn = ORIGEM / uf / "urnas" / "indice.json"
+        if fcid.exists():
+            comurna = set()
+            if furn.exists():
+                comurna = {c["cod"] for c in
+                           json.loads(furn.read_text(encoding="utf-8"))["cidades"]
+                           if c.get("comCoord", 0) > 0}
+            for c in json.loads(fcid.read_text(encoding="utf-8"))["cidades"]:
+                cidades.append({
+                    "k": f"{uf}-{c['cod']}", "n": c["nome"], "uf": uf,
+                    "cod": c["cod"], "src": f"cidades/{c['cod']}.json",
+                    "urna": f"urnas/{c['cod']}.json" if c["cod"] in comurna else None,
+                    "st": bool(c.get("st")),
+                })
+        elif (ORIGEM / uf / "vereador.json").exists():
+            v = json.loads((ORIGEM / uf / "vereador.json").read_text(encoding="utf-8"))
+            cidades.append({"k": uf, "n": v["cidade"], "uf": uf, "cod": None,
+                            "src": "vereador.json", "urna": None, "st": False})
+    cidades.sort(key=lambda c: geo.normalizar(c["n"]))
+    fc = DESTINO / "cidades.json"
+    fc.write_text(json.dumps({"cidades": cidades}, separators=(",", ":"),
+                             ensure_ascii=False), encoding="utf-8")
+    print(f"cidades.json: {len(cidades)} cidades servidas, "
+          f"{fc.stat().st_size/1024:.0f} KB")
 
     # o agregado nacional de emendas viaja junto: 35 KB, e e' o unico arquivo
     # do Emendometro que a tela precisa antes de escolher um estado

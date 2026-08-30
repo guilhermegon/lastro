@@ -1,7 +1,7 @@
 import type {
   BaseUF, BlocoAno, BlocoRivais, Cargo, CargoComRival, Cruzamentos, Demografia,
   AlegoAdmin, AlegoVerbas, AlmgVerbas, Assembleias, CldfAdmin, CldfVerbas,
-  Emendas, EmendasBR, Indice, Padroes, Sigla, Urnas, Vereador,
+  Cidades, Emendas, EmendasBR, Indice, Padroes, Sigla, Urnas, Vereador,
 } from "../tipos";
 
 const BASE = `${import.meta.env.BASE_URL}dados`;
@@ -157,3 +157,19 @@ export const carregarAlmgVerbas = (): Promise<AlmgVerbas> =>
  *  Goias — entao quem chama trata a ausencia como "ainda nao ha' mapa aqui". */
 export const carregarUrnas = (uf: Sigla, ano: number): Promise<Urnas> =>
   comCache<Urnas>(`urnas:${uf}:${ano}`, `${BASE}/${uf}/urnas_${ano}.json`);
+
+/** As cidades servidas, com o caminho de cada arquivo. 34 KB para 271 cidades.
+ *
+ *  Vem antes de escolher o estado de proposito: sem isso o leitor teria de
+ *  adivinhar em qual UF esta a cidade dele para descobrir se ela esta na lista.
+ */
+export const carregarCidades = (): Promise<Cidades> =>
+  comCache<Cidades>("cidades", `${BASE}/cidades.json`);
+
+/** Vereador de uma cidade, pelo caminho que o indice deu. */
+export const carregarCidade = (uf: Sigla, src: string): Promise<Vereador> =>
+  comCache<Vereador>(`cid:${uf}:${src}`, `${BASE}/${uf}/${src}`);
+
+/** Mapa de urnas de uma cidade, pelo caminho que o indice deu. */
+export const carregarUrnasCidade = (uf: Sigla, src: string): Promise<Urnas> =>
+  comCache<Urnas>(`urn:${uf}:${src}`, `${BASE}/${uf}/${src}`);

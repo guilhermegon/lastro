@@ -41,6 +41,8 @@ export interface ResumoUF {
   capital?: string;
   /** há arquivo de vereador para esta UF — é isto que liga a aba */
   ver?: boolean;
+  /** municipios servidos nesta UF; ausente onde so' a capital tem dado */
+  nCid?: number;
 }
 
 export interface AgregadoUF {
@@ -422,5 +424,35 @@ export interface Vereador {
     zonas: number[];
     fichas: FichaVereador[];
     partidos: Partido[];
+    /** o TSE nao publicou a totalizacao deste pleito nesta cidade: ha voto e
+     *  nao ha eleito. Distingue "camara vazia" de "resultado nao divulgado",
+     *  que sao coisas opostas com a mesma aparencia numa tela. */
+    semTotalizacao?: boolean;
   }>;
+  /** codigo IBGE — so nos arquivos por municipio, ausente nos das capitais */
+  cod?: string;
+  uf?: string;
 }
+
+/* ---------- as cidades que o produto serve ----------
+
+   Uma entrada por cidade com dado, com o CAMINHO do proprio arquivo em vez de
+   uma regra de montagem: a capital vem de `vereador.json`, o municipio de
+   Goias vem de `cidades/{cod}.json`, e a tela nao precisa saber a diferenca.
+   Ampliar a cobertura passa a ser trabalho de ingestao, nao de codigo. */
+
+export interface CidadeServida {
+  /** chave unica: a UF nas capitais, `UF-cod` nos municipios */
+  k: string;
+  n: string;
+  uf: Sigla;
+  cod: string | null;
+  /** caminho do arquivo de vereador, relativo a `dados/{uf}/` */
+  src: string;
+  /** caminho do mapa de urnas, ou null onde ele nao existe */
+  urna: string | null;
+  /** o TSE nao totalizou o ultimo pleito aqui */
+  st: boolean;
+}
+
+export interface Cidades { cidades: CidadeServida[] }
