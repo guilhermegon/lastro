@@ -89,37 +89,46 @@ export function LogoEmendometro() {
   );
 }
 
-/** "Radar" — alcance e o que apareceu dentro dele.
+/** "Radar" — o visor.
  *
- *  A primeira versao eram barras crescentes com a ultima em contorno. O desenho
- *  estava certo no conceito e errado na vizinhanca: o Emendometro TAMBEM e'
- *  barras crescentes, e na fileira de produtos, a 158 px, os dois liam quase
- *  igual. Marca que nao se distingue da vizinha nao esta' cumprindo a funcao
- *  dela, que e' deixar a troca de produto ser reconhecida de relance.
+ *  Duas versoes anteriores erraram, e por motivos diferentes. A primeira eram
+ *  barras crescentes com a ultima em contorno: o Emendometro TAMBEM e' barras
+ *  crescentes, e a 158 px os dois liam quase igual. A segunda trocou as barras
+ *  por quartos de moldura — distinguia, mas nao dizia "radar": dizia "alcance",
+ *  que e' abstrato demais para uma marca ler de relance.
  *
- *  Agora sao tres arcos de alcance — quartos de moldura abertos a partir da
- *  mesma quina em que tudo se apoia — e um bloco cheio alem do ultimo. O bloco
- *  e' o que o radar viu antes de chegar, e por isso e' o unico elemento solido:
- *  o alcance e' estrutura, a deteccao e' o achado.
+ *  Esta e' o visor: tres arcos de alcance, a linha de varredura e o eco sobre
+ *  ela. E' a imagem que qualquer pessoa reconhece sem legenda.
  *
- *  Continua so' retangulo, hierarquia por opacidade e uma cor so'. */
+ *  **E e' o unico da familia com curva.** As outras tres sao so' retangulo, e
+ *  quebrar isso foi decisao, nao descuido: um visor de radar sem arco nao e' um
+ *  visor de radar, e o Radar e' justamente o produto que se separa dos outros —
+ *  fechado, premium, outra natureza. A quebra fica onde ela significa algo.
+ *
+ *  O que NAO se quebra e' o parentesco: os arcos partem da mesma quina em que
+ *  tudo se apoia, x=12 com y=52, e a marca ocupa a mesma caixa das outras tres.
+ *  O radar varre a partir do lastro. */
 export function LogoRadar() {
   // raio, opacidade — o alcance cresce e ganha peso
-  const arco = [[11, 0.34], [21, 0.55], [31, 0.78]] as const;
+  const arco = [[12, 0.34], [24, 0.5], [36, 0.68]] as const;
   return (
     <span className="lastro produto" role="img" aria-label="Radar">
       <svg viewBox="0 0 260 68" aria-hidden="true" focusable="false">
-        <g className="lastro-mark">
-          <rect x="12" y="12" width="4" height="44" rx="1" />
-          <rect x="12" y="52" width="52" height="4" rx="1.5" />
+        <g className="lastro-mark" fill="none">
+          <rect x="12" y="12" width="4" height="44" rx="1"
+                fill="currentColor" />
+          <rect x="12" y="52" width="52" height="4" rx="1.5"
+                fill="currentColor" />
+          {/* quartos de circulo centrados na quina (16, 52) */}
           {arco.map(([r, o]) => (
-            <g key={r} opacity={o}>
-              <rect x={21 + (r - 11)} y={52 - r} width="3" height={r} rx="1.5" />
-              <rect x="21" y={52 - r} width={r + 1} height="3" rx="1.5" />
-            </g>
+            <path key={r} d={`M${16 + r} 52 A${r} ${r} 0 0 0 16 ${52 - r}`}
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                  opacity={o} />
           ))}
-          {/* o detectado: alem do ultimo alcance, e o unico solido */}
-          <rect x="52" y="14" width="9" height="9" rx="2.5" />
+          {/* a varredura, e o eco sobre ela: o unico elemento solido */}
+          <line x1="16" y1="52" x2="43" y2="20"
+                stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+          <circle cx="35.5" cy="29.5" r="4" fill="currentColor" />
         </g>
         <text className="lastro-nome produto-nome" x="72" y="42">Radar</text>
       </svg>
