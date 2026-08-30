@@ -183,11 +183,18 @@ export function VistaSobre({ nUF, nMun }: { nUF: number; nMun: number }) {
           contra R$ 259,5 bi pagos.
         </p>
         <ul className="lista-fatos">
+          <li><strong>O Emendômetro cobre emenda individual, e só ela.</strong>{" "}
+            Bancada, comissão e relator somam R$ 119,5 bi dos R$ 259,5 bi pagos
+            no país — 46% do dinheiro de emenda fica fora por escolha de escopo.
+            Destes, R$ 4,7 bi têm município identificado e ainda assim não
+            entram.</li>
           <li><strong>Só 10,5% do dinheiro chega a um município.</strong> Das
-            emendas individuais, 76% do valor está declarado como{" "}
+            emendas individuais, 75,5% do valor está declarado como{" "}
             <em>MÚLTIPLO</em> — espalhado por cidades que o arquivo não nomeia.
             Por UF a cobertura é 97,1%, e é por isso que a leitura completa é
-            estadual, não municipal.</li>
+            estadual, não municipal. Os dois números são conferidos por
+            <span className="num"> 48_audita_emendas.py</span>, que reconcilia o
+            publicado com o arquivo de origem ao centavo.</li>
           <li><strong>Existe um atalho falso, e ele fica fechado.</strong> Há um
             arquivo por favorecido com município em 100% do dinheiro. Nele,{" "}
             <strong>Brasília concentra 36,4%</strong> das emendas individuais do

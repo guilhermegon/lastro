@@ -226,6 +226,17 @@ export function VistaEmendas({
           </div>
 
           <div className="nota">
+            <strong>O que fica de fora, e é muito.</strong> O Emendômetro cobre
+            <strong> emenda individual</strong> — a de um parlamentar. Emenda de
+            bancada, de comissão e de relator não entra: são
+            <span className="num"> R$ 119,5 bi</span> de
+            <span className="num"> R$ 259,5 bi</span> pagos no país, ou 46% de
+            todo o dinheiro de emenda. Delas,{" "}
+            <span className="num">R$ 4,7 bi</span> até têm município identificado e ainda assim ficam fora — é escolha
+            de escopo, não limitação da fonte, e reabri-la é decisão de produto.
+          </div>
+
+          <div className="nota">
             <strong>O denominador honesto.</strong> Do total pago nesta esfera,{" "}
             <span className="num">{percentual(pctComMunicipio, 1)}</span> tem
             município identificado no arquivo de origem —{" "}
@@ -239,8 +250,9 @@ export function VistaEmendas({
               <div className="cartaz">
                 <h2>Quem mandou</h2>
                 <p className="cap">
-                  Autores por valor pago em {ano}. Emenda de bancada e de
-                  comissão aparece sem autor individual, porque é isso que ela é.
+                  Autores por valor pago em {ano}. São só emendas
+                  <strong> individuais</strong>: bancada, comissão e relator não
+                  entram, e o cartaz abaixo diz quanto isso deixa de fora.
                 </p>
                 <div className="rolagem">
                   <table>
@@ -273,7 +285,8 @@ export function VistaEmendas({
                 <h2>{atual.n}</h2>
                 <p className="cap">
                   {atual.amb
-                    ? "Emenda coletiva: de bancada ou de comissão, sem autor individual."
+                    ? "Autoria ambígua: há mais de um eleito com este nome de urna, "
+                      + "em UFs diferentes, e o arquivo não distingue."
                     : atual.el
                     ? `Eleito por ${atual.ufEl}.`
                     : "Autor sem mandato eleito nesta série."}
