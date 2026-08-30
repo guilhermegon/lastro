@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import type {
-  BaseUF, BlocoEmenda, Demografia, Emendas, Esfera, FichaEmenda,
+  BaseUF, BlocoEmenda, Demografia, Emendas, EmendasBR, Esfera, FichaEmenda,
+  Sigla,
 } from "../tipos";
 import { decimal, numero, percentual } from "../lib/formato";
 import { quantis } from "../lib/escalas";
 import { fundeMandato, LEGISLATURAS } from "../lib/mandato";
+import { PaisEntreMandatos } from "./PaisEntreMandatos";
 import { Mapa } from "../componentes/Mapa";
 import { Legenda } from "../componentes/Legenda";
 import { Indices } from "../componentes/Indices";
@@ -42,11 +44,15 @@ interface Props {
   aoTrocarEsfera: (e: Esfera) => void;
   base: BaseUF;
   demo: Demografia | null;
+  /** o agregado nacional, para a comparacao entre mandatos */
+  br: EmendasBR | null;
+  uf: Sigla;
   aoInspecionar: (d: EstadoDica | null) => void;
 }
 
 export function VistaEmendas({
-  e, esfera, esferasDisponiveis, aoTrocarEsfera, base, demo, aoInspecionar,
+  e, esfera, esferasDisponiveis, aoTrocarEsfera, base, demo, br, uf,
+  aoInspecionar,
 }: Props) {
   const anos = useMemo(
     () => Object.keys(e.anos).map(Number).sort((a, b) => a - b), [e.anos]);
@@ -303,6 +309,12 @@ export function VistaEmendas({
             O resto sai com localidade <span className="num">MÚLTIPLO</span> ou
             em branco, e não há como distribuí-lo por território sem inventar.
           </div>
+
+          {/* So na esfera federal: o agregado nacional e de emenda federal, e
+              po-lo sob a estadual compararia coisas de origens diferentes. */}
+          {br && esfera === "federal" && (
+            <PaisEntreMandatos br={br} uf={uf} anoCorrente={anoCorrente} />
+          )}
 
           {fichas.length > 0 && atual && (
             <div className="duas">

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type {
   AlegoAdmin, AlegoVerbas, AlmgVerbas, Assembleias, BaseUF, Cargo, CldfAdmin,
-  CldfVerbas, DadosCargo, Demografia, Emendas, Esfera, Indice,
+  CldfVerbas, DadosCargo, Demografia, Emendas, EmendasBR, Esfera, Indice,
   Rivais, Sigla, Vereador,
 } from "./tipos";
 
@@ -19,7 +19,8 @@ import {
   carregarAnosCargo, carregarBase, carregarCargoAno,
   carregarAlegoAdmin, carregarAlegoVerbas, carregarAlmgVerbas,
   carregarAssembleias, carregarCldfAdmin, carregarCldfVerbas,
-  carregarDemografia, carregarEmendas, carregarEmendasEstadual, carregarIndice,
+  carregarDemografia, carregarEmendas, carregarEmendasBR,
+  carregarEmendasEstadual, carregarIndice,
   carregarRivaisAno, carregarVereador, prebuscar,
 } from "./lib/dados";
 import { numero } from "./lib/formato";
@@ -84,6 +85,8 @@ export default function App() {
   const [emEst, setEmEst] = useState<Emendas | null | false>(null);
   const [esfera, setEsfera] = useState<Esfera>("federal");
   const [demo, setDemo] = useState<Demografia | null>(null);
+  // Nacional: nao muda com a UF, entao carrega uma vez e fica.
+  const [emBR, setEmBR] = useState<EmendasBR | null>(null);
   // A aba API é nacional: carregada uma vez, não por UF.
   const [api, setApi] = useState<ApiCasas | null>(null);
   const [sel, setSel] = useState<Selecao>(lerURL);
@@ -166,6 +169,10 @@ export default function App() {
       // derruba a tela: some a opção, não o mapa.
       carregarDemografia(sel.uf).then((d) => { if (vivo) setDemo(d); })
         .catch(() => { /* sem per capita */ });
+      if (!emBR) {
+        carregarEmendasBR().then((d) => { if (vivo) setEmBR(d); })
+          .catch(() => { /* sem comparacao nacional */ });
+      }
       // A estadual só existe onde o governo do estado publica com autor e
       // município. `false` registra "procurei e não há", que é diferente de
       // "ainda não busquei".
@@ -406,6 +413,8 @@ export default function App() {
             aoTrocarEsfera={setEsfera}
             base={base}
             demo={demo}
+            br={emBR}
+            uf={sel.uf}
             aoInspecionar={setDica}
           />
         )}
