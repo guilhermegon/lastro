@@ -154,34 +154,120 @@ _SIGLA = {
 
 
 def casar_com_eleitos(d):
-    """Autor de emenda -> deputado federal eleito, por nome sem acento.
+    """Autor de emenda -> parlamentar eleito, por nome sem acento.
 
-    Guarda de qual UF e em que pleitos a pessoa foi eleita: e' isso que permite
-    perguntar se a emenda foi para o mesmo chao que deu o voto.
+    Guarda de qual UF, em que pleitos e em qual CASA a pessoa foi eleita: e'
+    isso que permite perguntar se a emenda foi para o mesmo chao que deu o voto,
+    e tambem separar Camara de Senado.
+
+    **As duas casas, e nao so' a Camara.** Ate 2026-08-30 esta funcao lia apenas
+    `*/federal.json`, e o docstring registrava o buraco sem registrar a
+    consequencia: a ficha do senador saia com `eleito=False`, e a tela mostrava
+    **"nao eleito"** para quem tinha mandato. Otto Alencar, terceiro maior autor
+    individual do pais em 2024, era um deles.
+
+    **E a casa importa por si.** Emenda individual e' das duas casas — 594
+    autores por exercicio, que e' exatamente 513 + 81 — e o senador tem cota
+    MAIOR. Em 2024 os tres maiores autores do pais sao senadores, com R$ 69,6
+    mi cada contra mediana de R$ 37,4 mi. Sem a casa, qualquer ordenacao por
+    valor poe o Senado no topo por construcao da cota, e o leitor conclui
+    comportamento onde ha' regra.
+
+    A casa vem do dado ELEITORAL, nunca da cota: inferir a casa pelo valor e
+    depois explicar o valor pela casa seria circular.
     """
     web = cfg.PROCESSED / "web"
     por_nome = {}
-    for p in sorted(web.glob("*/federal.json")):
-        uf = p.parent.name
-        dd = json.loads(p.read_text(encoding="utf-8"))
-        for ano, b in dd.items():
-            for f in b["fichas"]:
-                if not f.get("el"):
-                    continue
-                for chave in {sem_acento(f["n"]), sem_acento(f.get("completo", ""))}:
-                    if not chave:
+    for cargo in ("federal", "senador"):
+        for p in sorted(web.glob(f"*/{cargo}.json")):
+            uf = p.parent.name
+            dd = json.loads(p.read_text(encoding="utf-8"))
+            for ano, b in dd.items():
+                for f in b["fichas"]:
+                    if not f.get("el"):
                         continue
-                    r = por_nome.setdefault(chave, {"uf": set(), "anos": set(),
-                                                    "urna": f["n"], "sq": []})
-                    r["uf"].add(uf)
-                    r["anos"].add(int(ano))
-                    r["sq"].append(f["sq"])
+                    comp = sem_acento(f.get("completo", ""))
+                    for chave in {sem_acento(f["n"]), comp}:
+                        if not chave:
+                            continue
+                        r = por_nome.setdefault(chave, {
+                            "uf": set(), "anos": set(), "urna": f["n"],
+                            "sq": [], "casas": set()})
+                        # marca a entrada que E' o nome completo: so' essas
+                        # entram na segunda passada, porque e' do completo que
+                        # o Portal recorta o nome do autor
+                        if chave == comp:
+                            r["completo_de"] = chave
+                        r["uf"].add(uf)
+                        r["anos"].add(int(ano))
+                        r["sq"].append(f["sq"])
+                        r["casas"].add(cargo)
+
+    # ---------- segunda passada: recorte do nome completo ----------
+    #
+    # Depois de ler as duas casas, 326 de 1492 autores continuavam sem par, e
+    # os maiores deles eram todos senadores. O motivo nao era falta de dado, era
+    # a FORMA do nome: o Portal escreve um recorte do nome completo do TSE, que
+    # nao e' nem o de urna nem o completo inteiro.
+    #
+    #   portal                    urna no TSE        completo no TSE
+    #   RENAN CALHEIROS           RENAN              JOSE *RENAN* VASCONCELOS *CALHEIROS*
+    #   CARLOS FAVARO             FAVARO             *CARLOS* HENRIQUE BAQUETA *FAVARO*
+    #   STYVENSON VALENTIM        CAPITAO STYVENSON  EANN *STYVENSON VALENTIM* MENDES
+    #   ZENAIDE MAIA              DR. ZENAIDE MAIA   *ZENAIDE MAIA* CALADO PEREIRA...
+    #
+    # A regra e' de ESTRUTURA e nao de semelhanca: os tokens do autor aparecem
+    # em ordem entre os do nome completo. Semelhanca de texto e' o que este
+    # projeto recusa desde o pareamento de municipios, porque par errado nao
+    # perde dado — poe dado no lugar errado.
+    #
+    # Tres travas: dois tokens no minimo (SILVA sozinho casaria com meio
+    # Congresso), o ultimo token obrigatorio dentro do completo (e' o
+    # sobrenome), e UNICIDADE — recorte que serve a duas pessoas nao serve a
+    # nenhuma.
+    def subsequencia(pequeno, grande):
+        it = iter(grande)
+        return all(t in it for t in pequeno)
+
+    completos = [(chave.split(), r) for chave, r in por_nome.items()
+                 if r.get("completo_de") == chave]
+
+    def por_recorte(nome):
+        toks = nome.split()
+        if len(toks) < 2:
+            return None
+        achados = []
+        for gtoks, r in completos:
+            if toks[-1] not in gtoks:
+                continue
+            if subsequencia(toks, gtoks):
+                achados.append(r)
+        if not achados:
+            return None
+        sqs = {sq for r in achados for sq in r["sq"]}
+        nomes = {r["urna"] for r in achados}
+        # mesma pessoa reeleita tem varios sq; pessoas diferentes tem nomes de
+        # urna diferentes. Divergiu o nome de urna, e' ambiguo.
+        if len(nomes) > 1:
+            return None
+        junto = {"uf": set(), "anos": set(), "sq": list(sqs),
+                 "urna": next(iter(nomes)), "casas": set()}
+        for r in achados:
+            junto["uf"] |= r["uf"]
+            junto["anos"] |= r["anos"]
+            junto["casas"] |= r["casas"]
+        return junto
 
     autores = (d[d["individual"]].groupby(["autor_norm", "autor"], as_index=False)
                .agg(emendas=("cod_emenda", "nunique"), pago=("pago", "sum")))
     linhas = []
+    n_recorte = 0
     for r in autores.itertuples():
         m = por_nome.get(r.autor_norm)
+        if m is None:
+            m = por_recorte(r.autor_norm)
+            if m is not None:
+                n_recorte += 1
         linhas.append({
             "autor_norm": r.autor_norm, "autor": r.autor,
             "emendas": r.emendas, "pago": round(r.pago, 2),
@@ -192,7 +278,14 @@ def casar_com_eleitos(d):
             "ambiguo": bool(m and len(m["uf"]) > 1),
             "uf_eleito": "|".join(sorted(m["uf"])) if m else "",
             "anos_eleito": "|".join(str(a) for a in sorted(m["anos"])) if m else "",
+            # A casa. "ambas" quando a pessoa teve mandato nas duas ao longo da
+            # serie — Jader Barbalho e' o caso classico —, e ai o painel nao
+            # afirma cota: diz "as duas" e deixa o leitor ver os anos.
+            "casa": ("ambas" if m and len(m["casas"]) > 1
+                     else (next(iter(m["casas"])) if m else "")),
         })
+    if n_recorte:
+        print(f"  {n_recorte} autores casados por recorte do nome completo")
     return pd.DataFrame(linhas).sort_values("pago", ascending=False)
 
 
@@ -217,9 +310,13 @@ def main():
     c.to_csv(CASAMENTO, index=False, encoding="utf-8")
     casou = c[c["eleito"]]
     print(f"\n{CASAMENTO.name}: {len(c):,} autores")
-    print(f"  casam com deputado federal eleito: {len(casou):,} "
+    print(f"  casam com parlamentar eleito: {len(casou):,} "
           f"({len(casou)/len(c)*100:.0f}%), {bi(casou['pago'].sum())} "
           f"({casou['pago'].sum()/c['pago'].sum()*100:.0f}% do dinheiro individual)")
+    for casa in ("federal", "senador", "ambas"):
+        g = c[c["casa"] == casa]
+        if len(g):
+            print(f"     {casa:<9} {len(g):>5} autores, {bi(g['pago'].sum())}")
     amb = c[c["ambiguo"]]
     if len(amb):
         print(f"  ambíguos (mesmo nome eleito em mais de uma UF): {len(amb)} — "

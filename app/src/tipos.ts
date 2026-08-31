@@ -229,6 +229,12 @@ export interface FichaEmenda {
   /** o autor foi eleito, e por qual UF */
   el: boolean;
   ufEl: string;
+  /** a casa do mandato: "federal", "senador", "ambas" ao longo da série, ou
+   *  vazio quando o nome não casou com nenhum eleito de 1998 a 2022.
+   *
+   *  Importa porque emenda individual é das DUAS casas — 594 autores por
+   *  exercício, que é exatamente 513 + 81 — e a cota do senador é maior. */
+  casa?: string;
   /** emenda de bancada/comissão, sem autor individual */
   amb: boolean;
   /** função orçamentária dominante */

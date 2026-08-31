@@ -100,6 +100,9 @@ export function VistaEmendas({
   const [medida, setMedida] = useState<Medida>("total");
   const [comPix, setComPix] = useState(true);
   const [autor, setAutor] = useState(0);
+  /** filtro por casa do autor. "todas" não é neutro: é a leitura que mistura
+   *  duas cotas diferentes, e por isso o aviso fica sempre à vista. */
+  const [casa, setCasa] = useState<"todas" | "federal" | "senador">("todas");
 
   const municipios = base.municipios;
 
@@ -149,7 +152,14 @@ export function VistaEmendas({
       : valores.reduce((n, v) => n + (Number.isFinite(v) ? 0 : 1), 0)),
     [valores, medida]);
 
-  const fichas = bloco?.fichas ?? [];
+  const todasFichas = bloco?.fichas ?? [];
+  // "ambas" entra no filtro de senador: quem teve mandato nas duas casas ao
+  // longo da série recebeu cota de senador em parte dela, e escondê-lo do
+  // recorte do Senado tiraria justamente os maiores.
+  const fichas = casa === "todas" ? todasFichas
+    : todasFichas.filter((f) => casa === "senador"
+        ? f.casa === "senador" || f.casa === "ambas"
+        : f.casa === "federal");
   const atual: FichaEmenda | undefined = fichas[autor] ?? fichas[0];
   const p = bloco?.pleito;
 
@@ -320,6 +330,36 @@ export function VistaEmendas({
                   <strong> individuais</strong>: bancada, comissão e relator não
                   entram, e o cartaz abaixo diz quanto isso deixa de fora.
                 </p>
+
+                {/* O filtro não é conveniência: sem ele a lista mistura duas
+                    cotas diferentes e a ordenação vira artefato de regra. */}
+                <div className="seg-rot" style={{ margin: "2px 0 10px" }}>
+                  <span className="et">Casa do autor</span>
+                  <div className="seg" role="group" aria-label="Casa do autor">
+                    {([["todas", "as duas"], ["federal", "Câmara"],
+                       ["senador", "Senado"]] as const).map(([id, r]) => (
+                      <button key={id} aria-pressed={casa === id}
+                              onClick={() => { setCasa(id); setAutor(0); }}>
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {casa === "todas" && (
+                  <div className="nota" style={{ marginBottom: 12 }}>
+                    <strong>Senador e deputado não têm a mesma cota, e esta lista
+                    mistura as duas.</strong> A emenda individual é das duas casas
+                    — são <span className="num">594</span> autores por exercício,
+                    que é exatamente 513 deputados mais 81 senadores — e a mediana
+                    paga por senador na série é de{" "}
+                    <span className="num">R$ 148,2 mi</span> contra{" "}
+                    <span className="num">R$ 79,6 mi</span> por deputado:{" "}
+                    <strong>1,86 vez</strong>. Ordenar por valor sem separar as
+                    casas põe o Senado no topo por regra de orçamento, e não por
+                    comportamento político. Os botões acima separam.
+                  </div>
+                )}
                 <div className="rolagem">
                   <table>
                     <thead>
@@ -336,7 +376,11 @@ export function VistaEmendas({
                             aria-selected={i === autor}
                             onClick={() => setAutor(i)}
                             style={{ cursor: "pointer" }}>
-                          <td>{f.n}{f.amb ? " (coletiva)" : ""}</td>
+                          <td>{f.n}{f.amb ? " (coletiva)" : ""}
+                            {f.casa === "senador" && <span className="casa-tag">Senado</span>}
+                            {f.casa === "ambas" && <span className="casa-tag">as duas</span>}
+                            {!f.casa && <span className="casa-tag vazio">sem par</span>}
+                          </td>
                           <td className="n">{reais(f.t)}</td>
                           <td className="n">{numero(f.nm)}</td>
                           <td className="n">{percentual(f.t1, 1)}</td>
@@ -354,8 +398,13 @@ export function VistaEmendas({
                     ? "Autoria ambígua: há mais de um eleito com este nome de urna, "
                       + "em UFs diferentes, e o arquivo não distingue."
                     : atual.el
-                    ? `Eleito por ${atual.ufEl}.`
-                    : "Autor sem mandato eleito nesta série."}
+                    ? `Eleito por ${atual.ufEl}${
+                        atual.casa === "senador" ? ", para o Senado"
+                        : atual.casa === "ambas" ? ", para as duas casas"
+                        : atual.casa === "federal" ? ", para a Câmara" : ""}.`
+                    : "O nome deste autor não casou com nenhum eleito de 1998 a "
+                      + "2022 — pode ser suplente que assumiu, mandato anterior a "
+                      + "1998, ou homônimo que o critério recusou desempatar."}
                   {atual.fn ? ` Função dominante: ${atual.fn}.` : ""}
                 </p>
                 <Indices itens={[

@@ -467,3 +467,22 @@ footer p { margin: 3px 0; max-width: 80ch; }
   border: 1.3px solid var(--ink-3);
   border-radius: 50%;
 }
+
+/* Etiqueta da casa do autor, na tabela de emendas. NAO e' `.casa`, que ja' e'
+   o bloco da marca na landing — colidir quebraria a entrada do site.
+
+   Discreta de proposito: a Camara e' o caso comum e nao leva marca. So' o que
+   foge do padrao a recebe — o Senado, quem teve as duas casas, e quem nao
+   casou com eleito nenhum. */
+.casa-tag {
+  margin-left: 6px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: .68rem;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  background: var(--accent-soft);
+  color: var(--accent);
+  white-space: nowrap;
+}
+.casa-tag.vazio { background: var(--surface-2); color: var(--ink-3); }

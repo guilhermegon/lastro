@@ -239,6 +239,23 @@ export function VistaSobre({ nUF, nMun }: { nUF: number; nMun: number }) {
             acompanhamento federal. Totaliza R$ 32,2 bi, ou 23% das
             individuais, e dispõe de filtro próprio por constituir a modalidade
             sobre a qual há menor informação disponível.</li>
+          <li><strong>A emenda individual é das duas casas legislativas, e as
+            cotas não são iguais.</strong> Verificam-se <strong>594 autores por
+            exercício</strong>, número que corresponde exatamente às 513 cadeiras
+            da Câmara dos Deputados somadas às 81 do Senado Federal. A mediana
+            paga por senador na série é de R$ 148,2 mi, contra R$ 79,6 mi por
+            deputado — proporção de 1,86. A ordenação por valor sem distinção de
+            casa reflete, portanto, regra orçamentária, e não comportamento
+            parlamentar. A casa de cada autor é apresentada na listagem, com
+            filtro próprio.</li>
+          <li><strong>A identificação da casa é derivada do resultado
+            eleitoral, e sua cobertura é declarada.</strong> O arquivo de origem
+            não informa o mandato do autor. O pareamento é feito contra os
+            eleitos para deputado federal e para senador de 1998 a 2022,
+            alcançando <strong>1.266 dos 1.492 autores</strong> da série — 91,4%
+            do valor. Os 226 restantes correspondem a suplentes que assumiram,
+            mandatos anteriores a 1998 e casos de homonímia em que o critério
+            recusou desempatar: pai e filho com o mesmo nome, entre eles.</li>
           <li><strong>A apresentação padrão é acumulada.</strong> Em exercício
             isolado, a maioria dos municípios não apresenta registro, e o mapa
             sugere ausência de recurso onde há ausência de rastreabilidade. No

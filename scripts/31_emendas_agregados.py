@@ -84,6 +84,12 @@ def main():
     cas = pd.read_csv(CASAMENTO)
     eleito = dict(zip(cas["autor_norm"], cas["eleito"]))
     uf_el = dict(zip(cas["autor_norm"], cas["uf_eleito"].fillna("")))
+    # A casa do autor. Emenda individual e das DUAS: 594 autores por exercicio,
+    # que e exatamente 513 deputados + 81 senadores. E o senador tem cota maior
+    # — mediana de R$ 148,2 mi contra R$ 79,6 mi na serie, 1,86x —, entao
+    # ordenar por valor sem dizer a casa poe o Senado no topo por regra, e o
+    # leitor le comportamento onde ha cota.
+    casa_de = dict(zip(cas["autor_norm"], cas["casa"].fillna("")))
     ambiguo = dict(zip(cas["autor_norm"], cas["ambiguo"]))
 
     idx, nomes = indices_uf()
@@ -176,6 +182,7 @@ def main():
                     "gi": round(gini(v), 4),
                     "el": bool(eleito.get(autor, False)),
                     "ufEl": uf_el.get(autor, ""),
+                    "casa": casa_de.get(autor, ""),
                     "amb": bool(ambiguo.get(autor, False)),
                     "fn": gg.groupby("funcao")["pago"].sum().idxmax()
                           if gg["funcao"].notna().any() else "",
