@@ -166,6 +166,34 @@ export function VistaEmendas({
   const atual: FichaEmenda | undefined = fichas[autor] ?? fichas[0];
   const p = bloco?.pleito;
 
+  /** Partido -> total, autores e o que saiu sem destino declarado.
+   *
+   *  Agrupa por `ptn`, a sigla de HOJE: um mandato atravessa anos e a sigla da
+   *  epoca muda no meio — PFL vira DEM vira Uniao Brasil —, e comparar bancadas
+   *  com a sigla de cada ano somaria o mesmo partido em tres linhas. A sigla da
+   *  epoca continua na lista de autores, que e' onde ela informa.
+   *
+   *  Instituicao e autor sem par entram nomeados, e nao somem: se sumissem, a
+   *  soma da tabela nao fecharia com o total do periodo e nada avisaria. */
+  const porPartido = useMemo(() => {
+    const m = new Map<string, { pago: number; sm: number; n: number; inst: boolean }>();
+    for (const f of todasFichas) {
+      const inst = !!f.gr && f.gr !== "individual";
+      const k = inst ? "— instituição —"
+        : (f.ptn || f.pt || "— sem par com eleito —");
+      const r = m.get(k) ?? { pago: 0, sm: 0, n: 0, inst };
+      r.pago += f.t;
+      r.sm += f.sm ?? 0;
+      r.n += 1;
+      m.set(k, r);
+    }
+    return [...m.entries()]
+      .map(([nome, r]) => ({ nome, ...r, porAutor: r.pago / Math.max(r.n, 1) }))
+      .sort((a, b) => b.pago - a.pago);
+  }, [todasFichas]);
+
+  const totalPartidos = porPartido.reduce((s, r) => s + r.pago, 0);
+
   const cob = e.cobertura;
   const pctComMunicipio = cob.pago > 0 ? (cob.pagoMun / cob.pago) * 100 : 0;
 
@@ -316,7 +344,89 @@ export function VistaEmendas({
             {reais(cob.pagoMun)} de {reais(cob.pago)}. O mapa fala desse pedaço.
             O resto sai com localidade <span className="num">MÚLTIPLO</span> ou
             em branco, e não há como distribuí-lo por território sem inventar.
+            <br /><br />
+            <strong>E essa fatia cresceu enquanto o dinheiro crescia.</strong> No
+            país, a parte paga sem município declarado foi de{" "}
+            <span className="num">65,9%</span> em 2015 a{" "}
+            <span className="num">97,5%</span> em 2026, com o total saindo de
+            R$ 2,77 bi para R$ 25,67 bi. Não é efeito de mistura de tipos:{" "}
+            <em>dentro da emenda individual</em>, sozinha, o mesmo percurso —
+            65,9% para 96,0%. O dinheiro multiplicou por dez e a rastreabilidade
+            caiu junto.
+            <br /><br />
+            A subida não é lisa, e dizer que fosse seria exagerar: 2019 volta a
+            66,9% na individual antes de subir de novo. O que a série sustenta é
+            a direção, não uma taxa.
           </div>
+
+          {porPartido.length > 1 && (
+            <div className="cartaz">
+              <h2>Por partido</h2>
+              <p className="cap">
+                A mesma lista de autores, somada por sigla. Agrupa pela sigla de{" "}
+                <strong>hoje</strong>, depois das fusões: um mandato atravessa
+                anos, e usar a sigla de cada exercício somaria o mesmo partido em
+                três linhas. A sigla da época continua ao lado de cada nome na
+                lista acima.
+              </p>
+              <div className="rolagem">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Partido</th>
+                      <th className="n">Autores</th>
+                      <th className="n">Pago</th>
+                      <th className="n">Por autor</th>
+                      <th className="n">Sem destino</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {porPartido.map((r) => (
+                      <tr key={r.nome}>
+                        <td>{r.nome}</td>
+                        <td className="n">{numero(r.n)}</td>
+                        <td className="n">{reais(r.pago)}</td>
+                        <td className="n">{reais(r.porAutor)}</td>
+                        <td className="n">
+                          {r.pago > 0 ? percentual((r.sm / r.pago) * 100, 0) : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td><strong>Total</strong></td>
+                      <td className="n">
+                        {numero(porPartido.reduce((s, r) => s + r.n, 0))}
+                      </td>
+                      <td className="n">{reais(totalPartidos)}</td>
+                      <td className="n">—</td>
+                      <td className="n">
+                        {totalPartidos > 0
+                          ? percentual((porPartido.reduce((s, r) => s + r.sm, 0)
+                              / totalPartidos) * 100, 0)
+                          : "—"}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <div className="nota" style={{ marginTop: 12 }}>
+                <strong>A coluna que decide é a do meio, não a do total.</strong>{" "}
+                Valor por partido põe bancada grande no topo por ser grande;{" "}
+                <em>por autor</em> neutraliza o tamanho e é o número que compara.
+                E a última coluna não existe em nenhum painel que eu conheça: é
+                quanto do dinheiro daquele partido <strong>não diz para onde
+                foi</strong> — pago, e sem município no arquivo de origem.
+                <br /><br />
+                As duas linhas sem sigla ficam à vista de propósito. Bancada,
+                comissão e relator são instituições e não têm partido; autor sem
+                par com eleito não tem partido conhecido. Escondê-las faria a
+                soma da tabela não fechar com o total do período, sem que nada
+                avisasse.
+              </div>
+            </div>
+          )}
 
           {/* So na esfera federal: o agregado nacional e de emenda federal, e
               po-lo sob a estadual compararia coisas de origens diferentes. */}

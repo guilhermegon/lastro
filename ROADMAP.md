@@ -762,6 +762,31 @@ vezes — os 26 mapas vazios do `51_`, os quatro arquivos do interim corrompidos
 que uma verificação com `usecols` mascarou, e estes oito municípios. Todo script
 que descarta entrada agora aborta.
 
+## Marco 17 — o Emendômetro conta tudo, e ganha leitura por partido
+
+- [x] Escopo dos **quatro tipos** de emenda: R$ 140,0 bi → R$ 259,5 bi.
+- [x] Autor sem município deixa de sumir da lista: GO 2022 foi de 14 fichas e
+  R$ 9,3 mi para 25 fichas e R$ 574,8 mi, que é o total do pleito.
+- [x] Político citado sempre com **nome e partido**, em duas siglas — a da
+  época e a de hoje. O partido é o do pleito mais recente **até** o exercício.
+- [x] Seção **Por partido**: valor, valor por autor e a fatia sem destino.
+- [x] Casa do autor no federal, com filtro e aviso da cota (1,86 vez).
+- [x] Pareamento estadual: uma chave de pessoa só, nos três scripts.
+
+### O achado que o escopo novo produziu
+
+A fatia paga **sem município declarado** foi de **65,9% em 2015 a 97,5% em
+2026**, enquanto o total ia de R$ 2,77 bi a R$ 25,67 bi. E não é efeito de
+mistura de tipos: dentro da emenda individual, sozinha, o mesmo percurso —
+65,9% para 96,0%. O dinheiro multiplicou por dez e a rastreabilidade caiu junto.
+
+A subida não é monótona — 2019 volta a 66,9% na individual — e a tela diz
+isso: a série sustenta a direção, não uma taxa.
+
+Este número só existe porque o painel parou de esconder o que não tem
+município. Enquanto a lista de autores nascia de , a pergunta
+"quanto não tem destino" não tinha como ser feita.
+
 ## AGUARDANDO — espera evento externo ou comando do usuário
 
 O BEDEL lê o **título da seção** para saber que não há próximo item seguro
