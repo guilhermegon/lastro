@@ -288,7 +288,7 @@ export function VistaEmendas({
           ]} />
 
           <div className="cartaz">
-            <h2>Onde o dinheiro chegou{sufixo}</h2>
+            <h2>Distribuição municipal{sufixo}</h2>
             <p className="cap">
               {ROTULO_MEDIDA[medida]} por município em {periodo},
               {comPix ? " incluindo" : " excluindo"} a transferência especial —
@@ -327,47 +327,56 @@ export function VistaEmendas({
           </div>
 
           <div className="nota">
-            <strong>O que fica de fora, e é muito.</strong> O Emendômetro cobre
-            <strong> emenda individual</strong> — a de um parlamentar. Emenda de
-            bancada, de comissão e de relator não entra: são
-            <span className="num"> R$ 119,5 bi</span> de
-            <span className="num"> R$ 259,5 bi</span> pagos no país, ou 46% de
-            todo o dinheiro de emenda. Delas,{" "}
-            <span className="num">R$ 4,7 bi</span> até têm município identificado e ainda assim ficam fora — é escolha
-            de escopo, não limitação da fonte, e reabri-la é decisão de produto.
+            <strong>Escopo.</strong> Estão compreendidos os quatro tipos de
+            emenda parlamentar — individual, de bancada, de comissão e de
+            relator —, totalizando{" "}
+            <span className="num">R$ 259,5 bi</span> pagos no país. Até
+            2026-08-30 a publicação restringia-se à emenda individual, o que
+            excluía <span className="num">R$ 119,5 bi</span>, ou 46% do
+            montante, sob o fundamento de que os demais tipos careceriam de
+            autoria atribuível.
+            <br /><br />
+            A verificação não sustentou o fundamento: há{" "}
+            <strong>autoria em 100% dos registros dos quatro tipos</strong>. O
+            que difere é a natureza dela — pessoa na emenda individual,
+            instituição nas demais: 27 bancadas estaduais, 94 comissões
+            nominadas e um relator-geral.
           </div>
 
           <div className="nota">
-            <strong>O denominador honesto.</strong> Do total pago nesta esfera,{" "}
+            <strong>Cobertura territorial.</strong> Do total pago nesta
+            esfera,{" "}
             <span className="num">{percentual(pctComMunicipio, 1)}</span> tem
             município identificado no arquivo de origem —{" "}
-            {reais(cob.pagoMun)} de {reais(cob.pago)}. O mapa fala desse pedaço.
-            O resto sai com localidade <span className="num">MÚLTIPLO</span> ou
-            em branco, e não há como distribuí-lo por território sem inventar.
+            {reais(cob.pagoMun)} de {reais(cob.pago)}. O mapa representa exclusivamente essa parcela.
+            O restante consta com localidade{" "}
+            <span className="num">MÚLTIPLO</span> ou em branco, e não é
+            passível de distribuição territorial sem arbitramento.
             <br /><br />
-            <strong>E essa fatia cresceu enquanto o dinheiro crescia.</strong> No
-            país, a parte paga sem município declarado foi de{" "}
+            <strong>A proporção cresceu ao longo da série.</strong> No país, a
+            parcela paga sem município declarado passou de{" "}
             <span className="num">65,9%</span> em 2015 a{" "}
             <span className="num">97,5%</span> em 2026, com o total saindo de
-            R$ 2,77 bi para R$ 25,67 bi. Não é efeito de mistura de tipos:{" "}
-            <em>dentro da emenda individual</em>, sozinha, o mesmo percurso —
-            65,9% para 96,0%. O dinheiro multiplicou por dez e a rastreabilidade
-            caiu junto.
+            R$ 2,77 bi para R$ 25,67 bi. Não se trata de efeito de composição
+            entre tipos: <em>na emenda individual isoladamente</em>, verifica-se
+            o mesmo percurso — de 65,9% a 96,0%. O montante multiplicou-se por
+            dez e a rastreabilidade reduziu-se na mesma proporção.
             <br /><br />
-            A subida não é lisa, e dizer que fosse seria exagerar: 2019 volta a
-            66,9% na individual antes de subir de novo. O que a série sustenta é
-            a direção, não uma taxa.
+            A progressão não é monótona: o exercício de 2019 retorna a 66,9% na
+            emenda individual antes de voltar a subir. A série sustenta a
+            direção, e não uma taxa.
           </div>
 
           {porPartido.length > 1 && (
             <div className="cartaz">
               <h2>Por partido</h2>
               <p className="cap">
-                A mesma lista de autores, somada por sigla. Agrupa pela sigla de{" "}
-                <strong>hoje</strong>, depois das fusões: um mandato atravessa
-                anos, e usar a sigla de cada exercício somaria o mesmo partido em
-                três linhas. A sigla da época continua ao lado de cada nome na
-                lista acima.
+                A mesma listagem de autores, agregada por sigla. A agregação
+                adota a sigla <strong>vigente</strong>, posterior às fusões
+                partidárias: um mandato abrange múltiplos exercícios, e a adoção
+                da sigla de cada ano fracionaria um mesmo partido em várias
+                linhas. A sigla à época consta ao lado de cada nome na listagem
+                anterior.
               </p>
               <div className="rolagem">
                 <table>
@@ -412,18 +421,19 @@ export function VistaEmendas({
                 </table>
               </div>
               <div className="nota" style={{ marginTop: 12 }}>
-                <strong>A coluna que decide é a do meio, não a do total.</strong>{" "}
-                Valor por partido põe bancada grande no topo por ser grande;{" "}
-                <em>por autor</em> neutraliza o tamanho e é o número que compara.
-                E a última coluna não existe em nenhum painel que eu conheça: é
-                quanto do dinheiro daquele partido <strong>não diz para onde
-                foi</strong> — pago, e sem município no arquivo de origem.
+                <strong>A coluna determinante é a de valor por autor.</strong>{" "}
+                O valor absoluto por partido reflete o tamanho da bancada e
+                posiciona as maiores no topo por essa razão; o valor{" "}
+                <em>por autor</em> neutraliza esse efeito e permite a
+                comparação. A última coluna indica a parcela do montante daquele
+                partido que <strong>não dispõe de município declarado</strong> no
+                arquivo de origem.
                 <br /><br />
-                As duas linhas sem sigla ficam à vista de propósito. Bancada,
-                comissão e relator são instituições e não têm partido; autor sem
-                par com eleito não tem partido conhecido. Escondê-las faria a
-                soma da tabela não fechar com o total do período, sem que nada
-                avisasse.
+                As duas linhas sem sigla constam deliberadamente. Bancada,
+                comissão e relator são instituições e não possuem filiação
+                partidária; autor sem correspondência com eleito não tem partido
+                conhecido. Sua supressão faria a soma da tabela divergir do total
+                do período sem qualquer sinalização.
               </div>
             </div>
           )}
@@ -437,11 +447,12 @@ export function VistaEmendas({
           {fichas.length > 0 && atual && (
             <div className="duas">
               <div className="cartaz">
-                <h2>Quem mandou</h2>
+                <h2>Autoria</h2>
                 <p className="cap">
-                  Autores por valor pago em {periodo}. São só emendas
-                  <strong> individuais</strong>: bancada, comissão e relator não
-                  entram, e o cartaz abaixo diz quanto isso deixa de fora.
+                  Autores ordenados por valor pago em {periodo}, compreendendo
+                  os quatro tipos de emenda. A etiqueta ao lado do nome indica o
+                  tipo; <strong>Individual</strong>, por ser o caso predominante,
+                  não recebe marcação.
                 </p>
 
                 {/* Só na esfera federal. A emenda estadual é de uma casa só —
@@ -464,16 +475,18 @@ export function VistaEmendas({
 
                 {esfera === "federal" && casa === "todas" && (
                   <div className="nota" style={{ marginBottom: 12 }}>
-                    <strong>Senador e deputado não têm a mesma cota, e esta lista
-                    mistura as duas.</strong> A emenda individual é das duas casas
-                    — são <span className="num">594</span> autores por exercício,
-                    que é exatamente 513 deputados mais 81 senadores — e a mediana
-                    paga por senador na série é de{" "}
+                    <strong>As cotas de senador e de deputado não são
+                    equivalentes, e esta listagem agrega as duas.</strong> A
+                    emenda individual é atribuição das duas casas —{" "}
+                    <span className="num">594</span> autores por exercício, que
+                    corresponde a 513 deputados somados a 81 senadores — e a
+                    mediana paga por senador na série é de{" "}
                     <span className="num">R$ 148,2 mi</span> contra{" "}
                     <span className="num">R$ 79,6 mi</span> por deputado:{" "}
-                    <strong>1,86 vez</strong>. Ordenar por valor sem separar as
-                    casas põe o Senado no topo por regra de orçamento, e não por
-                    comportamento político. Os botões acima separam.
+                    <strong>1,86</strong> de proporção. A ordenação por valor sem
+                    distinção de casa posiciona o Senado no topo por decorrência
+                    de regra orçamentária, e não de comportamento parlamentar.
+                    Os controles acima efetuam a separação.
                   </div>
                 )}
                 <div className="rolagem">

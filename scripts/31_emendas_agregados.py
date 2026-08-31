@@ -280,11 +280,17 @@ def main():
         # o denominador da UF inteira, para a tela poder declarar a cobertura
         tudo_uf = d[d["uf"] == uf]
         pix_uf = tudo_uf[tudo_uf["tipo"].map(eh_pix).astype(bool)]
+        # `g` passou a ser TODAS as linhas da UF quando o escopo abriu, e nao
+        # mais o subconjunto com municipio. O numerador da cobertura tem de
+        # continuar sendo so' o que tem municipio — sem este recorte a tela
+        # dividia o total por ele mesmo e declarava "100,0% tem municipio",
+        # exatamente o oposto do que a nota existe para dizer.
+        g_mun = g[g["cod_ibge"].notna()]
         obj = {"anos": blocos, "cobertura": {
             "pago": round(float(tudo_uf["pago"].sum()), 2),
-            "pagoMun": round(float(g["pago"].sum()), 2),
+            "pagoMun": round(float(g_mun["pago"].sum()), 2),
             "pix": round(float(pix_uf["pago"].sum()), 2),
-            "pixMun": round(float(g[g["tipo"].map(eh_pix).astype(bool)]["pago"].sum()), 2)}}
+            "pixMun": round(float(g_mun[g_mun["tipo"].map(eh_pix).astype(bool)]["pago"].sum()), 2)}}
         p = WEB / uf / "emendas.json"
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(json.dumps(obj, separators=(",", ":"), ensure_ascii=False),
