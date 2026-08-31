@@ -156,7 +156,9 @@ export function VistaEmendas({
   // "ambas" entra no filtro de senador: quem teve mandato nas duas casas ao
   // longo da série recebeu cota de senador em parte dela, e escondê-lo do
   // recorte do Senado tiraria justamente os maiores.
-  const fichas = casa === "todas" ? todasFichas
+  // O filtro de casa só governa a esfera federal: no estadual `casa` não existe
+  // nas fichas, e filtrar por ela esvaziaria a lista inteira.
+  const fichas = esfera !== "federal" || casa === "todas" ? todasFichas
     : todasFichas.filter((f) => casa === "senador"
         ? f.casa === "senador" || f.casa === "ambas"
         : f.casa === "federal");
@@ -331,8 +333,10 @@ export function VistaEmendas({
                   entram, e o cartaz abaixo diz quanto isso deixa de fora.
                 </p>
 
-                {/* O filtro não é conveniência: sem ele a lista mistura duas
-                    cotas diferentes e a ordenação vira artefato de regra. */}
+                {/* Só na esfera federal. A emenda estadual é de uma casa só —
+                    a assembleia —, e oferecer "Câmara ou Senado" ali seria
+                    oferecer uma divisão que não existe naquele dado. */}
+                {esfera === "federal" && (
                 <div className="seg-rot" style={{ margin: "2px 0 10px" }}>
                   <span className="et">Casa do autor</span>
                   <div className="seg" role="group" aria-label="Casa do autor">
@@ -345,8 +349,9 @@ export function VistaEmendas({
                     ))}
                   </div>
                 </div>
+                )}
 
-                {casa === "todas" && (
+                {esfera === "federal" && casa === "todas" && (
                   <div className="nota" style={{ marginBottom: 12 }}>
                     <strong>Senador e deputado não têm a mesma cota, e esta lista
                     mistura as duas.</strong> A emenda individual é das duas casas
@@ -377,9 +382,17 @@ export function VistaEmendas({
                             onClick={() => setAutor(i)}
                             style={{ cursor: "pointer" }}>
                           <td>{f.n}{f.amb ? " (coletiva)" : ""}
+                            {/* A etiqueta marca o que FOGE do padrão. Na esfera
+                                federal o padrão é a Câmara, e Senado ou as duas
+                                casas ganham marca. Na estadual a assembleia é
+                                casa única e `casa` nem existe — ali a única
+                                marca possível é a ausência de par com eleito.
+                                Enquanto o teste era `!f.casa`, toda ficha
+                                estadual saía "sem par", inclusive as 237 de 248
+                                que casam. */}
                             {f.casa === "senador" && <span className="casa-tag">Senado</span>}
                             {f.casa === "ambas" && <span className="casa-tag">as duas</span>}
-                            {!f.casa && <span className="casa-tag vazio">sem par</span>}
+                            {!f.el && <span className="casa-tag vazio">sem par</span>}
                           </td>
                           <td className="n">{reais(f.t)}</td>
                           <td className="n">{numero(f.nm)}</td>

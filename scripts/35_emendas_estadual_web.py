@@ -34,6 +34,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 cfg = import_module("00_config")
+geo = import_module("04_geo")
 
 WEB = cfg.PROCESSED / "web"
 # Um ingestor por estado, de proposito: a sondagem mostrou que nao existe
@@ -50,8 +51,31 @@ def sem_acento(t):
                             if not unicodedata.combining(c)).upper().split())
 
 
+# O que o arquivo escreve quando nao sabe o autor. Nao e' nome de gente.
+#
+# As formas estao NORMALIZADAS, porque a comparacao acontece depois da chave:
+# `chave_pessoa("#N/D")` da' "N D", ja' sem a pontuacao. Escrever "#N/D" aqui
+# nunca casaria — foi o que aconteceu na primeira tentativa.
+AUSENTE = {"N D", "N A", "NAO INFORMADO", "NAO IDENTIFICADO", "", "NAN"}
+
+
 def chave_pessoa(t):
-    return re.sub(r"^(DEP\.?|DEPUTAD[OA])\s+", "", sem_acento(t)).strip()
+    """Chave de pessoa: o normalizador DO PROJETO, sem o titulo de tratamento.
+
+    Usava um `sem_acento` local, que so' tirava acento. Resultado: "DR. GEORGE
+    MORAIS" do arquivo da assembleia nao casava com "DR GEORGE MORAIS" do TSE,
+    porque um traz ponto e o outro nao. O `04_geo.normalizar` tira pontuacao
+    desde sempre — foi escrito para o pareamento de municipios, e e' o mesmo
+    problema.
+
+    E' a terceira vez neste projeto que duplicar esta funcao custa pares: antes
+    foram SAO JOAO D'ALIANCA no `56_` e as grafias do TSE contra o IBGE. A
+    licao: chave de pareamento tem um dono so'.
+
+    O prefixo de tratamento sai porque e' cargo, nao nome: o arquivo do Espirito
+    Santo escreve "Dep. Allan Ferreira" e o TSE, "ALLAN FERREIRA".
+    """
+    return re.sub(r"^(DEP|DEPUTADO|DEPUTADA)\s+", "", geo.normalizar(t)).strip()
 
 
 def gini(x):
@@ -69,16 +93,54 @@ def eleitos_estaduais(uf):
     if not f.exists():
         return {}
     d = json.loads(f.read_text(encoding="utf-8"))
-    por = {}
+    por, completos = {}, {}
     for ano, b in d.items():
         for ficha in b["fichas"]:
             if not ficha.get("el"):
                 continue
-            for k in {chave_pessoa(ficha["n"]),
-                      chave_pessoa(ficha.get("completo", ""))}:
+            comp = chave_pessoa(ficha.get("completo", ""))
+            for k in {chave_pessoa(ficha["n"]), comp}:
                 if k:
                     por.setdefault(k, set()).add(int(ano))
-    return por
+            # o completo entra num indice a parte: e' dele que o arquivo da
+            # assembleia recorta o nome do autor (ver `casar_por_recorte`)
+            if comp:
+                completos.setdefault(comp, {"anos": set(), "urna": ficha["n"]})
+                completos[comp]["anos"].add(int(ano))
+    return por, completos
+
+
+def casar_por_recorte(nome, completos):
+    """Os tokens do autor aparecem EM ORDEM entre os do nome completo.
+
+    Mesma regra do `30_emendas_ingest.py` no federal, e pelo mesmo motivo: o
+    arquivo escreve um recorte do nome completo, que nao e' o de urna nem o
+    inteiro. Regra de ESTRUTURA, nunca de semelhanca de texto — par errado nao
+    perde dado, poe dado no lugar errado.
+
+    Tres travas: dois tokens no minimo, o ultimo token (sobrenome) obrigatorio
+    dentro do completo, e unicidade — recorte que serve a dois nao serve a
+    nenhum.
+    """
+    toks = nome.split()
+    if len(toks) < 2:
+        return None
+
+    def subseq(pequeno, grande):
+        it = iter(grande)
+        return all(t in it for t in pequeno)
+
+    achados = []
+    for comp, r in completos.items():
+        g = comp.split()
+        if toks[-1] in g and subseq(toks, g):
+            achados.append(r)
+    if not achados or len({r["urna"] for r in achados}) > 1:
+        return None
+    anos = set()
+    for r in achados:
+        anos |= r["anos"]
+    return anos
 
 
 def main():
@@ -101,7 +163,8 @@ def main():
         if d.empty:
             print(f"  {uf}: nenhuma linha pareada com a malha")
             continue
-        el = eleitos_estaduais(uf)
+        el, completos = eleitos_estaduais(uf)
+        n_recorte = n_ausente = 0
 
         blocos = {}
         for ano, ga in d.groupby("ano"):
@@ -111,6 +174,14 @@ def main():
 
             fichas = []
             for autor, gg in ga.groupby("autor_norm"):
+                # "#N/D" e' o marcador de ausencia do arquivo de origem, nao um
+                # nome. Publicado como autor, cria um parlamentar que nao
+                # existe. O dinheiro continua no total do municipio — ele foi
+                # gasto —, so' nao inventa autoria. Sao 13 linhas e R$ 1,04 mi
+                # de R$ 4.004 mi em Goias: 0,03%, e nao e' o tamanho que decide.
+                if autor in AUSENTE:
+                    n_ausente += len(gg)
+                    continue
                 por_mun = gg.groupby("cod_ibge")["valor"].sum()
                 por_mun = por_mun[por_mun > 0]
                 if por_mun.empty:
@@ -118,6 +189,13 @@ def main():
                 v = por_mun.to_numpy(dtype=float)
                 p = v / v.sum()
                 anos_el = el.get(autor, set())
+                if not anos_el:
+                    # segunda passada: recorte do nome completo — ver
+                    # `casar_por_recorte`
+                    r = casar_por_recorte(autor, completos)
+                    if r:
+                        anos_el = r
+                        n_recorte += 1
                 fichas.append({
                     "n": str(gg["autor"].iloc[0]),
                     "t": round(float(v.sum()), 2),
@@ -170,7 +248,10 @@ def main():
         feito.append(uf)
         print(f"  {uf}: {len(blocos)} exercícios, {f.stat().st_size/1024:.0f} KB")
         print(f"     R$ {d['valor'].sum()/1e6:.0f} mi em {d['cod_ibge'].nunique()} "
-              f"municípios | fichas casadas com eleito: {casados}/{total_f}")
+              f"municípios | fichas casadas com eleito: {casados}/{total_f}"
+              + (f", {n_recorte} por recorte do nome" if n_recorte else "")
+              + (f" | {n_ausente} linhas sem autor no arquivo, fora da lista"
+                 if n_ausente else ""))
 
     print(f"\nemendas_estadual.json em {len(feito)} UF(s): {', '.join(feito) or '—'}")
     if feito:

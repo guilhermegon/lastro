@@ -74,12 +74,18 @@ def sem_acento(t):
 
 
 def chave_pessoa(t):
-    """Chave de pessoa. A base do estado escreve "DEP. ALVARO GUIMARAES" e a do
-    TSE escreve "ALVARO GUIMARAES" — o prefixo sozinho derrubava dezenas de
-    casamentos."""
-    s = sem_acento(t)
-    s = re.sub(r"^(DEP\.?|DEPUTAD[OA])\s+", "", s)
-    return s.strip()
+    """Chave de pessoa: o normalizador DO PROJETO, menos o titulo de tratamento.
+
+    UMA funcao, tres arquivos, e ela precisa ser identica nos tres: o `34_` e o
+    `38_` gravam `autor_norm` no CSV, e o `35_` monta com ela o indice de
+    eleitos. Divergiram uma vez — o `35_` passou a tirar pontuacao e os outros
+    nao —, e o Espirito Santo caiu de 157 para 148 fichas casadas sem que nada
+    acusasse. Por isso as tres delegam ao mesmo `04_geo.normalizar`.
+
+    O prefixo sai porque e' cargo, nao nome: a base do estado escreve
+    "DEP. ALVARO GUIMARAES" e "Dep. Allan Ferreira"; o TSE nao usa prefixo.
+    """
+    return re.sub(r"^(DEP|DEPUTADO|DEPUTADA)\s+", "", geo.normalizar(t)).strip()
 
 
 def achar(cols, padroes):

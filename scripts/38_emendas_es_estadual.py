@@ -39,6 +39,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 cfg = import_module("00_config")
+geo = import_module("04_geo")
 
 UF = "ES"
 API = ("https://dados.es.gov.br/api/3/action/package_search"
@@ -56,8 +57,18 @@ def sem_acento(t):
 
 
 def chave_pessoa(t):
-    """O ES prefixa "Dep." em todo autor; o TSE nao usa prefixo nenhum."""
-    return re.sub(r"^(DEP\.?|DEPUTAD[OA])\s+", "", sem_acento(t)).strip()
+    """Chave de pessoa: o normalizador DO PROJETO, menos o titulo de tratamento.
+
+    UMA funcao, tres arquivos, e ela precisa ser identica nos tres: o `34_` e o
+    `38_` gravam `autor_norm` no CSV, e o `35_` monta com ela o indice de
+    eleitos. Divergiram uma vez — o `35_` passou a tirar pontuacao e os outros
+    nao —, e o Espirito Santo caiu de 157 para 148 fichas casadas sem que nada
+    acusasse. Por isso as tres delegam ao mesmo `04_geo.normalizar`.
+
+    O prefixo sai porque e' cargo, nao nome: a base do estado escreve
+    "DEP. ALVARO GUIMARAES" e "Dep. Allan Ferreira"; o TSE nao usa prefixo.
+    """
+    return re.sub(r"^(DEP|DEPUTADO|DEPUTADA)\s+", "", geo.normalizar(t)).strip()
 
 
 def dinheiro(s):

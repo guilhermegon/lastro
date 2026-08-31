@@ -255,7 +255,12 @@ export function VistaSobre({ nUF, nMun }: { nUF: number; nMun: number }) {
             alcançando <strong>1.266 dos 1.492 autores</strong> da série — 91,4%
             do valor. Os 226 restantes correspondem a suplentes que assumiram,
             mandatos anteriores a 1998 e casos de homonímia em que o critério
-            recusou desempatar: pai e filho com o mesmo nome, entre eles.</li>
+            recusou desempatar: pai e filho com o mesmo nome, entre eles.
+            <br /><br />
+            Na esfera estadual o mesmo pareamento é feito contra os eleitos à
+            assembleia, e não há distinção de casa: a assembleia é casa única.
+            A cobertura é de <strong>237 de 248</strong> registros em Goiás e{" "}
+            <strong>160 de 179</strong> no Espírito Santo.</li>
           <li><strong>A apresentação padrão é acumulada.</strong> Em exercício
             isolado, a maioria dos municípios não apresenta registro, e o mapa
             sugere ausência de recurso onde há ausência de rastreabilidade. No
