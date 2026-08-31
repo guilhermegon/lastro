@@ -202,6 +202,11 @@ def casar_com_eleitos(d):
                         r["anos"].add(int(ano))
                         r["sq"].append(f["sq"])
                         r["casas"].add(cargo)
+                        # partido POR PLEITO: a sigla a epoca e a de hoje. O
+                        # consumidor escolhe pelo ano do exercicio — emenda de
+                        # 2016 e' de quem a pessoa era em 2016.
+                        r.setdefault("pt", {})[int(ano)] = (
+                            f.get("p", ""), f.get("pn", ""))
 
     # ---------- segunda passada: recorte do nome completo ----------
     #
@@ -250,12 +255,15 @@ def casar_com_eleitos(d):
         # urna diferentes. Divergiu o nome de urna, e' ambiguo.
         if len(nomes) > 1:
             return None
+        # o partido vem junto: sem isto os 100 casados por recorte ficariam com
+        # nome e sem sigla, que e' meia identificacao
         junto = {"uf": set(), "anos": set(), "sq": list(sqs),
-                 "urna": next(iter(nomes)), "casas": set()}
+                 "urna": next(iter(nomes)), "casas": set(), "pt": {}}
         for r in achados:
             junto["uf"] |= r["uf"]
             junto["anos"] |= r["anos"]
             junto["casas"] |= r["casas"]
+            junto["pt"].update(r.get("pt", {}))
         return junto
 
     autores = (d[d["individual"]].groupby(["autor_norm", "autor"], as_index=False)
@@ -283,6 +291,10 @@ def casar_com_eleitos(d):
             # afirma cota: diz "as duas" e deixa o leitor ver os anos.
             "casa": ("ambas" if m and len(m["casas"]) > 1
                      else (next(iter(m["casas"])) if m else "")),
+            # o partido de cada pleito, serializado "ano:sigla:sigla_hoje"
+            "partidos": ("|".join(f"{a}:{v[0]}:{v[1]}"
+                                  for a, v in sorted(m.get("pt", {}).items()))
+                         if m else ""),
         })
     if n_recorte:
         print(f"  {n_recorte} autores casados por recorte do nome completo")

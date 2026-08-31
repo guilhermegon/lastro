@@ -222,10 +222,17 @@ export interface FichaEmenda {
   nm: number;
   mi: number[];
   mv: number[];
-  /** concentração: fatia do maior município, municípios efetivos, Gini */
-  t1: number;
-  ef: number;
-  gi: number;
+  /** concentração: fatia do maior município, municípios efetivos, Gini.
+   *
+   *  `null` no autor cujo dinheiro não tem município nenhum declarado — e é
+   *  null e não zero: zero afirmaria "concentração nula", que é uma medida, e
+   *  ali não há o que medir. */
+  t1: number | null;
+  ef: number | null;
+  gi: number | null;
+  /** o que foi pago sem município declarado no arquivo. `t` é o total; esta é
+   *  a parte que o mapa não pode mostrar. */
+  sm?: number;
   /** o autor foi eleito, e por qual UF */
   el: boolean;
   ufEl: string;
@@ -235,6 +242,14 @@ export interface FichaEmenda {
    *  Importa porque emenda individual é das DUAS casas — 594 autores por
    *  exercício, que é exatamente 513 + 81 — e a cota do senador é maior. */
   casa?: string;
+  /** o tipo da emenda. Onde o autor aparece em mais de um tipo no ano, vale o
+   *  que concentra o valor. */
+  gr?: string;
+  /** partido do autor no pleito mais recente até o exercício, e a sigla de
+   *  hoje quando houve fusão. Vazio nas emendas de instituição — bancada,
+   *  comissão e relator não têm partido — e em quem não casou com eleito. */
+  pt?: string;
+  ptn?: string;
   /** emenda de bancada/comissão, sem autor individual */
   amb: boolean;
   /** função orçamentária dominante */
@@ -471,6 +486,18 @@ export interface CidadeServida {
   /** e' a capital do estado — o ponto de partida da aba */
   cap?: boolean;
 }
+
+/** Os quatro tipos de emenda, e a categoria que recolhe o que não se encaixa.
+ *
+ *  Não é taxonomia decorativa: individual tem autor PESSOA, os outros três têm
+ *  autor INSTITUIÇÃO — "BANCADA DE GOIÁS", "COMISSÃO DE AGRICULTURA",
+ *  "RELATOR GERAL" — e a diferença muda o que a lista de autores significa. */
+export type GrupoEmenda = "individual" | "bancada" | "comissao" | "relator" | "outro";
+
+export const NOME_GRUPO: Record<GrupoEmenda, string> = {
+  individual: "Individual", bancada: "Bancada", comissao: "Comissão",
+  relator: "Relator", outro: "Outra",
+};
 
 export interface Cidades { cidades: CidadeServida[] }
 

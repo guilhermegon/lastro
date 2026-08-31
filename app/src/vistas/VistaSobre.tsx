@@ -74,7 +74,7 @@ const INDICES = [
 const ESTADO = [
   ["Voto, todos os cargos", "27 unidades, 1998–2022", "integral"],
   ["Emenda federal", "território nacional, 2015–2026",
-   "97,1% do valor com unidade da federação; 10,5% com município"],
+   "72,6% do valor com unidade da federação; 7,5% com município"],
   ["Emenda estadual", "2 das 27 unidades", "Goiás e Espírito Santo"],
   ["Emenda de assembleia", "1 das 27 (Distrito Federal)",
    "sem autoria e sem município: não atribuível"],
@@ -212,12 +212,23 @@ export function VistaSobre({ nUF, nMun }: { nUF: number; nMun: number }) {
           pagos.
         </p>
         <ul className="lista-fatos">
-          <li><strong>O escopo restringe-se à emenda individual.</strong> As
-            emendas de bancada, de comissão e de relator somam R$ 119,5 bi dos
-            R$ 259,5 bi pagos no país, correspondendo a 46% do montante, que
-            permanece fora desta publicação por delimitação de escopo. Desse
-            total, R$ 4,7 bi dispõem de município identificado e ainda assim não
-            são incorporados.</li>
+          <li><strong>O escopo compreende os quatro tipos de emenda.</strong>{" "}
+            Individual, de bancada, de comissão e de relator, totalizando
+            R$ 259,5 bi pagos no país. Até 2026-08-30 a publicação restringia-se
+            à emenda individual, deixando R$ 119,5 bi — 46% do montante — fora,
+            sob o fundamento de que os demais tipos não possuem autoria
+            atribuível. A verificação não sustentou o fundamento:{" "}
+            <strong>há autor em 100% dos registros dos quatro tipos</strong>. O
+            que difere é a natureza da autoria — pessoa na emenda individual,
+            instituição nas demais: 27 bancadas estaduais, 94 comissões nominadas
+            e um relator-geral.</li>
+          <li><strong>O valor sem município declarado constitui categoria
+            própria, e não omissão.</strong> A ausência de destino é a regra, não
+            a exceção: alcança 89,5% da emenda individual e 92,2% da de bancada.
+            O montante correspondente é apresentado em coluna específica na
+            listagem de autores. Sua supressão faria a publicação parecer
+            completa sendo parcial — e o mapa, que só pode exibir o que tem
+            município, informa o próprio denominador.</li>
           <li><strong>Apenas 10,5% do montante é atribuível a município.</strong>{" "}
             Nas emendas individuais, 75,5% do valor consta como{" "}
             <em>MÚLTIPLO</em>, isto é, distribuído por municípios que o arquivo

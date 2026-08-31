@@ -486,3 +486,15 @@ footer p { margin: 3px 0; max-width: 80ch; }
   white-space: nowrap;
 }
 .casa-tag.vazio { background: var(--surface-2); color: var(--ink-3); }
+
+/* Sigla do partido ao lado do nome. Politico citado sem partido e' meia
+   identificacao — nao da' para ler bancada nem cruzar com nada. Discreta,
+   porque acompanha o nome e nao compete com ele. */
+.pt-tag {
+  margin-left: 6px;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .3px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}

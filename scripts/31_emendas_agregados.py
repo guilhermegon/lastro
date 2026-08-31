@@ -77,7 +77,15 @@ def main():
         raise SystemExit("rode 30_emendas_ingest.py antes")
     d = pd.read_csv(FONTE, dtype={"cod_ibge": str, "cod_emenda": str},
                     low_memory=False)
-    d = d[d["individual"].astype(str).str.lower().isin(("true", "1"))]
+    # NAO filtra mais por individual. Ver docstring: os outros tipos tem autor
+    # em 100% das linhas — instituicao, nao pessoa — e somam R$ 119,5 bi que
+    # ficavam fora do painel.
+    d["grupo"] = (d["tipo"].astype(str)
+                  .str.extract(r"^Emenda (Individual|de Bancada|de Relator|de Comiss)",
+                               expand=False)
+                  .map({"Individual": "individual", "de Bancada": "bancada",
+                        "de Relator": "relator", "de Comiss": "comissao"})
+                  .fillna("outro"))
     d["ano"] = pd.to_numeric(d["ano"], errors="coerce").astype("Int64")
     d = d[d["ano"].notna()]
 
@@ -90,6 +98,29 @@ def main():
     # ordenar por valor sem dizer a casa poe o Senado no topo por regra, e o
     # leitor le comportamento onde ha cota.
     casa_de = dict(zip(cas["autor_norm"], cas["casa"].fillna("")))
+
+    # O partido do autor, por pleito. Politico citado sem partido e' meia
+    # identificacao: nao da' para ler bancada nem cruzar com nada.
+    def _parse(s):
+        fora = {}
+        for parte in str(s or "").split("|"):
+            campos = parte.split(":")
+            if len(campos) == 3 and campos[0].isdigit():
+                fora[int(campos[0])] = (campos[1], campos[2])
+        return fora
+
+    partidos_de = {a: _parse(v) for a, v in
+                   zip(cas["autor_norm"], cas.get("partidos", ""))}
+
+    def partido_em(autor, ano):
+        """A sigla do pleito mais recente ATE' o exercicio.
+
+        Emenda de 2016 e' de quem a pessoa era em 2016. Usar o ultimo mandato
+        atribuiria a legenda errada a um gasto de anos antes — e este projeto
+        ja' mantem duas visoes de partido justamente porque a sigla muda."""
+        p = partidos_de.get(autor) or {}
+        anos = [a for a in p if a <= ano]
+        return p[max(anos)] if anos else ("", "")
     ambiguo = dict(zip(cas["autor_norm"], cas["ambiguo"]))
 
     idx, nomes = indices_uf()
@@ -99,7 +130,7 @@ def main():
     poruf = []
     for (uf, ano), g in d[d["uf"].notna()].groupby(["uf", "ano"]):
         com = g[g["cod_ibge"].notna()]
-        gp = g[g["tipo"].map(eh_pix)]
+        gp = g[g["tipo"].map(eh_pix).astype(bool)]
         poruf.append({
             "uf": uf, "ano": int(ano),
             "pago": round(float(g["pago"].sum()), 2),
@@ -110,16 +141,27 @@ def main():
             # o denominador viaja junto com o numero
             "pagoMun": round(float(com["pago"].sum()), 2),
             "nMun": int(com["cod_ibge"].nunique()),
+            # quanto de cada tipo, e quanto de cada tipo chega a municipio.
+            # Sem isto o leitor ve' um total e nao sabe que 46% dele nunca teve
+            # como aparecer no mapa.
+            "porGrupo": {k: [round(float(x["pago"].sum()), 2),
+                             round(float(x.loc[x["cod_ibge"].notna(),
+                                               "pago"].sum()), 2)]
+                         for k, x in g.groupby("grupo")},
         })
     nacional = {
         "anos": anos,
         "uf": sorted(poruf, key=lambda r: (r["uf"], r["ano"])),
         "cobertura": {
             "pago": round(float(d["pago"].sum()), 2),
-            "pix": round(float(d.loc[d["tipo"].map(eh_pix), "pago"].sum()), 2),
+            "pix": round(float(d.loc[d["tipo"].map(eh_pix).astype(bool), "pago"].sum()), 2),
             "pagoUF": round(float(d.loc[d["uf"].notna(), "pago"].sum()), 2),
             "pagoMun": round(float(d.loc[d["cod_ibge"].notna(), "pago"].sum()), 2),
             "nAutores": int(d["autor_norm"].nunique()),
+            "porGrupo": {k: [round(float(x["pago"].sum()), 2),
+                             round(float(x.loc[x["cod_ibge"].notna(),
+                                               "pago"].sum()), 2)]
+                         for k, x in d.groupby("grupo")},
             "nCasados": int(sum(1 for a in d["autor_norm"].unique()
                                 if eleito.get(a))),
         },
@@ -132,25 +174,37 @@ def main():
           f"{len(poruf)} pares UF/ano")
 
     # ---------- por UF: municipio e autor ----------
-    com_mun = d[d["cod_ibge"].notna() & d["uf"].notna()]
+    #
+    # TODAS as linhas da UF, e nao so' as que tem municipio. Antes a lista de
+    # autores nascia de `cod_ibge.notna()`, e por isso a bancada de Goias — que
+    # pagou R$ 209,2 mi em 2022 sem um unico municipio declarado — nao gerava
+    # ficha nenhuma. O agregado nacional contava; a lista, nao.
+    #
+    # O vetor municipal continua vindo so' do que tem municipio: nao ha' como
+    # distribuir o resto sem inventar. O que sobra vai em `sm`, e a tela o
+    # mostra como categoria em vez de o omitir.
+    da_uf = d[d["uf"].notna()]
     total = 0
-    for uf, g in com_mun.groupby("uf"):
+    for uf, g in da_uf.groupby("uf"):
         if uf not in idx:
             continue
         n = len(nomes[uf])
         pos = idx[uf]
-        g = g[g["cod_ibge"].isin(pos)]
+        # o municipio so' vale se estiver na malha; o resto conta como sem
+        # destino, que e' o que ele e'
+        g = g[g["cod_ibge"].isna() | g["cod_ibge"].isin(pos)]
         if g.empty:
             continue
         blocos = {}
         for ano, ga in g.groupby("ano"):
+            gm = ga[ga["cod_ibge"].notna()]
             tot_mun = np.zeros(n)
-            for c, v in ga.groupby("cod_ibge")["pago"].sum().items():
+            for c, v in gm.groupby("cod_ibge")["pago"].sum().items():
                 tot_mun[pos[c]] = v
 
             # o mesmo vetor municipal, so' com o que e' Pix
             tot_pix = np.zeros(n)
-            gp = ga[ga["tipo"].map(eh_pix)]
+            gp = gm[gm["tipo"].map(eh_pix).astype(bool)]
             for c, v in gp.groupby("cod_ibge")["pago"].sum().items():
                 tot_pix[pos[c]] = v
 
@@ -158,16 +212,26 @@ def main():
             for autor, gg in ga.groupby("autor_norm"):
                 por_mun = gg.groupby("cod_ibge")["pago"].sum()
                 por_mun = por_mun[por_mun > 0]
-                if por_mun.empty:
+                # `t` e' TUDO que o autor pagou na UF; `sm` e' a parte sem
+                # municipio declarado. O autor cujo dinheiro nao tem destino
+                # nenhum entra com vetor vazio — antes ele sumia da lista, e o
+                # painel dizia por omissao que ele nao gastou nada.
+                pago_total = float(gg["pago"].sum())
+                sem_mun = pago_total - float(por_mun.sum())
+                if pago_total <= 0:
                     continue
-                v = por_mun.to_numpy(dtype=float)
-                p = v / v.sum()
-                pix = gg[gg["tipo"].map(eh_pix)]
+                v = (por_mun.to_numpy(dtype=float) if not por_mun.empty
+                     else np.zeros(0, dtype=float))
+                p = v / v.sum() if v.size and v.sum() > 0 else v
+                pix = gg[gg["tipo"].map(eh_pix).astype(bool)]
                 por_pix = pix.groupby("cod_ibge")["pago"].sum()
                 por_pix = por_pix[por_pix > 0]
                 fichas.append({
                     "n": str(gg["autor"].iloc[0]),
-                    "t": round(float(v.sum()), 2),
+                    "t": round(pago_total, 2),
+                    # o que nao tem municipio declarado. Nao e' zero: e' pago
+                    # sem destino no arquivo, e o mapa nao pode mostra-lo.
+                    "sm": round(sem_mun, 2),
                     "pix": round(float(pix["pago"].sum()), 2),
                     "pxi": [pos[c] for c in por_pix.index],
                     "pxv": [round(float(x), 2) for x in por_pix.to_numpy()],
@@ -176,13 +240,22 @@ def main():
                     "nm": int(len(v)),
                     "mi": [pos[c] for c in por_mun.index],
                     "mv": [round(float(x), 2) for x in v],
-                    "t1": round(float(p.max() * 100), 2),
+                    # Sem municipio nenhum, os indices de concentracao nao
+                    # existem — e `null`, nao zero: zero afirmaria "concentracao
+                    # nula", que e' uma medida, e aqui nao ha' o que medir.
+                    "t1": (round(float(p.max() * 100), 2) if p.size else None),
                     # municipios efetivos: mesmo indice do voto, 1/HHI
-                    "ef": round(float(1 / (p ** 2).sum()), 2),
-                    "gi": round(gini(v), 4),
+                    "ef": (round(float(1 / (p ** 2).sum()), 2) if p.size else None),
+                    "gi": (round(gini(v), 4) if v.size else None),
                     "el": bool(eleito.get(autor, False)),
                     "ufEl": uf_el.get(autor, ""),
                     "casa": casa_de.get(autor, ""),
+                    # o tipo da emenda, para a tela poder isolar. Um autor pode
+                    # aparecer em mais de um grupo no mesmo ano — deputado que
+                    # tambem relata —, e ai vale o grupo que concentra o valor.
+                    "gr": str(gg.groupby("grupo")["pago"].sum().idxmax()),
+                    "pt": partido_em(autor, int(ano))[0],
+                    "ptn": partido_em(autor, int(ano))[1],
                     "amb": bool(ambiguo.get(autor, False)),
                     "fn": gg.groupby("funcao")["pago"].sum().idxmax()
                           if gg["funcao"].notna().any() else "",
@@ -206,12 +279,12 @@ def main():
             }
         # o denominador da UF inteira, para a tela poder declarar a cobertura
         tudo_uf = d[d["uf"] == uf]
-        pix_uf = tudo_uf[tudo_uf["tipo"].map(eh_pix)]
+        pix_uf = tudo_uf[tudo_uf["tipo"].map(eh_pix).astype(bool)]
         obj = {"anos": blocos, "cobertura": {
             "pago": round(float(tudo_uf["pago"].sum()), 2),
             "pagoMun": round(float(g["pago"].sum()), 2),
             "pix": round(float(pix_uf["pago"].sum()), 2),
-            "pixMun": round(float(g[g["tipo"].map(eh_pix)]["pago"].sum()), 2)}}
+            "pixMun": round(float(g[g["tipo"].map(eh_pix).astype(bool)]["pago"].sum()), 2)}}
         p = WEB / uf / "emendas.json"
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(json.dumps(obj, separators=(",", ":"), ensure_ascii=False),

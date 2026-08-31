@@ -3,6 +3,7 @@ import type {
   BaseUF, BlocoEmenda, Demografia, Emendas, EmendasBR, Esfera, FichaEmenda,
   Sigla,
 } from "../tipos";
+import { NOME_GRUPO, type GrupoEmenda } from "../tipos";
 import { decimal, numero, percentual } from "../lib/formato";
 import { quantis } from "../lib/escalas";
 import { fundeMandato, LEGISLATURAS } from "../lib/mandato";
@@ -373,6 +374,7 @@ export function VistaEmendas({
                         <th className="n">Pago</th>
                         <th className="n">Municípios</th>
                         <th className="n">No maior</th>
+                        <th className="n">Sem destino</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -390,13 +392,24 @@ export function VistaEmendas({
                                 Enquanto o teste era `!f.casa`, toda ficha
                                 estadual saía "sem par", inclusive as 237 de 248
                                 que casam. */}
+                            {f.pt && <span className="pt-tag">{f.pt}</span>}
+                            {f.gr && f.gr !== "individual" &&
+                              <span className="casa-tag">
+                                {NOME_GRUPO[f.gr as GrupoEmenda] ?? f.gr}
+                              </span>}
                             {f.casa === "senador" && <span className="casa-tag">Senado</span>}
                             {f.casa === "ambas" && <span className="casa-tag">as duas</span>}
-                            {!f.el && <span className="casa-tag vazio">sem par</span>}
+                            {!f.el && f.gr === "individual" &&
+                              <span className="casa-tag vazio">sem par</span>}
                           </td>
                           <td className="n">{reais(f.t)}</td>
                           <td className="n">{numero(f.nm)}</td>
-                          <td className="n">{percentual(f.t1, 1)}</td>
+                          <td className="n">
+                            {f.t1 == null ? "—" : percentual(f.t1, 1)}
+                          </td>
+                          <td className="n">
+                            {f.sm ? reais(f.sm) : "—"}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -405,16 +418,23 @@ export function VistaEmendas({
               </div>
 
               <div className="cartaz">
-                <h2>{atual.n}</h2>
+                <h2>{atual.n}{atual.pt ? ` (${atual.pt})` : ""}</h2>
                 <p className="cap">
                   {atual.amb
                     ? "Autoria ambígua: há mais de um eleito com este nome de urna, "
                       + "em UFs diferentes, e o arquivo não distingue."
+                    : atual.gr && atual.gr !== "individual"
+                    ? `Emenda de ${(NOME_GRUPO[atual.gr as GrupoEmenda] ?? atual.gr)
+                        .toLowerCase()}: o autor é uma instituição, não uma `
+                      + "pessoa, e por isso não tem partido."
                     : atual.el
                     ? `Eleito por ${atual.ufEl}${
                         atual.casa === "senador" ? ", para o Senado"
                         : atual.casa === "ambas" ? ", para as duas casas"
-                        : atual.casa === "federal" ? ", para a Câmara" : ""}.`
+                        : atual.casa === "federal" ? ", para a Câmara" : ""}${
+                        atual.ptn && atual.ptn !== atual.pt
+                          ? `, pelo ${atual.pt} (hoje ${atual.ptn})` 
+                          : atual.pt ? `, pelo ${atual.pt}` : ""}.`
                     : "O nome deste autor não casou com nenhum eleito de 1998 a "
                       + "2022 — pode ser suplente que assumiu, mandato anterior a "
                       + "1998, ou homônimo que o critério recusou desempatar."}
@@ -426,9 +446,16 @@ export function VistaEmendas({
                   { rotulo: "Municípios", valor: numero(atual.nm),
                     explicacao: porMandato ? "alcançados no mandato"
                                            : "alcançados no ano" },
-                  { rotulo: "No maior", valor: percentual(atual.t1, 1),
+                  { rotulo: "Sem destino declarado",
+                    valor: atual.sm ? reais(atual.sm) : "—",
+                    explicacao: atual.sm
+                      ? `${percentual((atual.sm / atual.t) * 100, 0)} do que ele pagou`
+                      : "todo o valor tem município no arquivo" },
+                  { rotulo: "No maior",
+                    valor: atual.t1 == null ? "—" : percentual(atual.t1, 1),
                     explicacao: "fatia do município que mais recebeu" },
-                  { rotulo: "Municípios efetivos", valor: decimal(atual.ef, 1),
+                  { rotulo: "Municípios efetivos",
+                    valor: atual.ef == null ? "—" : decimal(atual.ef, 1),
                     explicacao: "inverso da concentração" },
                 ]} />
                 {atual.pix > 0 && (
